@@ -1,0 +1,44 @@
+name: PHP Mess Detector
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  PHPMD:
+    name: PHPMD Scanner
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+
+      - name: Setup Environment
+        uses: php-actions/composer@v6
+        with:
+          command: install
+          php_version: "8.2"
+
+      - name: Run PHP Mess Detector
+        uses: php-actions/phpmd@v2
+        with:
+          path: bin/,public/,src/
+          php_version: "8.2"
+          ruleset: .phpmd.dist.xml
+          output: sarif
+          reportfile: phpmd-results.sarif
+
+      - name: Upload Analysis Results
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: phpmd-results.sarif
+          wait-for-processing: true

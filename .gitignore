@@ -1,3 +1,17 @@
+/.ddev/
+!/.ddev/config.yaml
+/.phpdoc/cache/
+/.vscode/
+/.php-cs-fixer.cache
+/.php-cs-fixer.php
+/.phpcs-cache
+/.phpmd.result-cache.php
+/.phpmd.xml
+/phpcs.xml
+/phpdoc.xml
+/phpstan.neon
+/psalm.xml
+/TODO
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -18,3 +32,17 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+
+###> phpstan/phpstan ###
+phpstan.neon
+###< phpstan/phpstan ###
+
+###> squizlabs/php_codesniffer ###
+/.phpcs-cache
+/phpcs.xml
+###< squizlabs/php_codesniffer ###
