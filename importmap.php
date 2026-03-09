@@ -16,6 +16,9 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'es-module-shims' => [
+        'version' => '2.8.0',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
