@@ -1,4 +1,3 @@
-import './stimulus_bootstrap.js';
 /*
  * Welcome to your app's main JavaScript file!
  *
@@ -7,6 +6,16 @@ import './stimulus_bootstrap.js';
  */
 import './styles/app.css';
 
-// import Bootstrap
+// Stimulus
+import './stimulus_bootstrap.js';
+
+// Bootstrap JS + CSS
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+// jQuery
+import $ from 'jquery';
+window.$ = $;
+
+// Utility Functions
+import './utility/colormode.js';

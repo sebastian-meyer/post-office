@@ -1,16 +1,6 @@
 /.ddev/
 !/.ddev/config.yaml
-/.phpdoc/cache/
 /.vscode/
-/.php-cs-fixer.cache
-/.php-cs-fixer.php
-/.phpcs-cache
-/.phpmd.result-cache.php
-/.phpmd.xml
-/phpcs.xml
-/phpdoc.xml
-/phpstan.neon
-/psalm.xml
 /TODO
 
 ###> symfony/framework-bundle ###
@@ -23,26 +13,40 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
 ###> phpunit/phpunit ###
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
 
-###> symfony/asset-mapper ###
-/public/assets/
-/assets/vendor/
-###< symfony/asset-mapper ###
+###> phpdocumentor/shim ###
+/.phpdoc/cache/
+/phpdoc.xml
+###< phpdocumentor/shim ###
 
 ###> friendsofphp/php-cs-fixer ###
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
 
+###> phpmd/phpmd ###
+/.phpmd.result-cache.php
+/.phpmd.xml
+###< phpmd/phpmd ###
+
 ###> phpstan/phpstan ###
-phpstan.neon
+/phpstan.neon
 ###< phpstan/phpstan ###
 
 ###> squizlabs/php_codesniffer ###
 /.phpcs-cache
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
+
+###> vimeo/psalm ###
+/psalm.xml
+###< vimeo/psalm ###
