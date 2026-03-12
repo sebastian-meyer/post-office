@@ -1,4 +1,4 @@
-/*
+/*!
  * Welcome to your app's main JavaScript file!
  *
  * This file will be included onto the page via the importmap() Twig function,
@@ -13,9 +13,6 @@ import './stimulus_bootstrap.js';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// jQuery
-import $ from 'jquery';
-window.$ = $;
-
 // Utility Functions
 import './utility/colormode.js';
+import './utility/scrolltotop.js';

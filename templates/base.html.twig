@@ -12,7 +12,13 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body id="page-top">
+
         {% block body %}{% endblock %}
+
+        <!-- Scroll to Top Button -->
+        <a class="btn btn-outline-secondary scroll-to-top" href="#page-top" role="button">
+            {{ ux_icon('tabler:chevrons-up') }}
+        </a>
     </body>
 </html>
