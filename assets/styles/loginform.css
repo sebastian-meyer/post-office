@@ -1,0 +1,54 @@
+form .svgContainer {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 1em auto;
+  border-radius: 50%;
+  pointer-events: none;
+}
+form .svgContainer:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: inherit;
+  height: inherit;
+  box-sizing: border-box;
+  border: solid 2.5px var(--bs-primary-border-subtle);
+  border-radius: 50%;
+}
+form .svgContainer div {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  padding-bottom: 100%;
+}
+form .svgContainer .mySVG {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+form .svgContainer .mySVG > circle {
+    fill: var(--bs-primary-bg-subtle);
+}
+form #showPasswordCheck {
+    background-image: url('../icons/ic/round-visibility-off-light.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 1.2rem 1.2rem;
+}
+[data-bs-theme="dark"] form #showPasswordCheck {
+    background-image: url('../icons/ic/round-visibility-off-dark.svg');
+}
+form #showPasswordCheck[aria-pressed="true"] {
+    background-image: url('../icons/ic/round-visibility-dark.svg');
+}
+[data-bs-theme="dark"] form #showPasswordCheck[aria-pressed="true"] {
+    background-image: url('../icons/ic/round-visibility-light.svg');
+}

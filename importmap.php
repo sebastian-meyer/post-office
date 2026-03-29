@@ -41,4 +41,10 @@ return [
     'jquery' => [
         'version' => '4.0.0',
     ],
+    'gsap' => [
+        'version' => '3.14.2',
+    ],
+    'gsap/MorphSVGPlugin' => [
+        'version' => '3.14.2',
+    ],
 ];
