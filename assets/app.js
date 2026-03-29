@@ -4,8 +4,6 @@
  * This file will be included onto the page via the importmap() Twig function,
  * which should already be in your base.html.twig.
  */
-import './styles/app.css';
-
 // Stimulus
 import './stimulus_bootstrap.js';
 
@@ -16,3 +14,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // Utility Functions
 import './utility/colormode.js';
 import './utility/scrolltotop.js';
+
+// Stylesheet
+import './styles/app.css';

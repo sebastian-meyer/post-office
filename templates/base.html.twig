@@ -7,14 +7,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Post Office{% endblock %}</title>
         <link rel="icon" href="{{ asset('icons/streamline-freehand/stamps-portrait.svg') }}">
-        {% block stylesheets %}
-        {% endblock %}
-
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% block stylesheets %}{% endblock %}
     </head>
-    <body id="page-top">
+    <body id="page-top" class="min-vh-100">
 
         {% block body %}{% endblock %}
 

@@ -1,5 +1,9 @@
-body {
-    background-color: skyblue;
+:root {
+    --bs-primary: #fd7e14;
+    --bs-primary-rgb: from #fd7e14 r g b;
+    --bs-primary-bg-subtle: #ffe4cf;
+    --bs-primary-border-subtle: #fdb271;
+    --bs-primary-text-emphasis: #331803;
 }
 
 a.scroll-to-top {
