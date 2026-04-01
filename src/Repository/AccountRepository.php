@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\User;
+use App\Entity\Account;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
@@ -33,13 +33,13 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 /**
  * The repository for user accounts.
  *
- * @extends ServiceEntityRepository<User>
+ * @extends ServiceEntityRepository<Account>
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserLoaderInterface
+class AccountRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserLoaderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, User::class);
+        parent::__construct($registry, Account::class);
     }
 
     /**
@@ -47,7 +47,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      *
      * @see UserLoaderInterface
      */
-    public function loadUserByIdentifier(string $identifier): ?User
+    public function loadUserByIdentifier(string $identifier): ?Account
     {
         list($username, $domain) = explode('@', $identifier, 2);
 
@@ -69,7 +69,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
-        if (!$user instanceof User) {
+        if (!$user instanceof Account) {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
         }
 

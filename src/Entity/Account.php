@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use App\Repository\AccountRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,10 +30,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * The user account.
  */
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Entity(repositoryClass: AccountRepository::class)]
 #[ORM\Table(name: 'accounts')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', columns: ['username', 'domain'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class Account implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * The auto-incremented unique identifier.
