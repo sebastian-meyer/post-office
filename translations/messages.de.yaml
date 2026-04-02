@@ -1,2 +1,13 @@
+change_password: Passwort ändern
+changePassword: Passwort ändern
+close: Schließen
+currentPassword: Aktuelles Passwort
+email: E-Mail-Adresse
+homepage: Startseite
 login: Anmelden
 logout: Abmelden
+newPassword: Neues Passwort
+newPasswordRepeat: Neues Passwort (Wiederholung)
+password: Passwort
+passwordChanged: Passwort geändert!
+showPassword: Passwort ein-/ausblenden

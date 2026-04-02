@@ -1,7 +1,6 @@
 /*!
-* Login form animations from Darin Senneff (https://www.darins.page/)
+* Authentication form animations from Darin Senneff (https://www.darins.page/)
 * Copyright 2018 Darin Senneff
-* Code licensed for private use.
 */
 import {Controller} from '@hotwired/stimulus';
 import {gsap} from 'gsap';
@@ -13,7 +12,7 @@ export default class extends Controller {
         'email',
         'password',
         'spy',
-        'mySVG',
+        'bear',
         'twoFingers',
         'armL',
         'armR',
@@ -261,10 +260,14 @@ export default class extends Controller {
         e.target.focus();
         setTimeout(() => {
             if(e.target.getAttribute("aria-pressed") == "true") {
-                this.passwordTarget.type = "text";
+                for(var input of this.passwordTargets) {
+                    input.type = "text";
+                }
                 this.spreadFingers();
             } else {
-                this.passwordTarget.type = "password";
+                for(var input of this.passwordTargets) {
+                    input.type = "password";
+                }
                 this.closeFingers();
             }
         }, 100);
@@ -356,11 +359,11 @@ export default class extends Controller {
         };
     }
 
-    initLoginForm() {
+    initForm() {
         // some measurements for the svg's elements
-        this.svgCoords = this.getPosition(this.mySVGTarget);
+        this.svgCoords = this.getPosition(this.bearTarget);
         this.emailCoords = this.getPosition(this.emailTarget);
-        this.screenCenter = this.svgCoords.x + (this.mySVGTarget.offsetWidth / 2);
+        this.screenCenter = this.svgCoords.x + (this.bearTarget.offsetWidth / 2);
         this.eyeLCoords = {x: this.svgCoords.x + 84, y: this.svgCoords.y + 76};
         this.eyeRCoords = {x: this.svgCoords.x + 113, y: this.svgCoords.y + 76};
         this.noseCoords = {x: this.svgCoords.x + 97, y: this.svgCoords.y + 81};
@@ -385,6 +388,6 @@ export default class extends Controller {
     }
 
     connect() {
-        this.initLoginForm();
+        this.initForm();
     }
 }

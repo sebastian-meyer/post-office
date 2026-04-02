@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('styles/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<form action="{{ path(app.current_route) }}" method="post" data-controller="auth" class="card bg-body-tertiary shadow-sm position-absolute top-50 start-50 translate-middle" style="min-width: 20vw;">
+    <div class="card-img-top" data-auth-target="bear">
+        <div>
+            {{ include('components/bear.svg.twig') }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ block('form', 'partials/' ~ app.current_route ~ '.html.twig') }}
+    </div>
+    <div class="card-footer">
+        {{ block('submit', 'partials/' ~ app.current_route ~ '.html.twig')}}
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% block form %}
+<input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+<div class="input-group has-validation mb-3">
+    <input type="email" data-auth-target="email" data-action="focus->auth#onEmailFocus blur->auth#onEmailBlur input->auth#onEmailInput" maxlength="254" name="_username" value="{{ lastUsername }}" placeholder="{{ 'email'|trans }}" aria-label="{{ 'email'|trans }}" class="form-control{% if error %} is-invalid{% endif %}"{% if is_granted('IS_AUTHENTICATED') %} disabled readonly{% endif %} required>
+</div>
+<div class="input-group has-validation mb-3">
+    <input type="password" data-auth-target="password" data-action="focus->auth#onPasswordFocus blur->auth#onPasswordBlur" name="_password" placeholder="{% if not is_granted('IS_AUTHENTICATED') %}{{ 'password'|trans }}{% else %}******{% endif %}" aria-label="{{ 'password'|trans }}" class="form-control{% if error %} is-invalid{% endif %}"{% if is_granted('IS_AUTHENTICATED') %} disabled{% endif %} required>
+    <button type="button" role="switch" data-auth-target="spy" data-action="focus->auth#onPasswordToggleFocus blur->auth#onPasswordToggleBlur click->auth#onPasswordToggleClick" data-bs-toggle="button" aria-label="{{ 'showPassword'|trans }}" class="btn btn-outline-secondary pe-4 showPasswordCheck"{% if is_granted('IS_AUTHENTICATED') %} disabled{% endif %}></button>
+    <div class="invalid-feedback">
+        {% if error %}{{ error.messageKey|trans(error.messageData, 'security') }}{% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block submit %}
+{% if not is_granted('IS_AUTHENTICATED') %}
+<button type="submit" class="btn btn-primary">{{ ux_icon('mdi:login', {class: 'fs-4 me-1'}) }} {{ 'login'|trans }}</button>
+{% else %}
+<a class="btn btn-danger" href="{{ logout_path() }}">{{ ux_icon('mdi:logout', {class: 'fs-4 me-1'}) }} {{ 'logout'|trans }}</a>
+{% endif %}
+{% endblock %}

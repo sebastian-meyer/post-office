@@ -25,20 +25,16 @@ namespace App\Controller;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
- * Controller for the login form.
+ * Controller for the landing page.
  */
-final class LoginController extends AbstractController
+final class HomeController extends AbstractController
 {
-    #[Route('/login', name: 'app_login')]
-    #[Template('pages/login.html.twig')]
-    public function index(AuthenticationUtils $authenticationUtils): array
+    #[Route('/', name: 'homepage')]
+    #[Template('pages/home.html.twig')]
+    public function index(): array
     {
-        return [
-            'error' => $authenticationUtils->getLastAuthenticationError(),
-            'last_username' => $authenticationUtils->getLastUsername()
-        ];
+        return [];
     }
 }

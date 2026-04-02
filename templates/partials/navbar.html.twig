@@ -1,0 +1,33 @@
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+<nav class="collapse navbar-collapse justify-content-end" id="navigation">
+    <ul class="navbar-nav">
+        {% if not is_granted('IS_AUTHENTICATED') %}
+        <li class="nav-item">
+            <a class="btn btn-outline-primary" href="{{ path('login') }}" title="{{ 'login'|trans }}">
+                {{ ux_icon('mdi:account', {class: 'fs-4'}) }}
+            </a>
+        </li>
+        {% else %}
+        <li class="nav-item dropdown">
+            <a class="btn btn-outline-success" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ ux_icon('mdi:account-check', {class: 'fs-4'}) }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{{ path('change_password') }}" title="{{ 'changePassword'|trans }}">
+                        {{ 'changePassword'|trans }}
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item" href="{{ logout_path() }}" title="{{ 'logout'|trans }}">
+                        {{ ux_icon('mdi:logout', {class: 'fs-4 me-1'}) }} {{ 'logout'|trans }}
+                    </a>
+                </li>
+            </ul>
+        </li>
+        {% endif %}
+    </ul>
+</nav>

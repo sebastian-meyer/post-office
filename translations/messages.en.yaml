@@ -1,2 +1,13 @@
+change_password: Change password
+changePassword: Change password
+close: Close
+currentPassword: Current password
+email: E-mail address
+homepage: Homepage
 login: Log in
 logout: Log out
+newPassword: New password
+newPasswordRepeat: New password (repeat)
+password: Password
+passwordChanged: Password changed!
+showPassword: Show/hide password

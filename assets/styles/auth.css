@@ -1,4 +1,4 @@
-form .svgContainer {
+form .card-img-top {
   position: relative;
   width: 200px;
   height: 200px;
@@ -6,7 +6,7 @@ form .svgContainer {
   border-radius: 50%;
   pointer-events: none;
 }
-form .svgContainer:after {
+form .card-img-top:after {
   content: "";
   position: absolute;
   top: 0;
@@ -18,7 +18,7 @@ form .svgContainer:after {
   border: solid 2.5px var(--bs-primary-border-subtle);
   border-radius: 50%;
 }
-form .svgContainer div {
+form .card-img-top div {
   position: relative;
   width: 100%;
   height: 0;
@@ -26,7 +26,7 @@ form .svgContainer div {
   border-radius: 50%;
   padding-bottom: 100%;
 }
-form .svgContainer .mySVG {
+form .card-img-top .bear {
   position: absolute;
   left: 0;
   top: 0;
@@ -34,21 +34,21 @@ form .svgContainer .mySVG {
   height: 100%;
   pointer-events: none;
 }
-form .svgContainer .mySVG > circle {
+form .card-img-top .bear > circle {
     fill: var(--bs-primary-bg-subtle);
 }
-form #showPasswordCheck {
+form .showPasswordCheck {
     background-image: url('../icons/ic/round-visibility-off-light.svg');
     background-position: center;
     background-repeat: no-repeat;
     background-size: 1.2rem 1.2rem;
 }
-[data-bs-theme="dark"] form #showPasswordCheck {
+[data-bs-theme="dark"] form .showPasswordCheck {
     background-image: url('../icons/ic/round-visibility-off-dark.svg');
 }
-form #showPasswordCheck[aria-pressed="true"] {
+form .showPasswordCheck[aria-pressed="true"] {
     background-image: url('../icons/ic/round-visibility-dark.svg');
 }
-[data-bs-theme="dark"] form #showPasswordCheck[aria-pressed="true"] {
+[data-bs-theme="dark"] form .showPasswordCheck[aria-pressed="true"] {
     background-image: url('../icons/ic/round-visibility-light.svg');
 }
