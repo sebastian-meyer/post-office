@@ -26,7 +26,6 @@ use App\Entity\Account;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -71,6 +70,10 @@ final class AuthController extends AbstractController
                 [
                     'constraints' => [
                         new Assert\NotBlank(),
+                        new Assert\Expression(
+                            expression: 'this.getParent().get("currentPassword").getData() !== this.getData()',
+                            message: 'newPasswordSameAsCurrent'
+                        ),
                         new Assert\PasswordStrength(minScore: Assert\PasswordStrength::STRENGTH_STRONG)
                     ]
                 ]

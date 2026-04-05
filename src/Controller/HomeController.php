@@ -25,14 +25,16 @@ namespace App\Controller;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller for the landing page.
  */
+#[Template('pages/home.html.twig')]
 final class HomeController extends AbstractController
 {
+    #[IsGranted('IS_AUTHENTICATED')]
     #[Route('/', name: 'homepage')]
-    #[Template('pages/home.html.twig')]
     public function index(): array
     {
         return [];
