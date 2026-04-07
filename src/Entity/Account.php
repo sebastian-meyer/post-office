@@ -80,6 +80,13 @@ class Account implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $sendonly = false;
 
     /**
+     * The list of administrative account IDs.
+     *
+     * @var int[]
+     */
+    private readonly array $adminIds;
+
+    /**
      * Removes sensitive data from the user.
      *
      * @see UserInterface
@@ -88,6 +95,29 @@ class Account implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    /**
+     * Returns the list of administrative account IDs.
+     *
+     * @return int[]
+     */
+    private function getAdminIds(): array
+    {
+        if (!isset($this->adminIds)) {
+            $this->adminIds = array_map(
+                'intval',
+                array_filter(
+                    explode(
+                        ',',
+                        $_ENV['ADMIN_IDS'] ?? ''
+                    ),
+                    'is_numeric'
+                )
+            );
+        }
+
+        return $this->adminIds;
     }
 
     /**
@@ -107,6 +137,10 @@ class Account implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
+        if (in_array($this->id, $this->getAdminIds(), true)) {
+            return ['ROLE_USER', 'ROLE_ADMIN'];
+        }
+
         return ['ROLE_USER'];
     }
 
@@ -139,6 +173,7 @@ class Account implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $data = (array) $this;
         $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
+
         return $data;
     }
 }
