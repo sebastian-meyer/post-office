@@ -44,7 +44,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Template('pages/auth.html.twig')]
 final class AuthController extends AbstractController
 {
-    #[IsGranted('IS_AUTHENTICATED')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/change-password', name: 'change_password')]
     public function changePassword(
         Request $request,
