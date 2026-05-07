@@ -39,7 +39,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Controller for authentication and account management.
+ * Controller for authentication and password management.
  */
 #[Template('pages/auth.html.twig')]
 final class AuthController extends AbstractController
@@ -74,6 +74,7 @@ final class AuthController extends AbstractController
                             expression: 'this.getParent().get("currentPassword").getData() !== this.getData()',
                             message: 'newPasswordSameAsCurrent'
                         ),
+                        new Assert\NotCompromisedPassword(),
                         new Assert\PasswordStrength(minScore: Assert\PasswordStrength::STRENGTH_STRONG)
                     ]
                 ]
@@ -98,6 +99,7 @@ final class AuthController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $hashedPassword = $hasher->hashPassword($user, $form->getData()['newPassword']);
             $entityManager->getRepository(Account::class)->upgradePassword($user, $hashedPassword);
+
             return $this->redirectToRoute('change_password', ['success' => true]);
         }
 

@@ -1,2 +1,6 @@
+accountAlreadyExists: An account with this email address already exists.
+domainAlreadyExists: An entry with this domain name already exists.
+emailAlreadyExists: An entry with this email address already exists.
+invalidUsername: The username contains invalid characters.
 newPasswordSameAsCurrent: The new password must not match the current password.
 passwordsNotMatching: The passwords do not match.

@@ -31,13 +31,12 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
  */
 final class LocaleSubscriber implements EventSubscriberInterface
 {
-    public function __construct(private ContainerBagInterface $params)
-    {
-    }
-
     /**
      * Register subscribed events.
+     *
+     * @see EventSubscriberInterface::getSubscribedEvents()
      */
+    #[\Override]
     public static function getSubscribedEvents(): array
     {
         return [
@@ -53,5 +52,13 @@ final class LocaleSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         $locale = $request->getPreferredLanguage($this->params->get('kernel.enabled_locales'));
         $request->setLocale($locale);
+    }
+
+    /**
+     * @param ContainerBagInterface $params The container parameters for accessing enabled locales.
+     */
+    public function __construct(
+        private ContainerBagInterface $params
+    ) {
     }
 }

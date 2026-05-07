@@ -6,6 +6,7 @@
         <meta name="robots" content="noindex,nofollow">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}{{ app_name }}{% endblock %}</title>
+        <link rel="canonical" href="{{ app.current_route }}">
         <link rel="icon" href="{{ asset('icons/streamline-freehand/stamps-portrait.svg') }}">
         {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% block stylesheets %}{% endblock %}

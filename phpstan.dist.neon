@@ -13,6 +13,6 @@ parameters:
     phpVersion: 80200 # PHP 8.2
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
-        - identifier: ternary.shortNotAllowed
+        - identifier: property.dynamicName
     paths:
         - src
