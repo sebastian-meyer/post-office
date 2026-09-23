@@ -26,13 +26,13 @@ jobs:
         uses: php-actions/composer@v6
         with:
           command: install
-          php_version: "8.2"
+          php_version: "8.4"
 
       - name: Run PHP Mess Detector
         uses: php-actions/phpmd@v2
         with:
           path: bin/,public/,src/
-          php_version: "8.2"
+          php_version: "8.4"
           ruleset: .phpmd.dist.xml
           output: sarif
           reportfile: phpmd-results.sarif
