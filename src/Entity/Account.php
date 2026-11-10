@@ -45,6 +45,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read Collection<int, Destination> $destinations Optional destination email addresses.
  * @property-read ?int<0, 5120> $quota The quota value for the user's mailbox (in megabytes).
  * @property-read bool $replyToList Whether responses should be sent back to the account's email address.
+ * @property-read bool $strictList Whether only list members should be allowed to post to the list.
  * @property-read Collection<int, Account> $managers Additional account managers.
  * @property-read bool $isAdmin Whether the account has administrative privileges.
  * @property-read bool $enabled Whether the user's account is activated.
@@ -124,8 +125,16 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      *
      * Setting this to TRUE makes sense only for mailing lists.
      */
-    #[ORM\Column(name: 'replytolist', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'replytolist', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $replyToList = false;
+
+    /**
+     * Whether only list members should be allowed to post to the list.
+     *
+     * Setting this to TRUE makes sense only for mailing lists.
+     */
+    #[ORM\Column(name: 'strictlist', type: 'boolean', nullable: false, options: ['default' => false])]
+    private bool $strictList = false;
 
     /**
      * Additional managers of the account.
@@ -294,6 +303,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         $this->destinations->clear();
         $this->quota = null;
         $this->replyToList = false;
+        $this->strictList = false;
 
         return $this->addDestinations($destination);
     }
@@ -313,6 +323,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
 
         $this->destinations->clear();
         $this->replyToList = false;
+        $this->strictList = false;
 
         return $this->setQuota($quota);
     }
@@ -345,6 +356,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         $this->destinations->clear();
         $this->quota = null;
         $this->replyToList = false;
+        $this->strictList = false;
 
         return $this;
     }
@@ -363,10 +375,6 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         }
 
         $this->destinations->removeElement($destination);
-
-        if ($this->destinations->count() < 2) {
-            $this->replyToList = false;
-        }
 
         return $this;
     }
@@ -453,6 +461,24 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         }
 
         $this->replyToList = $replyToList;
+
+        return $this;
+    }
+
+    /**
+     * Sets the strict list mode for the mailing list.
+     *
+     * @param bool $strictList Whether only list members should be allowed to post to the list.
+     *
+     * @throws \LogicException if the account is not a mailing list.
+     */
+    public function setStrictList(bool $strictList): static
+    {
+        if ($strictList && !$this->isMailingList()) {
+            throw new \LogicException('Only mailing lists can enforce a strict list mode.');
+        }
+
+        $this->strictList = $strictList;
 
         return $this;
     }
