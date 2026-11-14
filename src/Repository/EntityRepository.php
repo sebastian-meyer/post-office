@@ -24,6 +24,7 @@ namespace App\Repository;
 
 use App\Entity\Entity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -42,16 +43,18 @@ abstract class EntityRepository extends ServiceEntityRepository
     protected readonly ValidatorInterface $validator;
 
     /**
-     * Saves an entity to the database.
+     * Validates an entity and saves it to the database.
      *
-     * @param Entity $entity The entity to save.
+     * @param T $entity The entity to save.
+     *
+     * @throws ValidationFailedException if the entity is not valid.
      */
     public function save(Entity $entity): void
     {
         $violations = $this->validator->validate($entity);
 
         if ($violations->count() > 0) {
-            // TODO: Handle validation errors appropriately (e.g., throw an exception or return an error response).
+            throw new ValidationFailedException($entity, $violations);
         }
 
         $this->getEntityManager()->persist($entity);
