@@ -33,6 +33,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Template('pages/home.html.twig')]
 final class HomeController extends AbstractController
 {
+    /**
+     * Shows the homepage.
+     *
+     * @return array<string, mixed> The template variables.
+     */
     #[IsGranted('IS_AUTHENTICATED')]
     #[Route('/', name: 'homepage')]
     public function index(): array

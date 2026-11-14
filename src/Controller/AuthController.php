@@ -44,6 +44,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Template('pages/auth.html.twig')]
 final class AuthController extends AbstractController
 {
+    /**
+     * Shows and handles the form for changing the user's password.
+     *
+     * @return array<string, mixed>|Response The template variables or a redirect after success.
+     */
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/change-password', name: 'change_password')]
     public function changePassword(
@@ -96,8 +101,10 @@ final class AuthController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $hashedPassword = $hasher->hashPassword($user, $form->getData()['newPassword']);
+        $newPassword = $form->get('newPassword')->getData();
+
+        if ($form->isSubmitted() && $form->isValid() && \is_string($newPassword)) {
+            $hashedPassword = $hasher->hashPassword($user, $newPassword);
             $entityManager->getRepository(Account::class)->upgradePassword($user, $hashedPassword);
 
             return $this->redirectToRoute('change_password', ['success' => true]);
@@ -109,6 +116,11 @@ final class AuthController extends AbstractController
         ];
     }
 
+    /**
+     * Shows the login form (the login itself is handled by the security firewall).
+     *
+     * @return array<string, mixed> The template variables.
+     */
     #[Route('/login', name: 'login')]
     public function login(AuthenticationUtils $authenticationUtils): array
     {

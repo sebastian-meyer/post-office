@@ -35,6 +35,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Template('pages/account.html.twig')]
 final class AccountController extends AbstractController
 {
+    /**
+     * Shows the user's account settings.
+     *
+     * @return array<string, mixed> The template variables.
+     */
     #[IsGranted('IS_AUTHENTICATED')]
     #[Route('/account', name: 'account')]
     public function index(#[CurrentUser] Account $account): array
