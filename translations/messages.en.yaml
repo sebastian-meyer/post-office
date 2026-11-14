@@ -1,9 +1,14 @@
 account: Account settings
+backToHomepage: Back to homepage
 change_password: Change password
 changePassword: Change password
 close: Close
 currentPassword: Current password
 email: E-mail address
+error403: You are not allowed to access this page.
+error404: The requested page could not be found.
+errorGeneric: An unexpected error occurred. Please try again later.
+errorTitle: 'Error %code%'
 homepage: Homepage
 login: Log in
 logout: Log out

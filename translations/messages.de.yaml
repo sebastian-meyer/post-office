@@ -1,9 +1,14 @@
 account: Kontoeinstellungen
+backToHomepage: Zurück zur Startseite
 change_password: Passwort ändern
 changePassword: Passwort ändern
 close: Schließen
 currentPassword: Aktuelles Passwort
 email: E-Mail-Adresse
+error403: Sie haben keine Berechtigung, diese Seite aufzurufen.
+error404: Die angeforderte Seite wurde nicht gefunden.
+errorGeneric: Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.
+errorTitle: 'Fehler %code%'
 homepage: Startseite
 login: Anmelden
 logout: Abmelden

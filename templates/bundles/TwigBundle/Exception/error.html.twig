@@ -1,0 +1,24 @@
+{% extends 'layout.html.twig' %}
+
+{#
+    Error page for production (kernel.debug = false).
+    Preview in dev environment: /_error/{statusCode}
+#}
+
+{% set messageKey = status_code in [403, 404] ? 'error' ~ status_code : 'errorGeneric' %}
+
+{% block title %}{{ app_name }} - {{ 'errorTitle'|trans({'%code%': status_code}) }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card bg-body-tertiary shadow-sm mx-auto" style="max-width: 36rem;">
+        <div class="card-body text-center">
+            <h1 class="display-4 font-monospace text-primary">{{ status_code }}</h1>
+            <p class="lead">{{ messageKey|trans }}</p>
+        </div>
+        <div class="card-footer text-center">
+            <a class="btn btn-primary" href="{{ path('homepage') }}">{{ 'backToHomepage'|trans }}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
