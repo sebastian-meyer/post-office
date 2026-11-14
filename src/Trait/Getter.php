@@ -41,9 +41,21 @@ trait Getter
     public function __get(string $name): mixed
     {
         if (property_exists($this, $name)) {
-            return $this->$name;
+            // The property is read in the scope of the object's actual class, so this also works for private
+            // properties of subclasses when the trait is used in a common base class.
+            return (fn (): mixed => $this->$name)->call($this);
         }
 
         throw new InvalidArgumentException(\sprintf('Undefined property: %s::$%s', get_debug_type($this), $name));
+    }
+
+    /**
+     * Whether a property is defined (needed e.g. for property access in Twig templates).
+     *
+     * @param string $name The name of the property.
+     */
+    public function __isset(string $name): bool
+    {
+        return property_exists($this, $name);
     }
 }
