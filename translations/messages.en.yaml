@@ -1,4 +1,9 @@
 account: Account settings
+accountType: Account type
+accountType.alias: Alias
+accountType.list: Mailing list
+accountType.mailbox: Mailbox
+accountType.sendonly: Send-only address
 backToHomepage: Back to homepage
 change_password: Change password
 changePassword: Change password
@@ -10,10 +15,14 @@ error404: The requested page could not be found.
 errorGeneric: An unexpected error occurred. Please try again later.
 errorTitle: 'Error %code%'
 homepage: Homepage
+label: Name
 login: Log in
 logout: Log out
 newPassword: New password
 newPasswordRepeat: New password (repeat)
 password: Password
 passwordChanged: Password changed!
+quota: Storage quota
+quotaMegabytes: '%quota% MB'
+quotaUnlimited: Unlimited
 showPassword: Show/hide password

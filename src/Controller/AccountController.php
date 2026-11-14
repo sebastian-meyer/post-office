@@ -30,7 +30,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * Controller for the landing page.
+ * Controller for the user's account settings.
  */
 #[Template('pages/account.html.twig')]
 final class AccountController extends AbstractController
@@ -44,6 +44,8 @@ final class AccountController extends AbstractController
     #[Route('/account', name: 'account')]
     public function index(#[CurrentUser] Account $account): array
     {
-        return [];
+        return [
+            'account' => $account
+        ];
     }
 }

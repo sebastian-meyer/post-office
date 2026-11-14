@@ -1,4 +1,9 @@
 account: Kontoeinstellungen
+accountType: Kontotyp
+accountType.alias: Weiterleitung
+accountType.list: Verteiler
+accountType.mailbox: Postfach
+accountType.sendonly: Nur-Senden-Adresse
 backToHomepage: Zurück zur Startseite
 change_password: Passwort ändern
 changePassword: Passwort ändern
@@ -10,10 +15,14 @@ error404: Die angeforderte Seite wurde nicht gefunden.
 errorGeneric: Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.
 errorTitle: 'Fehler %code%'
 homepage: Startseite
+label: Name
 login: Anmelden
 logout: Abmelden
 newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
 password: Passwort
 passwordChanged: Passwort geändert!
+quota: Speicherkontingent
+quotaMegabytes: '%quota% MB'
+quotaUnlimited: Unbegrenzt
 showPassword: Passwort ein-/ausblenden
