@@ -44,6 +44,17 @@ abstract class EntityRepository extends ServiceEntityRepository
     protected readonly ValidatorInterface $validator;
 
     /**
+     * Removes an entity from the database.
+     *
+     * @param T $entity The entity to remove.
+     */
+    public function remove(Entity $entity): void
+    {
+        $this->getEntityManager()->remove($entity);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
      * Validates an entity and saves it to the database.
      *
      * @param T $entity The entity to save.

@@ -5,11 +5,15 @@ accountType.list: Mailing list
 accountType.mailbox: Mailbox
 accountType.sendonly: Send-only address
 backToHomepage: Back to homepage
+catchAllHelp: Leave empty for a catch-all address that receives all emails for the domain.
 change_password: Change password
 changePassword: Change password
 close: Close
 currentPassword: Current password
+destination: Destination address
+domain: Domain
 email: E-mail address
+enabled: Enabled
 error403: You are not allowed to access this page.
 error404: The requested page could not be found.
 errorGeneric: An unexpected error occurred. Please try again later.
@@ -18,11 +22,20 @@ homepage: Homepage
 label: Name
 login: Log in
 logout: Log out
+managerHelp: Must be an enabled mailbox of the same domain.
 newPassword: New password
 newPasswordRepeat: New password (repeat)
 password: Password
 passwordChanged: Password changed!
+passwordUnchangedHelp: Leave empty to keep the current password.
 quota: Storage quota
+quotaHelp: 0 means unlimited.
+quotaInMegabytes: Storage quota (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unlimited
+replyToList: Replies go to the list
+replyToListHelp: Adds a Reply-To header with the list address.
 showPassword: Show/hide password
+strictList: Members only
+strictListHelp: Only members of the list are allowed to send emails to it.
+username: Username

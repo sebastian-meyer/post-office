@@ -35,6 +35,8 @@ final class DestinationRepository extends EntityRepository
     /**
      * Returns an existing or new destination.
      *
+     * New destinations are registered for persistence, so they get saved with the next flush.
+     *
      * @param string $email The destination email address.
      *
      * @return Destination The destination entry.
@@ -45,6 +47,7 @@ final class DestinationRepository extends EntityRepository
 
         if ($destination === null) {
             $destination = new Destination($email);
+            $this->getEntityManager()->persist($destination);
         }
 
         return $destination;

@@ -137,6 +137,22 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
     }
 
     /**
+     * Finds the account with the given email address (or "@domain" for a catch-all address).
+     *
+     * @param string $email The email address.
+     *
+     * @return ?Account The account, or NULL if it doesn't exist.
+     */
+    public function findOneByEmail(string $email): ?Account
+    {
+        [$username, $hostname] = $this->splitEmail($email);
+
+        $domain = $hostname !== null ? $this->domainRepository->find($hostname) : null;
+
+        return $domain !== null ? $this->findOneBy(['username' => $username, 'domain' => $domain]) : null;
+    }
+
+    /**
      * Loads the account for the given identifier (e.g. email).
      *
      * @param string $identifier The account identifier (e.g. email).
@@ -150,17 +166,9 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
     #[\Override]
     public function loadUserByIdentifier(string $identifier): Account
     {
-        [$username, $hostname] = $this->splitEmail($identifier);
+        $account = $this->findOneByEmail($identifier);
 
-        $domain = $hostname !== null ? $this->domainRepository->find($hostname) : null;
-
-        $account = $domain !== null ? $this->findOneBy([
-            'username' => $username,
-            'domain' => $domain,
-            'enabled' => true
-        ]) : null;
-
-        if ($account === null) {
+        if ($account === null || !$account->enabled) {
             $exception = new UserNotFoundException(\sprintf('User "%s" not found.', $identifier));
             $exception->setUserIdentifier($identifier);
 

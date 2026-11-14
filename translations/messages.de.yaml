@@ -5,11 +5,15 @@ accountType.list: Verteiler
 accountType.mailbox: Postfach
 accountType.sendonly: Nur-Senden-Adresse
 backToHomepage: Zurück zur Startseite
+catchAllHelp: Leer lassen für eine Catch-all-Adresse, die alle E-Mails der Domain empfängt.
 change_password: Passwort ändern
 changePassword: Passwort ändern
 close: Schließen
 currentPassword: Aktuelles Passwort
+destination: Zieladresse
+domain: Domain
 email: E-Mail-Adresse
+enabled: Aktiviert
 error403: Sie haben keine Berechtigung, diese Seite aufzurufen.
 error404: Die angeforderte Seite wurde nicht gefunden.
 errorGeneric: Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.
@@ -18,11 +22,20 @@ homepage: Startseite
 label: Name
 login: Anmelden
 logout: Abmelden
+managerHelp: Muss ein aktiviertes Postfach derselben Domain sein.
 newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
 password: Passwort
 passwordChanged: Passwort geändert!
+passwordUnchangedHelp: Leer lassen, um das aktuelle Passwort zu behalten.
 quota: Speicherkontingent
+quotaHelp: 0 bedeutet unbegrenzt.
+quotaInMegabytes: Speicherkontingent (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unbegrenzt
+replyToList: Antworten gehen an den Verteiler
+replyToListHelp: Fügt einen Reply-To-Header mit der Verteileradresse hinzu.
 showPassword: Passwort ein-/ausblenden
+strictList: Nur Mitglieder
+strictListHelp: Nur Mitglieder des Verteilers dürfen E-Mails an ihn senden.
+username: Benutzername

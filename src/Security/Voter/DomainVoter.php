@@ -40,7 +40,9 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 final class DomainVoter extends Voter
 {
     /**
-     * Manage the domain's accounts (mailboxes, aliases, mailing lists).
+     * Manage the domain as a whole: list its accounts and create new ones.
+     *
+     * For existing accounts, use the attributes of AccountVoter instead.
      */
     public const string MANAGE = 'DOMAIN_MANAGE';
 

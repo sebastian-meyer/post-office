@@ -126,6 +126,8 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     #[ORM\JoinTable(name: 'account_destinations')]
     #[ORM\JoinColumn(name: 'account', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'destination', referencedColumnName: 'destination', onDelete: 'CASCADE')]
+    // Auto-mapping would wrongly expect the collection itself to be a Destination (from the generic type).
+    #[Assert\DisableAutoMapping]
     private Collection $destinations;
 
     /**
@@ -164,6 +166,8 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     #[ORM\JoinTable(name: 'account_managers')]
     #[ORM\JoinColumn(name: 'account', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'manager', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    // Auto-mapping would wrongly expect the collection itself to be an Account (from the generic type).
+    #[Assert\DisableAutoMapping]
     private Collection $managers;
 
     /**
