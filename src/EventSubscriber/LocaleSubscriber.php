@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
@@ -50,15 +50,19 @@ final class LocaleSubscriber implements EventSubscriberInterface
     public function setLocale(RequestEvent $event): void
     {
         $request = $event->getRequest();
-        $locale = $request->getPreferredLanguage($this->params->get('kernel.enabled_locales'));
-        $request->setLocale($locale);
+        $locale = $request->getPreferredLanguage($this->enabledLocales);
+
+        if ($locale !== null) {
+            $request->setLocale($locale);
+        }
     }
 
     /**
-     * @param ContainerBagInterface $params The container parameters for accessing enabled locales.
+     * @param string[] $enabledLocales The enabled locales.
      */
     public function __construct(
-        private ContainerBagInterface $params
+        #[Autowire(param: 'kernel.enabled_locales')]
+        private readonly array $enabledLocales
     ) {
     }
 }
