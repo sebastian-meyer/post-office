@@ -24,6 +24,7 @@ namespace App\Repository;
 
 use App\Entity\Entity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -59,6 +60,27 @@ abstract class EntityRepository extends ServiceEntityRepository
 
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * Executes the query and returns the resulting entities of this repository's type.
+     *
+     * @param QueryBuilder $queryBuilder The query to execute.
+     *
+     * @return list<T> The entities.
+     */
+    protected function getEntityResult(QueryBuilder $queryBuilder): array
+    {
+        $className = $this->getClassName();
+        $entities = [];
+
+        foreach ((array) $queryBuilder->getQuery()->getResult() as $entity) {
+            if ($entity instanceof $className) {
+                $entities[] = $entity;
+            }
+        }
+
+        return $entities;
     }
 
     /**

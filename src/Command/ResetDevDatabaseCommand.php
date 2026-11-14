@@ -135,7 +135,7 @@ final class ResetDevDatabaseCommand
             'dave@example.org',
             'external@example.net'
         );
-        $team->setReplyToList(true)->setStrictList(true)->addManager($bob);
+        $team->setListOptions(replyToList: true, strictList: true)->addManager($bob);
 
         $this->createAccount('empty', $exampleOrg, AccountType::MailingList, 'Empty list');
 

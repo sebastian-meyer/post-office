@@ -116,6 +116,27 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
     }
 
     /**
+     * Returns all mailing lists the given account is a list manager of.
+     *
+     * Note that this includes lists for which the account is no longer eligible as manager (e.g. because it is
+     * disabled), so use ManagerPolicy::isListManager() for authorization decisions.
+     *
+     * @param Account $manager The manager.
+     *
+     * @return list<Account> The mailing lists, ordered by domain and username.
+     */
+    public function findListsByManager(Account $manager): array
+    {
+        return $this->getEntityResult(
+            $this->createQueryBuilder('account')
+                ->andWhere('account.type = :type')->setParameter('type', AccountType::MailingList)
+                ->andWhere(':manager MEMBER OF account.managers')->setParameter('manager', $manager)
+                ->addOrderBy('account.domain', 'ASC')
+                ->addOrderBy('account.username', 'ASC')
+        );
+    }
+
+    /**
      * Loads the account for the given identifier (e.g. email).
      *
      * @param string $identifier The account identifier (e.g. email).
@@ -178,7 +199,7 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
      * @return Account The refreshed account.
      *
      * @throws UnsupportedUserException if the account type is not supported.
-     * @throws UserNotFoundException if the account is not found.
+     * @throws UserNotFoundException if the account is not found or has been disabled.
      *
      * @see UserProviderInterface::refreshUser()
      */
@@ -189,7 +210,7 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
             throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', get_debug_type($user)));
         }
 
-        $account = $this->find($user->id);
+        $account = $this->findOneBy(['id' => $user->id, 'enabled' => true]);
 
         if ($account === null) {
             $exception = new UserNotFoundException(\sprintf('User with id "%d" not found.', $user->id));

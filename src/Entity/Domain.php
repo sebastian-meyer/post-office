@@ -27,6 +27,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
+use LogicException;
 use Symfony\Bridge\Doctrine\Validator\Constraints;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -57,23 +58,53 @@ class Domain extends Entity
      * @var Collection<int, Account>
      */
     #[ORM\JoinTable(name: 'domain_managers')]
-    #[ORM\JoinColumn(name: 'domain', referencedColumnName: 'domain')]
-    #[ORM\InverseJoinColumn(name: 'account', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'domain', referencedColumnName: 'domain', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'account', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\ManyToMany(targetEntity: Account::class)]
     private Collection $managers;
+
+    /**
+     * Whether the account can be a manager for this domain or its mailing lists.
+     *
+     * Only enabled mailboxes of this domain can be managers.
+     *
+     * @param Account $account The (potential) manager.
+     */
+    public function acceptsManager(Account $account): bool
+    {
+        return $account->isMailbox() && $account->enabled && $account->domain === $this;
+    }
 
     /**
      * Adds a manager for this domain.
      *
      * @param Account $account The account to add as a manager.
+     *
+     * @throws LogicException if the account is not eligible as manager for this domain.
      */
     public function addManager(Account $account): static
     {
+        if (!$this->acceptsManager($account)) {
+            throw new LogicException('A manager must be an enabled mailbox of the same domain.');
+        }
+
         if (!$this->managers->contains($account)) {
             $this->managers->add($account);
         }
 
         return $this;
+    }
+
+    /**
+     * Whether this domain is managed by the given account.
+     *
+     * This only checks for domain managers, not for administrators.
+     *
+     * @param Account $account The (potential) manager.
+     */
+    public function isManagedBy(Account $account): bool
+    {
+        return $this->acceptsManager($account) && $this->managers->contains($account);
     }
 
     /**

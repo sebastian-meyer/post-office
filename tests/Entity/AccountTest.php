@@ -71,7 +71,7 @@ final class AccountTest extends TestCase
         $alice = new Destination('alice@example.com');
         $bob = new Destination('bob@example.com');
         $list = new Account('team', $this->domain, AccountType::MailingList, null, $alice, $bob);
-        $list->setReplyToList(true)->setStrictList(true);
+        $list->setListOptions(replyToList: true, strictList: true);
 
         $list->removeDestination($bob);
         self::assertTrue($list->isMailingList());
@@ -115,7 +115,7 @@ final class AccountTest extends TestCase
         $mailbox = new Account('alice', $this->domain);
 
         $this->expectException(LogicException::class);
-        $mailbox->setStrictList(true);
+        $mailbox->setListOptions(replyToList: false, strictList: true);
     }
 
     public function testQuotaOnlyForMailboxes(): void
@@ -137,7 +137,7 @@ final class AccountTest extends TestCase
     public function testConversionsResetTypeSpecificState(): void
     {
         $list = new Account('team', $this->domain, AccountType::MailingList, null, new Destination('alice@example.com'));
-        $list->setReplyToList(true);
+        $list->setListOptions(replyToList: true, strictList: false);
 
         $list->makeMailbox(200);
         self::assertTrue($list->isMailbox());

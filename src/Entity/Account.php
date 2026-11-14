@@ -49,7 +49,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property-read ?int<0, 5120> $quota The quota value for the user's mailbox (in megabytes).
  * @property-read bool $replyToList Whether responses should be sent back to the account's email address.
  * @property-read bool $strictList Whether only list members should be allowed to post to the list.
- * @property-read Collection<int, Account> $managers Additional account managers.
+ * @property-read Collection<int, Account> $managers The managers of the mailing list.
  * @property-read bool $isAdmin Whether the account has administrative privileges.
  * @property-read bool $enabled Whether the user's account is activated.
  */
@@ -124,8 +124,8 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      */
     #[ORM\ManyToMany(targetEntity: Destination::class, fetch: 'EXTRA_LAZY')]
     #[ORM\JoinTable(name: 'account_destinations')]
-    #[ORM\JoinColumn(name: 'account', referencedColumnName: 'id')]
-    #[ORM\InverseJoinColumn(name: 'destination', referencedColumnName: 'destination')]
+    #[ORM\JoinColumn(name: 'account', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'destination', referencedColumnName: 'destination', onDelete: 'CASCADE')]
     private Collection $destinations;
 
     /**
@@ -154,14 +154,16 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     private bool $strictList = false;
 
     /**
-     * Additional managers of the account.
+     * The managers of the mailing list.
+     *
+     * Only mailing lists can have managers, and only enabled mailboxes of the same domain can be managers.
      *
      * @var Collection<int, Account>
      */
     #[ORM\ManyToMany(targetEntity: Account::class, fetch: 'EXTRA_LAZY')]
     #[ORM\JoinTable(name: 'account_managers')]
-    #[ORM\JoinColumn(name: 'account', referencedColumnName: 'id')]
-    #[ORM\InverseJoinColumn(name: 'manager', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'account', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'manager', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Collection $managers;
 
     /**
@@ -192,12 +194,22 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
-     * Adds a manager for the account.
+     * Adds a manager for the mailing list.
      *
      * @param Account $account The account to add as a manager.
+     *
+     * @throws LogicException if the account is not a mailing list, or the manager is not eligible.
      */
     public function addManager(Account $account): static
     {
+        if ($this->type !== AccountType::MailingList) {
+            throw new LogicException('Only mailing lists can have managers.');
+        }
+
+        if (!$this->domain->acceptsManager($account)) {
+            throw new LogicException('A manager must be an enabled mailbox of the same domain.');
+        }
+
         if (!$this->managers->contains($account)) {
             $this->managers->add($account);
         }
@@ -341,6 +353,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     {
         $this->type = AccountType::Alias;
         $this->destinations->clear();
+        $this->managers->clear();
         $this->destinations->add($destination);
         $this->quota = null;
         $this->replyToList = false;
@@ -364,6 +377,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
 
         $this->type = AccountType::Mailbox;
         $this->destinations->clear();
+        $this->managers->clear();
         $this->replyToList = false;
         $this->strictList = false;
 
@@ -403,6 +417,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
 
         $this->type = AccountType::SendOnly;
         $this->destinations->clear();
+        $this->managers->clear();
         $this->quota = null;
         $this->replyToList = false;
         $this->strictList = false;
@@ -470,6 +485,26 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
+     * Sets the options for the mailing list.
+     *
+     * @param bool $replyToList Whether responses should be sent back to the mailing list (Reply-To header).
+     * @param bool $strictList Whether only list members should be allowed to post to the list.
+     *
+     * @throws LogicException if the account is not a mailing list.
+     */
+    public function setListOptions(bool $replyToList, bool $strictList): static
+    {
+        if ($this->type !== AccountType::MailingList) {
+            throw new LogicException('Only mailing lists can have list options.');
+        }
+
+        $this->replyToList = $replyToList;
+        $this->strictList = $strictList;
+
+        return $this;
+    }
+
+    /**
      * Updates the hashed password used to authenticate the account.
      *
      * @param ?string $hashedPassword The hashed password using algorithm bcrypt(10), or NULL to disable login.
@@ -497,42 +532,6 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         }
 
         $this->quota = max(0, min($quota, self::MAX_QUOTA));
-
-        return $this;
-    }
-
-    /**
-     * Sets the reply mode for the mailing list.
-     *
-     * @param bool $replyToList Whether responses should be sent back to the mailing list.
-     *
-     * @throws LogicException if the account is not a mailing list.
-     */
-    public function setReplyToList(bool $replyToList): static
-    {
-        if ($replyToList && $this->type !== AccountType::MailingList) {
-            throw new LogicException('Only mailing lists can set a Reply-To header.');
-        }
-
-        $this->replyToList = $replyToList;
-
-        return $this;
-    }
-
-    /**
-     * Sets the strict list mode for the mailing list.
-     *
-     * @param bool $strictList Whether only list members should be allowed to post to the list.
-     *
-     * @throws LogicException if the account is not a mailing list.
-     */
-    public function setStrictList(bool $strictList): static
-    {
-        if ($strictList && $this->type !== AccountType::MailingList) {
-            throw new LogicException('Only mailing lists can enforce a strict list mode.');
-        }
-
-        $this->strictList = $strictList;
 
         return $this;
     }

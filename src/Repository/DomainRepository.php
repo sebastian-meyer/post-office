@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Account;
 use App\Entity\Domain;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -32,6 +33,25 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class DomainRepository extends EntityRepository
 {
+    /**
+     * Returns all domains the given account is a domain manager of.
+     *
+     * Note that this includes domains for which the account is no longer eligible as manager (e.g. because it is
+     * disabled), so use Domain::isManagedBy() for authorization decisions.
+     *
+     * @param Account $manager The manager.
+     *
+     * @return list<Domain> The domains, ordered by name.
+     */
+    public function findByManager(Account $manager): array
+    {
+        return $this->getEntityResult(
+            $this->createQueryBuilder('domain')
+                ->andWhere(':manager MEMBER OF domain.managers')->setParameter('manager', $manager)
+                ->addOrderBy('domain.domain', 'ASC')
+        );
+    }
+
     /**
      * Returns an existing or new domain.
      *
