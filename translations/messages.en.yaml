@@ -4,12 +4,25 @@ accountType.alias: Alias
 accountType.list: Mailing list
 accountType.mailbox: Mailbox
 accountType.sendonly: Send-only address
+actions: Actions
+address: Address
 backToHomepage: Back to homepage
 catchAllHelp: Leave empty for a catch-all address that receives all emails for the domain.
 change_password: Change password
 changePassword: Change password
 close: Close
 currentPassword: Current password
+datatables.emptyTable: "No entries available."
+datatables.first: "First"
+datatables.info: "Showing _START_ to _END_ of _TOTAL_ entries"
+datatables.infoEmpty: "Showing 0 entries"
+datatables.infoFiltered: "(filtered from _MAX_ entries)"
+datatables.last: "Last"
+datatables.lengthMenu: "_MENU_ entries per page"
+datatables.next: "Next"
+datatables.previous: "Previous"
+datatables.search: "Search:"
+datatables.zeroRecords: "No matching entries found."
 destination: Destination address
 domain: Domain
 email: E-mail address
@@ -20,9 +33,15 @@ errorGeneric: An unexpected error occurred. Please try again later.
 errorTitle: 'Error %code%'
 homepage: Homepage
 label: Name
+leaveList: Leave
+leaveListConfirm: "Do you really want to leave the mailing list %list%? Only a list manager can add you again."
+listLeaveFailed: "You cannot leave the mailing list %list%. Please contact a list manager."
+listLeft: "You have left the mailing list %list%."
 login: Log in
 logout: Log out
 managerHelp: Must be an enabled mailbox of the same domain.
+myMailingLists: My mailing lists
+myMailingListsHelp: You receive emails sent to these mailing lists.
 newPassword: New password
 newPasswordRepeat: New password (repeat)
 password: Password

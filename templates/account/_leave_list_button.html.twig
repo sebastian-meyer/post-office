@@ -1,0 +1,8 @@
+{# Leave button for a mailing list (list: the mailing list). #}
+<form method="post" action="{{ path('account_leave_list', {id: list.id}) }}" class="d-inline"
+      data-controller="confirm" data-confirm-message-value="{{ 'leaveListConfirm'|trans({'%list%': list.userIdentifier}) }}" data-action="confirm#ask">
+    <input type="hidden" name="_token" value="{{ csrf_token('leave-list-' ~ list.id) }}">
+    <button type="submit" class="btn btn-sm btn-outline-danger">
+        {{ ux_icon('mdi:logout', {class: 'me-1'}) }} {{ 'leaveList'|trans }}
+    </button>
+</form>

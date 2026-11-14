@@ -1,0 +1,13 @@
+{% set flashes = app.flashes(['success', 'danger']) %}
+{% if flashes is not empty %}
+<div class="container pt-3">
+    {% for type, messages in flashes %}
+        {% for message in messages %}
+        <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+            {{ message|trans }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ 'close'|trans }}"></button>
+        </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endif %}

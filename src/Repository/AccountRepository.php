@@ -116,6 +116,26 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
     }
 
     /**
+     * Returns all mailing lists the given account is a member of.
+     *
+     * Destinations are identified by their email address, which the database collation compares case-insensitively.
+     *
+     * @param Account $member The member.
+     *
+     * @return list<Account> The mailing lists, ordered by domain and username.
+     */
+    public function findListsByMember(Account $member): array
+    {
+        return $this->getEntityResult(
+            $this->createQueryBuilder('account')
+                ->andWhere('account.type = :type')->setParameter('type', AccountType::MailingList)
+                ->andWhere(':email MEMBER OF account.destinations')->setParameter('email', $member->getUserIdentifier())
+                ->addOrderBy('account.domain', 'ASC')
+                ->addOrderBy('account.username', 'ASC')
+        );
+    }
+
+    /**
      * Returns all mailing lists the given account is a list manager of.
      *
      * Note that this includes lists for which the account is no longer eligible as manager (e.g. because it is

@@ -1,0 +1,34 @@
+{#
+    Attributes for a wrapper element that turns the <table> inside into a DataTable
+    (see assets/controllers/datatable_controller.js).
+
+    Usage:
+        {% import 'macros/datatable.html.twig' as datatable %}
+        <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
+            <table class="table table-striped table-hover align-middle">...</table>
+        </div>
+
+    The attributes must not be put on the <table> itself (see the controller for why). The table must have a <thead>
+    with one <th> per column, and no rows with colspan in <tbody>.
+#}
+{% macro attributes(options = {}) -%}
+    data-controller="datatable"
+    data-datatable-language-value="{{ {
+        emptyTable: 'datatables.emptyTable'|trans,
+        info: 'datatables.info'|trans,
+        infoEmpty: 'datatables.infoEmpty'|trans,
+        infoFiltered: 'datatables.infoFiltered'|trans,
+        lengthMenu: 'datatables.lengthMenu'|trans,
+        search: 'datatables.search'|trans,
+        zeroRecords: 'datatables.zeroRecords'|trans,
+        aria: {
+            paginate: {
+                first: 'datatables.first'|trans,
+                previous: 'datatables.previous'|trans,
+                next: 'datatables.next'|trans,
+                last: 'datatables.last'|trans
+            }
+        }
+    }|json_encode|e('html_attr') }}"
+    {%- if options is not empty %} data-datatable-options-value="{{ options|json_encode|e('html_attr') }}"{% endif %}
+{%- endmacro %}

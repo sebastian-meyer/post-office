@@ -1,6 +1,6 @@
 /*!
 * Authentication form animations from Darin Senneff (https://www.darins.page/)
-* Copyright 2018 Darin Senneff
+* Copyright (C) 2018 Darin Senneff
 */
 import {Controller} from '@hotwired/stimulus';
 import {gsap} from 'gsap';
@@ -172,35 +172,15 @@ export default class extends Controller {
         // very crude email validation to trigger effects
         if(this.curEmailIndex > 0) {
             if(this.mouthStatus == "small") {
-                this.mouthStatus = "medium";
-                gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthMediumBGTarget, ease: "expo.out"});
-                gsap.to(this.toothTarget, 1, {x: 0, y: 0, ease: "expo.out"});
-                gsap.to(this.tongueTarget, 1, {x: 0, y: 1, ease: "expo.out"});
-                gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: .85, scaleY: .85, ease: "expo.out"});
-                this.eyeScale = .85;
+                this.openMouth();
             }
             if(value.includes("@")) {
-                this.mouthStatus = "large";
-                gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthLargeBGTarget, ease: "expo.out"});
-                gsap.to(this.toothTarget, 1, {x: 3, y: -2, ease: "expo.out"});
-                gsap.to(this.tongueTarget, 1, {y: 2, ease: "expo.out"});
-                gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: .65, scaleY: .65, ease: "expo.out", transformOrigin: "center center"});
-                this.eyeScale = .65;
-            } else {
-                this.mouthStatus = "medium";
-                gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthMediumBGTarget, ease: "expo.out"});
-                gsap.to(this.toothTarget, 1, {x: 0, y: 0, ease: "expo.out"});
-                gsap.to(this.tongueTarget, 1, {x: 0, y: 1, ease: "expo.out"});
-                gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: .85, scaleY: .85, ease: "expo.out"});
-                this.eyeScale = .85;
+                this.openMouthWide();
+            } else if(this.mouthStatus == "large") {
+                this.openMouth();
             }
         } else {
-            this.mouthStatus = "small";
-            gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthSmallBGTarget, ease: "expo.out"});
-            gsap.to(this.toothTarget, 1, {x: 0, y: 0, ease: "expo.out"});
-            gsap.to(this.tongueTarget, 1, {y: 0, ease: "expo.out"});
-            gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: 1, scaleY: 1, ease: "expo.out"});
-            this.eyeScale = 1;
+            this.closeMouth();
         }
     }
 
@@ -271,6 +251,33 @@ export default class extends Controller {
                 this.closeFingers();
             }
         }, 100);
+    }
+
+    openMouth() {
+        this.mouthStatus = "medium";
+        gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthMediumBGTarget, ease: "expo.out"});
+        gsap.to(this.toothTarget, 1, {x: 0, y: 0, ease: "expo.out"});
+        gsap.to(this.tongueTarget, 1, {x: 0, y: 1, ease: "expo.out"});
+        gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: .85, scaleY: .85, ease: "expo.out"});
+        this.eyeScale = .85;
+    }
+
+    openMouthWide() {
+        this.mouthStatus = "large";
+        gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthLargeBGTarget, ease: "expo.out"});
+        gsap.to(this.toothTarget, 1, {x: 3, y: -2, ease: "expo.out"});
+        gsap.to(this.tongueTarget, 1, {y: 2, ease: "expo.out"});
+        gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: .65, scaleY: .65, ease: "expo.out", transformOrigin: "center center"});
+        this.eyeScale = .65;
+    }
+
+    closeMouth() {
+        this.mouthStatus = "small";
+        gsap.to([this.mouthBGTarget, this.mouthOutlineTarget, this.mouthMaskPathTarget], 1, {morphSVG: this.mouthSmallBGTarget, ease: "expo.out"});
+        gsap.to(this.toothTarget, 1, {x: 0, y: 0, ease: "expo.out"});
+        gsap.to(this.tongueTarget, 1, {y: 0, ease: "expo.out"});
+        gsap.to([this.eyeLTarget, this.eyeRTarget], 1, {scaleX: 1, scaleY: 1, ease: "expo.out"});
+        this.eyeScale = 1;
     }
 
     spreadFingers() {
@@ -382,9 +389,6 @@ export default class extends Controller {
         // determine how far email input can go before scrolling occurs
         // will be used as the furthest point avatar will look to the right
         this.emailScrollMax = this.emailTarget.scrollWidth;
-
-        // clear the console
-        //console.clear();
     }
 
     connect() {

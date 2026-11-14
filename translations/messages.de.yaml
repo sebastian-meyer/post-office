@@ -4,12 +4,25 @@ accountType.alias: Weiterleitung
 accountType.list: Verteiler
 accountType.mailbox: Postfach
 accountType.sendonly: Nur-Senden-Adresse
+actions: Aktionen
+address: Adresse
 backToHomepage: Zurück zur Startseite
 catchAllHelp: Leer lassen für eine Catch-all-Adresse, die alle E-Mails der Domain empfängt.
 change_password: Passwort ändern
 changePassword: Passwort ändern
 close: Schließen
 currentPassword: Aktuelles Passwort
+datatables.emptyTable: "Keine Einträge vorhanden."
+datatables.first: "Erste"
+datatables.info: "_START_ bis _END_ von _TOTAL_ Einträgen"
+datatables.infoEmpty: "Keine Einträge"
+datatables.infoFiltered: "(gefiltert aus _MAX_ Einträgen)"
+datatables.last: "Letzte"
+datatables.lengthMenu: "_MENU_ Einträge pro Seite"
+datatables.next: "Nächste"
+datatables.previous: "Vorherige"
+datatables.search: "Suche:"
+datatables.zeroRecords: "Keine passenden Einträge gefunden."
 destination: Zieladresse
 domain: Domain
 email: E-Mail-Adresse
@@ -20,9 +33,15 @@ errorGeneric: Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es sp
 errorTitle: 'Fehler %code%'
 homepage: Startseite
 label: Name
+leaveList: Austreten
+leaveListConfirm: "Möchten Sie wirklich aus dem Verteiler %list% austreten? Nur ein Verteilerverwalter kann Sie wieder hinzufügen."
+listLeaveFailed: "Sie können nicht aus dem Verteiler %list% austreten. Bitte wenden Sie sich an einen Verteilerverwalter."
+listLeft: "Sie sind aus dem Verteiler %list% ausgetreten."
 login: Anmelden
 logout: Abmelden
 managerHelp: Muss ein aktiviertes Postfach derselben Domain sein.
+myMailingLists: Meine Verteiler
+myMailingListsHelp: Sie erhalten E-Mails, die an diese Verteiler gesendet werden.
 newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
 password: Passwort

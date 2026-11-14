@@ -38,13 +38,20 @@ return [
         'version' => '5.3.8',
         'type' => 'css',
     ],
-    'jquery' => [
-        'version' => '4.0.0',
-    ],
     'gsap' => [
         'version' => '3.14.2',
     ],
     'gsap/MorphSVGPlugin' => [
         'version' => '3.14.2',
+    ],
+    'datatables.net' => [
+        'version' => '3.1.5',
+    ],
+    'datatables.net-bs5' => [
+        'version' => '3.1.5',
+    ],
+    'datatables.net-bs5/css/dataTables.bootstrap5.min.css' => [
+        'version' => '3.1.5',
+        'type' => 'css',
     ],
 ];
