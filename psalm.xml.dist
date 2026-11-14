@@ -17,6 +17,9 @@
             <containerXml>var/cache/dev/App_KernelDevDebugContainer.xml</containerXml>
         </pluginClass>
     </plugins>
+    <extraFiles>
+        <directory name="var/cache/dev/Symfony/Config"/>
+    </extraFiles>
     <projectFiles>
         <directory name="src"/>
         <ignoreFiles>
