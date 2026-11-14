@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Account;
+use App\Entity\AccountType;
 use App\Entity\Destination;
 use App\Entity\Domain;
 use App\Exception\DomainNotFoundException;
@@ -39,6 +40,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
  * The repository for user accounts.
  *
  * @extends EntityRepository<Account>
+ * @implements UserProviderInterface<Account>
  */
 final class AccountRepository extends EntityRepository implements PasswordUpgraderInterface, UserProviderInterface
 {
@@ -59,15 +61,21 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
      *
      * @param ?string $username The username part of the account's email address.
      * @param Domain|string $domain The domain part of the account's email address.
+     * @param AccountType $type The type of the account.
      * @param ?string $hashedPassword The hashed password using algorithm bcrypt(10), or NULL to disable login.
-     * @param Destination ...$destinations Optional destination email addresses for accounts that are aliases or mailing lists.
+     * @param Destination ...$destinations The destination (for aliases) or members (for mailing lists).
      *
      * @return Account The created account.
      *
      * @throws DomainNotFoundException if the given domain does not exist.
      */
-    public function create(?string $username, Domain|string $domain, ?string $hashedPassword, Destination ...$destinations): Account
-    {
+    public function create(
+        ?string $username,
+        Domain|string $domain,
+        AccountType $type = AccountType::Mailbox,
+        ?string $hashedPassword = null,
+        Destination ...$destinations
+    ): Account {
         if (!$domain instanceof Domain) {
             $domain = $this->domainRepository->find($domain);
 
@@ -76,34 +84,35 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
             }
         }
 
-        return new Account($username, $domain, $hashedPassword, ...$destinations);
+        return new Account($username, $domain, $type, $hashedPassword, ...$destinations);
     }
 
     /**
      * Creates a new account from an email address.
      *
-     * @param string $email The email address to create the account from.
+     * @param string $email The email address (or "@domain" for a catch-all account) to create the account from.
+     * @param AccountType $type The type of the account.
      * @param ?string $hashedPassword The hashed password using algorithm bcrypt(10), or NULL to disable login.
-     * @param Destination ...$destinations Optional destination email addresses for accounts that are aliases or mailing lists.
+     * @param Destination ...$destinations The destination (for aliases) or members (for mailing lists).
      *
      * @return Account The created account.
      *
      * @throws InvalidEmailException if the given email address is not valid.
+     * @throws DomainNotFoundException if the given domain does not exist.
      */
-    public function createFromEmail(string $email, ?string $hashedPassword, Destination ...$destinations): Account
-    {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
-            [$username, $domain] = explode('@', $email, 2);
-        } else {
-            $username = null;
-            $domain = filter_var(trim($email, '@.'), FILTER_VALIDATE_DOMAIN, FILTER_NULL_ON_FAILURE);
-        }
+    public function createFromEmail(
+        string $email,
+        AccountType $type = AccountType::Mailbox,
+        ?string $hashedPassword = null,
+        Destination ...$destinations
+    ): Account {
+        [$username, $domain] = $this->splitEmail($email);
 
         if ($domain === null) {
             throw new InvalidEmailException();
         }
 
-        return $this->create($username, $domain, $hashedPassword, ...$destinations);
+        return $this->create($username, $domain, $type, $hashedPassword, ...$destinations);
     }
 
     /**
@@ -120,21 +129,15 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
     #[\Override]
     public function loadUserByIdentifier(string $identifier): Account
     {
-        if (filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false) {
-            [$username, $hostname] = explode('@', $identifier, 2);
-        } else {
-            $username = null;
-            $hostname = filter_var(trim($identifier, '@'), FILTER_VALIDATE_DOMAIN, FILTER_NULL_ON_FAILURE);
-        }
+        [$username, $hostname] = $this->splitEmail($identifier);
 
-        $domain = $this->getEntityManager()->getRepository(Domain::class)->find($hostname);
+        $domain = $hostname !== null ? $this->domainRepository->find($hostname) : null;
 
-        $account = $this->createQueryBuilder('accounts')
-            ->andWhere('accounts.username = :username')->setParameter('username', $username)
-            ->andWhere('accounts.domain = :domain')->setParameter('domain', $domain)
-            ->andWhere('accounts.enabled = :true')->setParameter('true', true)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $account = $domain !== null ? $this->findOneBy([
+            'username' => $username,
+            'domain' => $domain,
+            'enabled' => true
+        ]) : null;
 
         if ($account === null) {
             $exception = new UserNotFoundException(\sprintf('User "%s" not found.', $identifier));
@@ -143,7 +146,7 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
             throw $exception;
         }
 
-        return $account->setAdmin(\in_array($account->getId(), $this->adminIds, true));
+        return $account->setAdmin($this->isAdminId($account->id));
     }
 
     /**
@@ -172,7 +175,7 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
      *
      * @param UserInterface $user The account to refresh.
      *
-     * @return UserInterface The refreshed account.
+     * @return Account The refreshed account.
      *
      * @throws UnsupportedUserException if the account type is not supported.
      * @throws UserNotFoundException if the account is not found.
@@ -180,7 +183,7 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
      * @see UserProviderInterface::refreshUser()
      */
     #[\Override]
-    public function refreshUser(UserInterface $user): UserInterface
+    public function refreshUser(UserInterface $user): Account
     {
         if (!$user instanceof Account) {
             throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', get_debug_type($user)));
@@ -190,18 +193,18 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
 
         if ($account === null) {
             $exception = new UserNotFoundException(\sprintf('User with id "%d" not found.', $user->id));
-            $exception->setUserIdentifier(json_encode($user->id));
+            $exception->setUserIdentifier($user->getUserIdentifier());
 
             throw $exception;
         }
 
-        return $account->setAdmin(\in_array($user->id, $this->adminIds, true));
+        return $account->setAdmin($this->isAdminId($account->id));
     }
 
     /**
      * Whether this provider supports the given user class.
      *
-     * @param class-string $class The account/user class.
+     * @param string $class The account/user class.
      *
      * @see UserProviderInterface::supportsClass()
      */
@@ -209,6 +212,38 @@ final class AccountRepository extends EntityRepository implements PasswordUpgrad
     public function supportsClass(string $class): bool
     {
         return is_a($class, Account::class, true);
+    }
+
+    /**
+     * Whether the given account ID has administrative privileges.
+     *
+     * @param int $id The account ID.
+     */
+    private function isAdminId(int $id): bool
+    {
+        return \in_array($id, $this->adminIds, true);
+    }
+
+    /**
+     * Splits an email address into username and domain.
+     *
+     * A bare domain name or "@domain" results in a NULL username (i.e. a catch-all address).
+     *
+     * @param string $email The email address.
+     *
+     * @return array{0: ?string, 1: ?string} The username and domain, each NULL if not present or invalid.
+     */
+    private function splitEmail(string $email): array
+    {
+        $email = trim($email);
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
+            [$username, $domain] = explode('@', $email, 2) + [1 => ''];
+
+            return [$username, $domain];
+        }
+
+        return [null, filter_var(trim($email, '@.'), FILTER_VALIDATE_DOMAIN, FILTER_NULL_ON_FAILURE)];
     }
 
     /**

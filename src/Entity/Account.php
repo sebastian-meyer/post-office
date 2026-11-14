@@ -27,6 +27,8 @@ use App\Repository\AccountRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
+use LogicException;
 use Symfony\Bridge\Doctrine\Validator\Constraints;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -35,14 +37,15 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * A user account.
  *
- * This can be a mailbox, an alias, a mailing list, or a send-only email address.
+ * This can be a mailbox, an alias, a mailing list, or a send-only email address (see AccountType).
  *
  * @property-read positive-int $id The auto-incremented unique identifier.
  * @property-read string $label The label for the account.
  * @property-read ?non-empty-string $username Optional username part of the user's email address.
  * @property-read Domain $domain The domain part of the user's email address.
  * @property-read ?non-empty-string $password The hashed password.
- * @property-read Collection<int, Destination> $destinations Optional destination email addresses.
+ * @property-read AccountType $type The type of the account.
+ * @property-read Collection<int, Destination> $destinations Destination email addresses of aliases and mailing lists.
  * @property-read ?int<0, 5120> $quota The quota value for the user's mailbox (in megabytes).
  * @property-read bool $replyToList Whether responses should be sent back to the account's email address.
  * @property-read bool $strictList Whether only list members should be allowed to post to the list.
@@ -61,6 +64,16 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     use Trait\Switchable;
 
     /**
+     * The default quota for new mailboxes (in megabytes).
+     */
+    public const int DEFAULT_QUOTA = 100;
+
+    /**
+     * The maximum quota for mailboxes (in megabytes).
+     */
+    public const int MAX_QUOTA = 5120;
+
+    /**
      * The label for the account.
      */
     #[ORM\Column(name: 'label', type:'string', length: 255, nullable: false)]
@@ -70,8 +83,8 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     /**
      * The username part of the account's email address.
      *
-     * If this is not set, the account is a catch-all address that receives all email for its domain. A destination has
-     * to be set for catch-all accounts, since they cannot be mailboxes.
+     * If this is not set, the account is a catch-all address that receives all email for its domain. Catch-all
+     * accounts can only be aliases or mailing lists and always need at least one destination.
      */
     #[ORM\Column(name: 'username', type: 'string', length: 64, nullable: true)]
     #[Assert\NotBlank(allowNull: true)]
@@ -82,14 +95,13 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      * The domain part of the account's email address.
      */
     #[ORM\ManyToOne(targetEntity: Domain::class, fetch: 'EXTRA_LAZY')]
-    #[ORM\JoinColumn(name: 'domain', referencedColumnName: 'domain')]
+    #[ORM\JoinColumn(name: 'domain', referencedColumnName: 'domain', nullable: false)]
     private Domain $domain;
 
     /**
      * The hashed password.
      *
-     * If this is NULL, the account is not allowed to log in and can only be used for email forwarding or as a mailing
-     * list.
+     * If this is NULL, the account is not allowed to log in.
      */
     #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: true)]
     #[Assert\DisableAutoMapping]
@@ -97,10 +109,16 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     private ?string $password;
 
     /**
-     * Optional destination email addresses for accounts that are aliases or mailing lists.
+     * The type of the account.
+     */
+    #[ORM\Column(name: 'type', type: 'string', length: 16, nullable: false, enumType: AccountType::class, options: ['default' => 'mailbox'])]
+    private AccountType $type = AccountType::Mailbox;
+
+    /**
+     * Destination email addresses for accounts that are aliases or mailing lists.
      *
-     * If this is set, the account is an alias or mailing list and emails will be forwarded to the specified addresses
-     * instead of being delivered to a mailbox. In this case, the quota value is ignored and should be set to NULL.
+     * An alias has exactly one destination, a mailing list has any number of destinations (its members). Mailboxes and
+     * send-only accounts never have destinations.
      *
      * @var Collection<int, Destination>
      */
@@ -113,17 +131,16 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     /**
      * The quota value for the account's mailbox (in megabytes).
      *
-     * A quota of 0 means the account has no quota limit. If this is NULL, the account is either an alias (if a
-     * destination is set) or a send-only address.
+     * A quota of 0 means the account has no quota limit. This is always NULL for accounts that are not mailboxes.
      */
-    #[ORM\Column(name: 'quota', type: 'integer', nullable: true, options: ['default' => 100, 'unsigned' => true])]
-    #[Assert\Range(min: 0, max: 5120)]
-    private ?int $quota = 100;
+    #[ORM\Column(name: 'quota', type: 'integer', nullable: true, options: ['default' => self::DEFAULT_QUOTA, 'unsigned' => true])]
+    #[Assert\Range(min: 0, max: self::MAX_QUOTA)]
+    private ?int $quota = self::DEFAULT_QUOTA;
 
     /**
      * Whether responses should be sent back to the account's email address.
      *
-     * Setting this to TRUE makes sense only for mailing lists.
+     * This can only be TRUE for mailing lists.
      */
     #[ORM\Column(name: 'replytolist', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $replyToList = false;
@@ -131,7 +148,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     /**
      * Whether only list members should be allowed to post to the list.
      *
-     * Setting this to TRUE makes sense only for mailing lists.
+     * This can only be TRUE for mailing lists.
      */
     #[ORM\Column(name: 'strictlist', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $strictList = false;
@@ -153,16 +170,16 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     private bool $isAdmin = false;
 
     /**
-     * Adds a destination for the account, making it an alias.
+     * Adds members to the mailing list.
      *
      * @param Destination ...$destinations The destination email addresses.
      *
-     * @throws \LogicException if the account is a mailbox.
+     * @throws LogicException if the account is not a mailing list.
      */
     public function addDestinations(Destination ...$destinations): static
     {
-        if ($this->quota !== null) {
-            throw new \LogicException('Cannot set a destination for a mailbox. Call Account::makeAlias() or Account::makeMailingList() instead.');
+        if ($this->type !== AccountType::MailingList) {
+            throw new LogicException('Only mailing lists can have additional destinations. Call Account::makeAlias() to change the destination of an alias.');
         }
 
         foreach ($destinations as $destination) {
@@ -235,7 +252,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     /**
      * Returns the identifier for this account (e.g. email).
      *
-     * @return string The identifier for this account.
+     * @return non-empty-string The identifier for this account.
      *
      * @see UserInterface::getUserIdentifier()
      */
@@ -254,11 +271,33 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
+     * Sets up a newly created account according to its type.
+     *
+     * @param AccountType $type The type of the account.
+     * @param list<Destination> $destinations The destination (for aliases) or members (for mailing lists).
+     *
+     * @throws InvalidArgumentException if the number of destinations doesn't match the account type.
+     */
+    private function initializeType(AccountType $type, array $destinations): void
+    {
+        if (!$type->acceptsDestinationCount(\count($destinations))) {
+            throw new InvalidArgumentException(\sprintf('An account of type "%s" cannot have %d destination(s).', $type->value, \count($destinations)));
+        }
+
+        match ($type) {
+            AccountType::Mailbox => $this->makeMailbox(),
+            AccountType::Alias => $this->makeAlias($destinations[0] ?? throw new InvalidArgumentException('An alias requires a destination.')),
+            AccountType::MailingList => $this->makeMailingList(...$destinations),
+            AccountType::SendOnly => $this->makeSendOnly(),
+        };
+    }
+
+    /**
      * Whether the account is an alias.
      */
     public function isAlias(): bool
     {
-        return $this->destinations->count() === 1;
+        return $this->type === AccountType::Alias;
     }
 
     /**
@@ -274,7 +313,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      */
     public function isMailbox(): bool
     {
-        return $this->destinations->isEmpty() && $this->quota !== null;
+        return $this->type === AccountType::Mailbox;
     }
 
     /**
@@ -282,7 +321,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      */
     public function isMailingList(): bool
     {
-        return $this->destinations->count() > 1;
+        return $this->type === AccountType::MailingList;
     }
 
     /**
@@ -290,37 +329,40 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      */
     public function isSendOnly(): bool
     {
-        return $this->destinations->isEmpty() && $this->quota === null;
+        return $this->type === AccountType::SendOnly;
     }
 
     /**
-     * Sets the destination and unsets the quota limit for the account, making it an alias.
+     * Makes the account an alias for the given destination.
      *
      * @param Destination $destination The destination email address.
      */
     public function makeAlias(Destination $destination): static
     {
+        $this->type = AccountType::Alias;
         $this->destinations->clear();
+        $this->destinations->add($destination);
         $this->quota = null;
         $this->replyToList = false;
         $this->strictList = false;
 
-        return $this->addDestinations($destination);
+        return $this;
     }
 
     /**
-     * Unsets the destination and sets the quota limit for the account, making it a mailbox.
+     * Makes the account a mailbox with the given quota limit.
      *
      * @param int $quota The quota limit in megabytes. Must be between 0 and 5120, where 0 means unlimited.
      *
-     * @throws \LogicException if the account is a catch-all address.
+     * @throws LogicException if the account is a catch-all address.
      */
-    public function makeMailbox(int $quota): static
+    public function makeMailbox(int $quota = self::DEFAULT_QUOTA): static
     {
         if ($this->username === null) {
-            throw new \LogicException('A catch-all account cannot be a mailbox.');
+            throw new LogicException('A catch-all account cannot be a mailbox.');
         }
 
+        $this->type = AccountType::Mailbox;
         $this->destinations->clear();
         $this->replyToList = false;
         $this->strictList = false;
@@ -329,30 +371,37 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
-     * Sets the destinations and unsets the quota limit for the account, making it a mailing list.
+     * Makes the account a mailing list with the given members.
      *
      * @param Destination ...$destinations The destination email addresses.
+     *
+     * @throws LogicException if the account is a catch-all address and no destination is given.
      */
     public function makeMailingList(Destination ...$destinations): static
     {
+        if ($this->username === null && \count($destinations) === 0) {
+            throw new LogicException('A catch-all account requires at least one destination.');
+        }
+
+        $this->type = AccountType::MailingList;
         $this->destinations->clear();
         $this->quota = null;
-        $this->addDestinations(...$destinations);
 
-        return $this;
+        return $this->addDestinations(...$destinations);
     }
 
     /**
-     * Unsets the destination and quota limit for the account, making it send-only.
+     * Makes the account send-only by removing destinations and quota limit.
      *
-     * @throws \LogicException if the account is a catch-all address.
+     * @throws LogicException if the account is a catch-all address.
      */
     public function makeSendOnly(): static
     {
         if ($this->username === null) {
-            throw new \LogicException('A catch-all account cannot be send-only.');
+            throw new LogicException('A catch-all account cannot be send-only.');
         }
 
+        $this->type = AccountType::SendOnly;
         $this->destinations->clear();
         $this->quota = null;
         $this->replyToList = false;
@@ -362,16 +411,21 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
-     * Removes a destination from the account.
+     * Removes a member from the mailing list.
      *
      * @param Destination $destination The email address to remove from the destinations.
      *
-     * @throws \LogicException if the account is a catch-all address and the last destination is about to be removed.
+     * @throws LogicException if the account is not a mailing list, or if it is a catch-all address and the last
+     *                        destination is about to be removed.
      */
     public function removeDestination(Destination $destination): static
     {
-        if ($this->username === null && $this->destinations->count() === 1) {
-            throw new \LogicException('A catch-all account must have at least one destination.');
+        if ($this->type !== AccountType::MailingList) {
+            throw new LogicException('Only mailing lists can have destinations removed. Call Account::makeAlias() to change the destination of an alias.');
+        }
+
+        if ($this->username === null && $this->destinations->count() === 1 && $this->destinations->contains($destination)) {
+            throw new LogicException('A catch-all account must have at least one destination.');
         }
 
         $this->destinations->removeElement($destination);
@@ -434,15 +488,15 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      *
      * @param int $quota The quota value in megabytes. Must be between 0 and 5120, where 0 means unlimited.
      *
-     * @throws \LogicException if the account is an alias.
+     * @throws LogicException if the account is not a mailbox.
      */
     public function setQuota(int $quota): static
     {
-        if (!$this->destinations->isEmpty()) {
-            throw new \LogicException('Cannot set a quota limit for an alias or mailing list.');
+        if ($this->type !== AccountType::Mailbox) {
+            throw new LogicException('Only mailboxes can have a quota limit.');
         }
 
-        $this->quota = max(0, min($quota, 5120));
+        $this->quota = max(0, min($quota, self::MAX_QUOTA));
 
         return $this;
     }
@@ -452,12 +506,12 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      *
      * @param bool $replyToList Whether responses should be sent back to the mailing list.
      *
-     * @throws \LogicException if the account is not a mailing list.
+     * @throws LogicException if the account is not a mailing list.
      */
     public function setReplyToList(bool $replyToList): static
     {
-        if ($replyToList && !$this->isMailingList()) {
-            throw new \LogicException('Only mailing lists can set a Reply-To header.');
+        if ($replyToList && $this->type !== AccountType::MailingList) {
+            throw new LogicException('Only mailing lists can set a Reply-To header.');
         }
 
         $this->replyToList = $replyToList;
@@ -470,12 +524,12 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      *
      * @param bool $strictList Whether only list members should be allowed to post to the list.
      *
-     * @throws \LogicException if the account is not a mailing list.
+     * @throws LogicException if the account is not a mailing list.
      */
     public function setStrictList(bool $strictList): static
     {
-        if ($strictList && !$this->isMailingList()) {
-            throw new \LogicException('Only mailing lists can enforce a strict list mode.');
+        if ($strictList && $this->type !== AccountType::MailingList) {
+            throw new LogicException('Only mailing lists can enforce a strict list mode.');
         }
 
         $this->strictList = $strictList;
@@ -486,20 +540,23 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     /**
      * @param ?string $username The username part of the account's email address, or NULL for a catch-all account.
      * @param Domain $domain The domain part of the account's email address.
+     * @param AccountType $type The type of the account.
      * @param ?string $hashedPassword The hashed password using algorithm bcrypt(10), or NULL to disable login.
-     * @param Destination ...$destinations Optional destination email addresses for accounts that are aliases or mailing lists.
+     * @param Destination ...$destinations The destination (for aliases) or members (for mailing lists).
      *
-     * @throws \LogicException if neither a username nor a destination is given.
-     * @throws \InvalidArgumentException if username and domain don't form a valid email address.
+     * @throws InvalidArgumentException if username and domain don't form a valid email address, or if the number of
+     *                                  destinations doesn't match the account type.
+     * @throws LogicException if a catch-all account is not an alias or mailing list with at least one destination.
      */
-    public function __construct(?string $username, Domain $domain, ?string $hashedPassword, Destination ...$destinations)
-    {
-        if ($username === null && \count($destinations) === 0) {
-            throw new \LogicException('A catch-all account cannot be a mailbox and therefore requires a destination.');
-        }
-
+    public function __construct(
+        ?string $username,
+        Domain $domain,
+        AccountType $type = AccountType::Mailbox,
+        ?string $hashedPassword = null,
+        Destination ...$destinations
+    ) {
         if ($username !== null && filter_var("{$username}@{$domain}", FILTER_VALIDATE_EMAIL) === false) {
-            throw new \InvalidArgumentException(\sprintf('Invalid email address "%s".', "{$username}@{$domain}"));
+            throw new InvalidArgumentException(\sprintf('Invalid email address "%s".', "{$username}@{$domain}"));
         }
 
         $this->username = $username;
@@ -508,9 +565,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         $this->destinations = new ArrayCollection();
         $this->managers = new ArrayCollection();
 
-        if (\count($destinations) !== 0) {
-            $this->makeMailingList(...$destinations);
-        }
+        $this->initializeType($type, array_values($destinations));
     }
 
     /**

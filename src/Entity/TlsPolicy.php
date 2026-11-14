@@ -25,6 +25,7 @@ namespace App\Entity;
 use App\Entity\Trait;
 use App\Repository\TlsPolicyRepository;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Validator\Constraints;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -47,7 +48,7 @@ class TlsPolicy extends Entity
     /**
      * List of valid TLS policies.
      */
-    private const POLICIES = [
+    private const array POLICIES = [
         'none',
         'may',
         'encrypt',
@@ -87,14 +88,14 @@ class TlsPolicy extends Entity
      *
      * @param string $policy The TLS policy to set (none, may, encrypt, dane, dane-only, fingerprint, verify, secure).
      *
-     * @throws \InvalidArgumentException if the policy is invalid.
+     * @throws InvalidArgumentException if the policy is invalid.
      */
     public function setPolicy(string $policy): static
     {
         $policy = trim(strtolower($policy));
 
         if (!\in_array($policy, self::POLICIES, true)) {
-            throw new \InvalidArgumentException(\sprintf('Invalid policy "%s". Must be one of %s.', $policy, json_encode(self::POLICIES)));
+            throw new InvalidArgumentException(\sprintf('Invalid policy "%s". Must be one of %s.', $policy, implode(', ', self::POLICIES)));
         }
 
         $this->policy = $policy;
@@ -117,12 +118,12 @@ class TlsPolicy extends Entity
     /**
      * @param string $domain The domain name.
      *
-     * @throws \InvalidArgumentException if the provided domain name is invalid.
+     * @throws InvalidArgumentException if the provided domain name is invalid.
      */
     public function __construct(string $domain)
     {
         if (filter_var(trim(trim($domain), '.'), FILTER_VALIDATE_DOMAIN) === false) {
-            throw new \InvalidArgumentException(\sprintf('Invalid domain name "%s".', $domain));
+            throw new InvalidArgumentException(\sprintf('Invalid domain name "%s".', $domain));
         }
 
         $this->domain = trim($domain);

@@ -25,6 +25,7 @@ namespace App\Entity;
 use App\Entity\Trait;
 use App\Repository\BlacklistRepository;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Validator\Constraints;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -50,7 +51,7 @@ class Blacklist extends Entity
     /**
      * Possible actions for blacklisted email addresses.
      */
-    private const ACTIONS = [
+    private const array ACTIONS = [
         'DISCARD',
         'REJECT'
     ];
@@ -88,14 +89,14 @@ class Blacklist extends Entity
      *
      * @param string $action The action to take for the sender (DISCARD or REJECT).
      *
-     * @throws \InvalidArgumentException if the action is invalid.
+     * @throws InvalidArgumentException if the action is invalid.
      */
     public function setAction(string $action): static
     {
         $action = trim(strtoupper($action));
 
         if (!\in_array($action, self::ACTIONS, true)) {
-            throw new \InvalidArgumentException(\sprintf('Invalid action "%s". Must be one of %s.', $action, json_encode(self::ACTIONS)));
+            throw new InvalidArgumentException(\sprintf('Invalid action "%s". Must be one of %s.', $action, implode(', ', self::ACTIONS)));
         }
 
         $this->action = $action;
@@ -106,21 +107,21 @@ class Blacklist extends Entity
     /**
      * @param string $emailOrDomain The email address or domain to blacklist.
      *
-     * @throws \InvalidArgumentException if the email address or domain is invalid.
+     * @throws InvalidArgumentException if the email address or domain is invalid.
      */
     public function __construct(string $emailOrDomain)
     {
         $emailOrDomain = trim($emailOrDomain);
 
         if (filter_var($emailOrDomain, FILTER_VALIDATE_EMAIL) !== false) {
-            [$username, $hostname] = explode('@', $emailOrDomain, 2);
+            [$username, $hostname] = explode('@', $emailOrDomain, 2) + [1 => null];
         } else {
             $username = null;
             $hostname = filter_var(trim($emailOrDomain, '@.'), FILTER_VALIDATE_DOMAIN, FILTER_NULL_ON_FAILURE);
         }
 
         if ($hostname === null) {
-            throw new \InvalidArgumentException(\sprintf('Invalid email address or domain name "%s".', $emailOrDomain));
+            throw new InvalidArgumentException(\sprintf('Invalid email address or domain name "%s".', $emailOrDomain));
         }
 
         $this->username = $username;

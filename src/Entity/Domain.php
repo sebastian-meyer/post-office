@@ -26,6 +26,7 @@ use App\Repository\DomainRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Validator\Constraints;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -90,12 +91,12 @@ class Domain extends Entity
     /**
      * @param string $domain The domain name.
      *
-     * @throws \InvalidArgumentException if the provided domain name is invalid.
+     * @throws InvalidArgumentException if the provided domain name is invalid.
      */
     public function __construct(string $domain)
     {
         if (filter_var(trim($domain), FILTER_VALIDATE_DOMAIN) === false) {
-            throw new \InvalidArgumentException(\sprintf('Invalid domain name "%s".', $domain));
+            throw new InvalidArgumentException(\sprintf('Invalid domain name "%s".', $domain));
         }
 
         $this->domain = trim($domain);

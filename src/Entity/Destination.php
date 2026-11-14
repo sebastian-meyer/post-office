@@ -24,6 +24,7 @@ namespace App\Entity;
 
 use App\Repository\DestinationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Validator\Constraints;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -35,7 +36,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: DestinationRepository::class)]
 #[ORM\Table(name: 'destinations')]
 #[Constraints\UniqueEntity(fields: 'destination', message: 'emailAlreadyExists')]
-class Destination
+class Destination extends Entity
 {
     /**
      * The destination email address.
@@ -49,12 +50,12 @@ class Destination
     /**
      * @param string $destination The destination email address.
      *
-     * @throws \InvalidArgumentException if the provided email address is invalid.
+     * @throws InvalidArgumentException if the provided email address is invalid.
      */
     public function __construct(string $destination)
     {
         if (filter_var(trim($destination), FILTER_VALIDATE_EMAIL) === false) {
-            throw new \InvalidArgumentException(\sprintf('Invalid email address "%s".', $destination));
+            throw new InvalidArgumentException(\sprintf('Invalid email address "%s".', $destination));
         }
 
         $this->destination = trim($destination);
