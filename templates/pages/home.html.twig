@@ -1,1 +1,18 @@
 {% extends 'layout.html.twig' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 mb-4">{{ 'welcome'|trans({'%label%': app.user.label ?: app.user.userIdentifier}) }}</h1>
+    <div class="row g-4">
+        {{ include('components/home-card.html.twig', {href: path('account'), icon: 'mdi:account-cog', title: 'account', text: 'homeAccountText'}) }}
+        {{ include('components/home-card.html.twig', {href: path('change_password'), icon: 'mdi:password-reset', title: 'changePassword', text: 'homePasswordText'}) }}
+        {% if manages_anything() %}
+        {{ include('components/home-card.html.twig', {href: path('manage'), icon: 'mdi:cog', title: 'manage', text: 'homeManageText'}) }}
+        {% endif %}
+        {% if is_granted('ROLE_ADMIN') %}
+        {{ include('components/home-card.html.twig', {href: path('admin_tls_policies'), icon: 'mdi:shield-lock', title: 'tlsPolicies', text: 'homeTlsPoliciesText'}) }}
+        {{ include('components/home-card.html.twig', {href: path('admin_blacklist'), icon: 'mdi:block-helper', title: 'blacklist', text: 'homeBlacklistText'}) }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

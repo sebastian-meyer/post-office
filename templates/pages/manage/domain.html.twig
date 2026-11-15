@@ -74,5 +74,56 @@
             </div>
         </div>
     </div>
+
+    {% if is_granted('DOMAIN_MANAGE_MANAGERS', domain) %}
+    <div class="card bg-body-tertiary shadow-sm mt-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">{{ 'domainManagers'|trans }}</h2>
+        </div>
+        <div class="card-body">
+            <p class="text-body-secondary">{{ 'domainManagersHelp'|trans }}</p>
+            {{ form_start(managerForm) }}
+            <div class="input-group has-validation">
+                {{ form_widget(managerForm.email, {attr: {placeholder: 'email'}}) }}
+                <button type="submit" class="btn btn-primary">
+                    {{ ux_icon('mdi:account-plus', {class: 'me-1'}) }} {{ 'addManager'|trans }}
+                </button>
+                {{ form_errors(managerForm.email) }}
+            </div>
+            <div class="form-text mb-3">{{ 'managerHelp'|trans }}</div>
+            {{ form_end(managerForm) }}
+
+            <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>{{ 'email'|trans }}</th>
+                            <th>{{ 'label'|trans }}</th>
+                            <th class="text-end" data-orderable="false" data-searchable="false">{{ 'actions'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for manager in domain.managers %}
+                        <tr>
+                            <td class="font-monospace">{{ manager }}</td>
+                            <td>{{ manager.label }}</td>
+                            <td class="text-end">
+                                <form method="post" action="{{ path('manage_domain_manager_remove', {domain: domain.domain, manager: manager.id}) }}" class="d-inline"
+                                      data-controller="confirm" data-action="confirm#ask"
+                                      data-confirm-message-value="{{ 'removeDomainManagerConfirm'|trans({'%email%': manager ~ '', '%domain%': domain ~ ''}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('remove-domain-manager-' ~ domain.domain) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        {{ ux_icon('mdi:account-remove', {class: 'me-1'}) }} {{ 'remove'|trans }}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

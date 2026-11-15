@@ -33,34 +33,6 @@ use Doctrine\Persistence\ManagerRegistry;
 final class TlsPolicyRepository extends EntityRepository
 {
     /**
-     * Returns an existing or new recipient TLS policy.
-     *
-     * @param string $domain The domain name.
-     * @param ?string $policy The TLS policy to set (none, may, encrypt, dane, dane-only, fingerprint, verify, secure).
-     * @param ?string $params The additional policy parameters.
-     *
-     * @return TlsPolicy The policy entry.
-     */
-    public function getEntity(string $domain, ?string $policy = null, ?string $params = null): TlsPolicy
-    {
-        $tlsPolicy = $this->find($domain);
-
-        if ($tlsPolicy === null) {
-            $tlsPolicy = new TlsPolicy($domain);
-        }
-
-        if ($policy !== null) {
-            $tlsPolicy->setPolicy($policy);
-        }
-
-        if ($params !== null) {
-            $tlsPolicy->setParams($params);
-        }
-
-        return $tlsPolicy;
-    }
-
-    /**
      * @param ManagerRegistry $registry The object manager registry.
      */
     public function __construct(ManagerRegistry $registry)

@@ -25,6 +25,7 @@ namespace App\Repository;
 use App\Entity\Account;
 use App\Entity\AccountType;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * The repository for user accounts.
@@ -50,8 +51,8 @@ final class AccountRepository extends EntityRepository
             $this->createQueryBuilder('account')
                 ->andWhere('account.type = :type')->setParameter('type', AccountType::MailingList)
                 ->andWhere(':email MEMBER OF account.destinations')->setParameter('email', $member->getUserIdentifier())
-                ->addOrderBy('account.domain', 'ASC')
-                ->addOrderBy('account.username', 'ASC')
+                ->addOrderBy('account.domain', SortDirection::Ascending)
+                ->addOrderBy('account.username', SortDirection::Ascending)
         );
     }
 
@@ -71,8 +72,8 @@ final class AccountRepository extends EntityRepository
             $this->createQueryBuilder('account')
                 ->andWhere('account.type = :type')->setParameter('type', AccountType::MailingList)
                 ->andWhere(':manager MEMBER OF account.managers')->setParameter('manager', $manager)
-                ->addOrderBy('account.domain', 'ASC')
-                ->addOrderBy('account.username', 'ASC')
+                ->addOrderBy('account.domain', SortDirection::Ascending)
+                ->addOrderBy('account.username', SortDirection::Ascending)
         );
     }
 

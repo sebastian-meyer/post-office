@@ -1,6 +1,8 @@
 accountAlreadyExists: An account with this email address already exists.
 domainAlreadyExists: An entry with this domain name already exists.
 emailAlreadyExists: An entry with this email address already exists.
+invalidDomain: Please enter a valid domain name.
+invalidEmailOrDomain: Please enter a valid email address or domain name.
 invalidUsername: The username contains invalid characters.
 managerNotEligible: "Only enabled mailboxes of the domain %domain% can be managers."
 managerNotFound: There is no account with this email address.

@@ -24,14 +24,12 @@ namespace App\Controller;
 
 use App\Entity\Account;
 use App\Entity\Domain;
-use App\Repository\AccountRepository;
 use App\Security\Voter\AccountVoter;
 use App\Security\Voter\DomainVoter;
 use App\Service\AccountManager;
 use App\Service\ManagementScope;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bridge\Twig\Attribute\Template;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -43,20 +41,19 @@ use Symfony\Component\Translation\TranslatableMessage;
  * Controller for the management area: overview, domain pages and deleting accounts.
  */
 #[IsGranted('IS_AUTHENTICATED')]
-final class ManageController extends AbstractController
+final class ManageController extends AbstractDomainController
 {
     /**
      * Shows the domains and mailing lists the user can manage.
      *
      * @param Account $user The current user.
      * @param ManagementScope $managementScope The service determining what a user can manage.
-     * @param AccountRepository $accountRepository The repository for accounts.
      *
      * @return array<string, mixed> The template variables.
      */
     #[Route('/manage', name: 'manage', methods: ['GET'])]
     #[Template('pages/manage/index.html.twig')]
-    public function index(#[CurrentUser] Account $user, ManagementScope $managementScope, AccountRepository $accountRepository): array
+    public function index(#[CurrentUser] Account $user, ManagementScope $managementScope): array
     {
         if (!$managementScope->managesAnything($user)) {
             throw $this->createAccessDeniedException('The user cannot manage anything.');
@@ -65,7 +62,7 @@ final class ManageController extends AbstractController
         $domains = [];
 
         foreach ($managementScope->getManagedDomains($user) as $domain) {
-            $domains[] = ['domain' => $domain, 'accounts' => $accountRepository->count(['domain' => $domain])];
+            $domains[] = ['domain' => $domain, 'accounts' => $this->accountRepository->count(['domain' => $domain])];
         }
 
         return [
@@ -78,19 +75,14 @@ final class ManageController extends AbstractController
      * Shows all accounts of a domain.
      *
      * @param Domain $domain The domain.
-     * @param AccountRepository $accountRepository The repository for accounts.
-     *
-     * @return array<string, mixed> The template variables.
      */
     #[IsGranted(DomainVoter::MANAGE, subject: 'domain')]
-    #[Route('/manage/domain/{domain}', name: 'manage_domain', requirements: ['domain' => '[^/]+'], methods: ['GET'])]
-    #[Template('pages/manage/domain.html.twig')]
-    public function domain(#[MapEntity(id: 'domain')] Domain $domain, AccountRepository $accountRepository): array
+    // The domain must not be the last path segment, since domains can look like file names: web servers block paths
+    // ending in e.g. ".sh" (a TLD), and Turbo doesn't handle URLs ending in e.g. ".zip" (also a TLD).
+    #[Route('/manage/domain/{domain}/accounts', name: 'manage_domain', requirements: ['domain' => '[^/]+'], methods: ['GET'])]
+    public function domain(#[MapEntity(id: 'domain')] Domain $domain): Response
     {
-        return [
-            'domain' => $domain,
-            'accounts' => $accountRepository->findBy(['domain' => $domain], ['username' => 'ASC'])
-        ];
+        return $this->renderDomainPage($domain);
     }
 
     /**

@@ -1,0 +1,11 @@
+{# Card linking to a page on the home page (href, icon, title and text: translation keys). #}
+<div class="col-sm-6 col-lg-4">
+    <a class="card bg-body-tertiary shadow-sm h-100 text-decoration-none" href="{{ href }}">
+        <div class="card-body">
+            <h2 class="h5 card-title d-flex align-items-center">
+                {{ ux_icon(icon, {class: 'fs-3 me-2 text-primary'}) }} {{ title|trans }}
+            </h2>
+            <p class="card-text text-body-secondary">{{ text|trans }}</p>
+        </div>
+    </a>
+</div>

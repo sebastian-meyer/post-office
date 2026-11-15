@@ -51,7 +51,7 @@ class Blacklist extends Entity
     /**
      * Possible actions for blacklisted email addresses.
      */
-    private const array ACTIONS = [
+    public const array ACTIONS = [
         'DISCARD',
         'REJECT'
     ];

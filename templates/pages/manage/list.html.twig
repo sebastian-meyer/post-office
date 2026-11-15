@@ -58,7 +58,7 @@
                 <div class="card-body">
                     {{ form_start(memberForm) }}
                     <div class="input-group has-validation mb-3">
-                        {{ form_widget(memberForm.email, {attr: {placeholder: 'email'|trans}}) }}
+                        {{ form_widget(memberForm.email, {attr: {placeholder: 'email'}}) }}
                         <button type="submit" class="btn btn-primary">
                             {{ ux_icon('mdi:account-plus', {class: 'me-1'}) }} {{ 'addMember'|trans }}
                         </button>
@@ -108,7 +108,7 @@
                     <p class="text-body-secondary">{{ 'listManagersHelp'|trans }}</p>
                     {{ form_start(managerForm) }}
                     <div class="input-group has-validation">
-                        {{ form_widget(managerForm.email, {attr: {placeholder: 'email'|trans}}) }}
+                        {{ form_widget(managerForm.email, {attr: {placeholder: 'email'}}) }}
                         <button type="submit" class="btn btn-primary">
                             {{ ux_icon('mdi:account-plus', {class: 'me-1'}) }} {{ 'addManager'|trans }}
                         </button>

@@ -14,6 +14,15 @@ addMember: Add member
 address: Address
 administrator: Administrator
 backToHomepage: Back to homepage
+blacklist: Blacklist
+blacklistAction: Action
+blacklistAction.DISCARD: Discard
+blacklistAction.REJECT: Reject
+blacklistAddress: Sender
+blacklistAddressHelp: An email address, or a domain (which includes all its subdomains).
+blacklistEntryDeleted: "%address% has been removed from the blacklist."
+blacklistEntrySaved: "The blacklist entry for %address% has been saved."
+blacklistHelp: Emails from these senders are not accepted by the mail server.
 cancel: Cancel
 catchAll: Catch-all
 catchAllHelp: Leave empty for a catch-all address that receives all emails for the domain.
@@ -34,21 +43,40 @@ datatables.search: "Search:"
 datatables.zeroRecords: "No matching entries found."
 delete: Delete
 deleteAccountConfirm: "Do you really want to delete %address%?"
+deleteBlacklistEntryConfirm: "Do you really want to remove %address% from the blacklist?"
+deleteDomainConfirm: "Do you really want to delete the domain %domain%?"
 deleteList: Delete mailing list
 deleteListConfirm: "Do you really want to delete the mailing list %list%? Its members will no longer receive emails sent to it."
 deleteMailboxConfirm: "Do you really want to delete the mailbox %address%? Emails stored on the server are not deleted and have to be removed by the server administrator."
+deleteTlsPolicyConfirm: "Do you really want to delete the TLS policy for %domain%?"
 destination: Destination address
 domain: Domain
+domainCreated: "The domain %domain% has been created."
+domainDeleted: "The domain %domain% has been deleted."
+domainManagerAdded: "%email% is now a manager of %domain%."
+domainManagerRemoved: "%email% is no longer a manager of %domain%."
+domainManagers: Domain managers
+domainManagersHelp: Domain managers can create, edit and delete all accounts and mailing lists of this domain.
+domainNotEmpty: "The domain %domain% cannot be deleted, because it still has accounts."
+domainNotEmptyHint: Only domains without accounts can be deleted.
+domainPlaceholder: example.com
 domains: Domains
 edit: Edit
 editAccount: "Edit %address%"
+editBlacklistEntry: "Edit blacklist entry for %address%"
+editTlsPolicy: "Edit TLS policy for %domain%"
 email: E-mail address
 enabled: Enabled
 error403: You are not allowed to access this page.
 error404: The requested page could not be found.
 errorGeneric: An unexpected error occurred. Please try again later.
 errorTitle: 'Error %code%'
+homeAccountText: Your account details and the mailing lists you are a member of.
+homeBlacklistText: Senders whose emails are not accepted.
+homeManageText: Manage the domains and mailing lists you are responsible for.
 homepage: Homepage
+homePasswordText: Change the password of your email account.
+homeTlsPoliciesText: Encryption requirements for sending emails to other domains.
 label: Name
 leaveList: Leave
 leaveListConfirm: "Do you really want to leave the mailing list %list%? Only a list manager can add you again."
@@ -75,10 +103,13 @@ members: Members
 myMailingLists: My mailing lists
 myMailingListsHelp: You receive emails sent to these mailing lists.
 newAlias: New alias
+newBlacklistEntry: New blacklist entry
+newDomain: New domain
 newMailbox: New mailbox
 newMailingList: New mailing list
 newPassword: New password
 newPasswordRepeat: New password (repeat)
+newTlsPolicy: New TLS policy
 open: Open
 password: Password
 passwordChanged: Password changed!
@@ -88,7 +119,9 @@ quotaHelp: 0 means unlimited.
 quotaInMegabytes: Storage quota (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unlimited
+recipientDomain: Recipient domain
 remove: Remove
+removeDomainManagerConfirm: "Do you really want to remove %email% as manager of %domain%?"
 removeManagerConfirm: "Do you really want to remove %email% as manager of %list%?"
 removeMemberConfirm: "Do you really want to remove %email% from %list%?"
 replyToList: Replies go to the list
@@ -100,4 +133,13 @@ statusDisabled: Disabled
 statusEnabled: Enabled
 strictList: Members only
 strictListHelp: Only members of the list are allowed to send emails to it.
+tlsDomainHelp: A leading dot (e.g. .example.com) includes all subdomains.
+tlsParams: Parameters
+tlsParamsHelp: Optional Postfix policy parameters, e.g. match=hostname.
+tlsPolicies: TLS policies
+tlsPoliciesHelp: TLS policies define how outgoing emails to these domains have to be encrypted.
+tlsPolicy: Policy
+tlsPolicyDeleted: "The TLS policy for %domain% has been deleted."
+tlsPolicySaved: "The TLS policy for %domain% has been saved."
 username: Username
+welcome: "Welcome, %label%!"

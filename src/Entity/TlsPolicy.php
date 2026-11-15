@@ -48,7 +48,7 @@ class TlsPolicy extends Entity
     /**
      * List of valid TLS policies.
      */
-    private const array POLICIES = [
+    public const array POLICIES = [
         'none',
         'may',
         'encrypt',
@@ -61,11 +61,13 @@ class TlsPolicy extends Entity
 
     /**
      * The recipient's domain name.
+     *
+     * A leading dot (e.g. ".example.com") includes all subdomains, as in Postfix.
      */
     #[ORM\Id]
     #[ORM\Column(name: 'domain', type: 'string', length: 180, unique: true, nullable: false)]
     #[Assert\NotBlank]
-    #[Assert\Hostname]
+    #[Assert\Regex(pattern: '/^\.?([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i', message: 'invalidDomain')]
     private string $domain;
 
     /**

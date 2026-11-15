@@ -14,6 +14,15 @@ addMember: Mitglied hinzufügen
 address: Adresse
 administrator: Administrator
 backToHomepage: Zurück zur Startseite
+blacklist: Sperrliste
+blacklistAction: Aktion
+blacklistAction.DISCARD: Verwerfen
+blacklistAction.REJECT: Abweisen
+blacklistAddress: Absender
+blacklistAddressHelp: Eine E-Mail-Adresse oder eine Domain (einschließlich aller Subdomains).
+blacklistEntryDeleted: "%address% wurde von der Sperrliste entfernt."
+blacklistEntrySaved: "Der Sperrlisteneintrag für %address% wurde gespeichert."
+blacklistHelp: E-Mails dieser Absender werden vom Mailserver nicht angenommen.
 cancel: Abbrechen
 catchAll: Catch-all
 catchAllHelp: Leer lassen für eine Catch-all-Adresse, die alle E-Mails der Domain empfängt.
@@ -34,21 +43,40 @@ datatables.search: "Suche:"
 datatables.zeroRecords: "Keine passenden Einträge gefunden."
 delete: Löschen
 deleteAccountConfirm: "Möchten Sie %address% wirklich löschen?"
+deleteBlacklistEntryConfirm: "Möchten Sie %address% wirklich von der Sperrliste entfernen?"
+deleteDomainConfirm: "Möchten Sie die Domain %domain% wirklich löschen?"
 deleteList: Verteiler löschen
 deleteListConfirm: "Möchten Sie den Verteiler %list% wirklich löschen? Seine Mitglieder erhalten dann keine E-Mails mehr, die an ihn gesendet werden."
 deleteMailboxConfirm: "Möchten Sie das Postfach %address% wirklich löschen? Auf dem Server gespeicherte E-Mails werden nicht gelöscht und müssen vom Server-Administrator entfernt werden."
+deleteTlsPolicyConfirm: "Möchten Sie die TLS-Richtlinie für %domain% wirklich löschen?"
 destination: Zieladresse
 domain: Domain
+domainCreated: "Die Domain %domain% wurde angelegt."
+domainDeleted: "Die Domain %domain% wurde gelöscht."
+domainManagerAdded: "%email% ist jetzt Verwalter von %domain%."
+domainManagerRemoved: "%email% ist kein Verwalter von %domain% mehr."
+domainManagers: Domainverwalter
+domainManagersHelp: Domainverwalter können alle Konten und Verteiler dieser Domain anlegen, bearbeiten und löschen.
+domainNotEmpty: "Die Domain %domain% kann nicht gelöscht werden, da sie noch Konten enthält."
+domainNotEmptyHint: Nur Domains ohne Konten können gelöscht werden.
+domainPlaceholder: example.com
 domains: Domains
 edit: Bearbeiten
 editAccount: "%address% bearbeiten"
+editBlacklistEntry: "Sperrlisteneintrag für %address% bearbeiten"
+editTlsPolicy: "TLS-Richtlinie für %domain% bearbeiten"
 email: E-Mail-Adresse
 enabled: Aktiviert
 error403: Sie haben keine Berechtigung, diese Seite aufzurufen.
 error404: Die angeforderte Seite wurde nicht gefunden.
 errorGeneric: Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.
 errorTitle: 'Fehler %code%'
+homeAccountText: Ihre Kontodaten und die Verteiler, in denen Sie Mitglied sind.
+homeBlacklistText: Absender, deren E-Mails nicht angenommen werden.
+homeManageText: Verwalten Sie die Domains und Verteiler, für die Sie zuständig sind.
 homepage: Startseite
+homePasswordText: Ändern Sie das Passwort Ihres E-Mail-Kontos.
+homeTlsPoliciesText: Verschlüsselungsanforderungen für den Versand an andere Domains.
 label: Name
 leaveList: Austreten
 leaveListConfirm: "Möchten Sie wirklich aus dem Verteiler %list% austreten? Nur ein Verteilerverwalter kann Sie wieder hinzufügen."
@@ -75,10 +103,13 @@ members: Mitglieder
 myMailingLists: Meine Verteiler
 myMailingListsHelp: Sie erhalten E-Mails, die an diese Verteiler gesendet werden.
 newAlias: Neue Weiterleitung
+newBlacklistEntry: Neuer Sperrlisteneintrag
+newDomain: Neue Domain
 newMailbox: Neues Postfach
 newMailingList: Neuer Verteiler
 newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
+newTlsPolicy: Neue TLS-Richtlinie
 open: Öffnen
 password: Passwort
 passwordChanged: Passwort geändert!
@@ -88,7 +119,9 @@ quotaHelp: 0 bedeutet unbegrenzt.
 quotaInMegabytes: Speicherkontingent (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unbegrenzt
+recipientDomain: Empfängerdomain
 remove: Entfernen
+removeDomainManagerConfirm: "Möchten Sie %email% wirklich als Verwalter von %domain% entfernen?"
 removeManagerConfirm: "Möchten Sie %email% wirklich als Verwalter von %list% entfernen?"
 removeMemberConfirm: "Möchten Sie %email% wirklich aus %list% entfernen?"
 replyToList: Antworten gehen an den Verteiler
@@ -100,4 +133,13 @@ statusDisabled: Deaktiviert
 statusEnabled: Aktiviert
 strictList: Nur Mitglieder
 strictListHelp: Nur Mitglieder des Verteilers dürfen E-Mails an ihn senden.
+tlsDomainHelp: Ein vorangestellter Punkt (z. B. .example.com) schließt alle Subdomains ein.
+tlsParams: Parameter
+tlsParamsHelp: Optionale Postfix-Parameter der Richtlinie, z. B. match=hostname.
+tlsPolicies: TLS-Richtlinien
+tlsPoliciesHelp: TLS-Richtlinien legen fest, wie ausgehende E-Mails an diese Domains verschlüsselt werden müssen.
+tlsPolicy: Richtlinie
+tlsPolicyDeleted: "Die TLS-Richtlinie für %domain% wurde gelöscht."
+tlsPolicySaved: "Die TLS-Richtlinie für %domain% wurde gespeichert."
 username: Benutzername
+welcome: "Willkommen, %label%!"

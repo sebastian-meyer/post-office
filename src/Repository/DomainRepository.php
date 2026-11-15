@@ -25,6 +25,7 @@ namespace App\Repository;
 use App\Entity\Account;
 use App\Entity\Domain;
 use Doctrine\Persistence\ManagerRegistry;
+use SortDirection;
 
 /**
  * The repository for managed domains.
@@ -48,26 +49,8 @@ final class DomainRepository extends EntityRepository
         return $this->getEntityResult(
             $this->createQueryBuilder('domain')
                 ->andWhere(':manager MEMBER OF domain.managers')->setParameter('manager', $manager)
-                ->addOrderBy('domain.domain', 'ASC')
+                ->addOrderBy('domain.domain', SortDirection::Ascending)
         );
-    }
-
-    /**
-     * Returns an existing or new domain.
-     *
-     * @param string $hostname The domain name.
-     *
-     * @return Domain The domain entry.
-     */
-    public function getEntity(string $hostname): Domain
-    {
-        $domain = $this->find($hostname);
-
-        if ($domain === null) {
-            $domain = new Domain($hostname);
-        }
-
-        return $domain;
     }
 
     /**

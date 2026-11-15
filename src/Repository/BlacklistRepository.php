@@ -33,29 +33,6 @@ use Doctrine\Persistence\ManagerRegistry;
 final class BlacklistRepository extends EntityRepository
 {
     /**
-     * Returns an existing or new blacklisted sender.
-     *
-     * @param string $emailOrDomain The email address or domain to blacklist.
-     * @param ?string $action The action to take for the sender (DISCARD or REJECT).
-     *
-     * @return Blacklist The blacklist entry.
-     */
-    public function getEntity(string $emailOrDomain, ?string $action = null): Blacklist
-    {
-        $blacklist = $this->find($emailOrDomain);
-
-        if ($blacklist === null) {
-            $blacklist = new Blacklist($emailOrDomain);
-        }
-
-        if ($action !== null) {
-            $blacklist->setAction($action);
-        }
-
-        return $blacklist;
-    }
-
-    /**
      * @param ManagerRegistry $registry The object manager registry.
      */
     public function __construct(ManagerRegistry $registry)

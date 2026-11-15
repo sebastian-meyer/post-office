@@ -150,7 +150,7 @@ final class AccountTest extends TestCase
         self::assertNull($list->quota);
 
         $list->makeSendOnly();
-        self::assertTrue($list->isSendOnly());
+        self::assertSame(AccountType::SendOnly, $list->type);
         self::assertCount(0, $list->destinations);
     }
 

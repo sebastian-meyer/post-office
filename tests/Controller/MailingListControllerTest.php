@@ -158,7 +158,7 @@ final class MailingListControllerTest extends WebTestCase
 
     public function testDomainPageLinksToListPage(): void
     {
-        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
 
         self::assertCount(1, $crawler->filter('a[href="' . $this->listUrl() . '"]'));
     }

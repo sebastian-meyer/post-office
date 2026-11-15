@@ -1,0 +1,16 @@
+{#
+    Edit and delete buttons of a table row.
+    Variables: edit, delete (URLs), token (CSRF token ID), confirm (confirmation message), fields (optional hidden fields of the delete form)
+#}
+<a class="btn btn-sm btn-outline-primary" href="{{ edit }}">
+    {{ ux_icon('mdi:pencil', {class: 'me-1'}) }} {{ 'edit'|trans }}
+</a>
+<form method="post" action="{{ delete }}" class="d-inline" data-controller="confirm" data-action="confirm#ask" data-confirm-message-value="{{ confirm }}">
+    <input type="hidden" name="_token" value="{{ csrf_token(token) }}">
+    {% for name, value in fields ?? {} %}
+    <input type="hidden" name="{{ name }}" value="{{ value }}">
+    {% endfor %}
+    <button type="submit" class="btn btn-sm btn-outline-danger">
+        {{ ux_icon('mdi:delete', {class: 'me-1'}) }} {{ 'delete'|trans }}
+    </button>
+</form>

@@ -48,14 +48,14 @@ final class ManageControllerTest extends WebTestCase
         self::assertSelectorExists('a[href="/manage"]');
         self::assertSame(['example.com'], $this->column($crawler, 0));
 
-        $this->client->request('GET', '/manage/domain/example.org');
+        $this->client->request('GET', '/manage/domain/example.org/accounts');
         self::assertResponseStatusCodeSame(403);
     }
 
     public function testAdminSeesAllDomains(): void
     {
         self::assertSame(['example.com', 'example.org'], $this->column($this->get($this->data->admin, '/manage'), 0));
-        $this->client->request('GET', '/manage/domain/example.org');
+        $this->client->request('GET', '/manage/domain/example.org/accounts');
         self::assertResponseIsSuccessful();
     }
 
@@ -64,13 +64,13 @@ final class ManageControllerTest extends WebTestCase
         $crawler = $this->get($this->data->bob, '/manage');
         self::assertStringContainsString('team@example.com', $crawler->filter('table')->text());
 
-        $this->client->request('GET', '/manage/domain/example.com');
+        $this->client->request('GET', '/manage/domain/example.com/accounts');
         self::assertResponseStatusCodeSame(403);
     }
 
     public function testDomainPageListsAccounts(): void
     {
-        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
         $addresses = array_map('trim', $this->column($crawler, 0));
 
         self::assertContains('alice@example.com', $addresses);
@@ -92,7 +92,7 @@ final class ManageControllerTest extends WebTestCase
         ]);
         $this->client->submit($form, [], self::SAME_ORIGIN);
 
-        self::assertResponseRedirects('/manage/domain/example.com', 303);
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
         $erin = $this->reload('erin@example.com');
         self::assertTrue($erin->isMailbox());
         self::assertSame(250, $erin->quota);
@@ -121,7 +121,7 @@ final class ManageControllerTest extends WebTestCase
         ]);
         $this->client->submit($form, [], self::SAME_ORIGIN);
 
-        self::assertResponseRedirects('/manage/domain/example.org', 303);
+        self::assertResponseRedirects('/manage/domain/example.org/accounts', 303);
         self::assertTrue($this->reload('@example.org')->isCatchAll());
     }
 
@@ -133,7 +133,7 @@ final class ManageControllerTest extends WebTestCase
         $form = $crawler->selectButton('Save')->form(['mailbox[quota]' => '0']);
         $this->client->submit($form, [], self::SAME_ORIGIN);
 
-        self::assertResponseRedirects('/manage/domain/example.com', 303);
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
         self::assertSame(0, $this->reload('bob@example.com')->quota);
     }
 
@@ -149,11 +149,11 @@ final class ManageControllerTest extends WebTestCase
 
     public function testDeleteMailbox(): void
     {
-        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
         $form = $crawler->filter('form[action="/manage/account/' . $this->data->bob->id . '/delete"]')->form();
         $this->client->submit($form);
 
-        self::assertResponseRedirects('/manage/domain/example.com', 303);
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
         $this->client->followRedirect();
         self::assertSelectorTextContains('.alert-success', 'bob@example.com');
         self::assertNull($this->accounts()->findOneByEmail('bob@example.com'));
@@ -161,7 +161,7 @@ final class ManageControllerTest extends WebTestCase
 
     public function testAdminAccountCannotBeDeleted(): void
     {
-        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
         self::assertCount(0, $crawler->filter('form[action="/manage/account/' . $this->data->admin->id . '/delete"]'));
         self::assertSelectorTextContains('.badge.text-bg-primary', 'Administrator');
 
@@ -172,7 +172,7 @@ final class ManageControllerTest extends WebTestCase
 
     public function testOnlyAdminsCanEditAdminAccounts(): void
     {
-        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
         self::assertCount(0, $crawler->filter('a[href="/manage/account/' . $this->data->admin->id . '"]'));
 
         $this->client->request('GET', '/manage/account/' . $this->data->admin->id);

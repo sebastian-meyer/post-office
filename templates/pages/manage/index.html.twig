@@ -6,10 +6,26 @@
 <div class="container py-4">
     <h1 class="h3 mb-4">{{ 'manage'|trans }}</h1>
 
-    {% if domains is not empty %}
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-outline-primary" href="{{ path('admin_tls_policies') }}">
+            {{ ux_icon('mdi:shield-lock', {class: 'me-1'}) }} {{ 'tlsPolicies'|trans }}
+        </a>
+        <a class="btn btn-outline-primary" href="{{ path('admin_blacklist') }}">
+            {{ ux_icon('mdi:block-helper', {class: 'me-1'}) }} {{ 'blacklist'|trans }}
+        </a>
+    </div>
+    {% endif %}
+
+    {% if domains is not empty or is_granted('ROLE_ADMIN') %}
     <div class="card bg-body-tertiary shadow-sm mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="h5 mb-0">{{ 'domains'|trans }}</h2>
+            {% if is_granted('ROLE_ADMIN') %}
+            <a class="btn btn-sm btn-primary" href="{{ path('admin_domain_new') }}">
+                {{ ux_icon('mdi:domain-plus', {class: 'me-1'}) }} {{ 'newDomain'|trans }}
+            </a>
+            {% endif %}
         </div>
         <div class="card-body">
             <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
@@ -30,6 +46,24 @@
                                 <a class="btn btn-sm btn-outline-primary" href="{{ path('manage_domain', {domain: entry.domain.domain}) }}">
                                     {{ ux_icon('mdi:domain', {class: 'me-1'}) }} {{ 'open'|trans }}
                                 </a>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                {% if entry.accounts == 0 %}
+                                <form method="post" action="{{ path('admin_domain_delete', {domain: entry.domain.domain}) }}" class="d-inline"
+                                      data-controller="confirm" data-action="confirm#ask"
+                                      data-confirm-message-value="{{ 'deleteDomainConfirm'|trans({'%domain%': entry.domain.domain}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-domain-' ~ entry.domain.domain) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        {{ ux_icon('mdi:delete', {class: 'me-1'}) }} {{ 'delete'|trans }}
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="d-inline-block" tabindex="0" title="{{ 'domainNotEmptyHint'|trans }}">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" disabled>
+                                        {{ ux_icon('mdi:delete', {class: 'me-1'}) }} {{ 'delete'|trans }}
+                                    </button>
+                                </span>
+                                {% endif %}
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

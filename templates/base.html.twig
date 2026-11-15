@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="{{ app.request.locale }}" data-bs-theme="light">
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="cache-control" content="no-cache">
@@ -8,7 +8,9 @@
         {# Don't let Turbo load pages when hovering links (GET links like logout must not be followed by accident). #}
         <meta name="turbo-prefetch" content="false">
         <title>{% block title %}{{ app_name }}{% endblock %}</title>
-        <link rel="canonical" href="{{ app.current_route }}">
+        {% if app.current_route %}
+        <link rel="canonical" href="{{ url(app.current_route, app.current_route_parameters) }}">
+        {% endif %}
         <link rel="icon" href="{{ asset('icons/streamline-freehand/stamps-portrait.svg') }}">
         {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% block stylesheets %}{% endblock %}

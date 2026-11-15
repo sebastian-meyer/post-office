@@ -1,0 +1,33 @@
+{% extends 'layout.html.twig' %}
+
+{#
+    Generic form page of the admin area.
+    Variables: form, heading (translation key), headingParameters (optional), back (URL of the previous page)
+#}
+
+{% set title = heading|trans(headingParameters ?? {}) %}
+
+{% block title %}{{ app_name }} - {{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card bg-body-tertiary shadow-sm mx-auto" style="max-width: 40rem;">
+        <div class="card-header">
+            <h1 class="h4 mb-0">{{ title }}</h1>
+        </div>
+        {{ form_start(form) }}
+        <div class="card-body">
+            {{ form_rest(form) }}
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a class="btn btn-outline-secondary" href="{{ back }}">
+                {{ ux_icon('mdi:arrow-left', {class: 'me-1'}) }} {{ 'cancel'|trans }}
+            </a>
+            <button type="submit" class="btn btn-primary">
+                {{ ux_icon('mdi:content-save', {class: 'me-1'}) }} {{ 'save'|trans }}
+            </button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

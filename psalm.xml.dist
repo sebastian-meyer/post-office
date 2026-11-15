@@ -48,6 +48,8 @@
             <errorLevel type="suppress">
                 <!-- Only used inside repositories (see above). -->
                 <referencedMethod name="App\Repository\EntityRepository::getEntityResult"/>
+                <!-- Used in Twig templates (account.catchAll), which Psalm doesn't analyze. -->
+                <referencedMethod name="App\Entity\Account::isCatchAll"/>
                 <!-- Magic getter, called implicitly when accessing @property-read properties. -->
                 <referencedMethod name="App\Entity\Entity::__get"/>
             </errorLevel>

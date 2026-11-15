@@ -279,14 +279,6 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
-     * Whether the account has a password (i.e. the user can log in).
-     */
-    public function hasPassword(): bool
-    {
-        return $this->password !== null;
-    }
-
-    /**
      * Sets up a newly created account according to its type.
      *
      * @param AccountType $type The type of the account.
@@ -338,14 +330,6 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     public function isMailingList(): bool
     {
         return $this->type === AccountType::MailingList;
-    }
-
-    /**
-     * Whether the account is only allowed to send email.
-     */
-    public function isSendOnly(): bool
-    {
-        return $this->type === AccountType::SendOnly;
     }
 
     /**
