@@ -24,6 +24,7 @@ namespace App\Repository;
 
 use App\Entity\Account;
 use App\Entity\AccountType;
+use App\Entity\Domain;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
 
@@ -36,6 +37,26 @@ use SortDirection;
  */
 final class AccountRepository extends EntityRepository
 {
+    /**
+     * Returns all accounts that can be managers of the domain or its mailing lists, i.e. its enabled mailboxes.
+     *
+     * @param Domain $domain The domain.
+     *
+     * @return list<Account> The accounts, ordered by username.
+     *
+     * @see Domain::acceptsManager()
+     */
+    public function findEligibleManagers(Domain $domain): array
+    {
+        return $this->getEntityResult(
+            $this->createQueryBuilder('account')
+                ->andWhere('account.domain = :domain')->setParameter('domain', $domain)
+                ->andWhere('account.type = :type')->setParameter('type', AccountType::Mailbox)
+                ->andWhere('account.enabled = true')
+                ->addOrderBy('account.username', SortDirection::Ascending)
+        );
+    }
+
     /**
      * Returns all mailing lists the given account is a member of.
      *

@@ -108,7 +108,8 @@
                     <p class="text-body-secondary">{{ 'listManagersHelp'|trans }}</p>
                     {{ form_start(managerForm) }}
                     <div class="input-group has-validation">
-                        {{ form_widget(managerForm.email, {attr: {placeholder: 'email'}}) }}
+                        {{ form_widget(managerForm.email, {attr: {placeholder: 'email', list: 'manager-candidates', autocomplete: 'off'}}) }}
+                        {{ include('manage/_manager_candidates.html.twig', {candidates: managerCandidates}) }}
                         <button type="submit" class="btn btn-primary">
                             {{ ux_icon('mdi:account-plus', {class: 'me-1'}) }} {{ 'addManager'|trans }}
                         </button>

@@ -1,0 +1,6 @@
+{# Suggestions for a manager input with list="manager-candidates" (candidates: the eligible accounts). #}
+<datalist id="manager-candidates">
+    {% for candidate in candidates %}
+    <option value="{{ candidate.userIdentifier }}">{{ candidate.label }}</option>
+    {% endfor %}
+</datalist>

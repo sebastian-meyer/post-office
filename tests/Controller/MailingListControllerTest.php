@@ -116,6 +116,17 @@ final class MailingListControllerTest extends WebTestCase
         self::assertCount(1, $this->reload('team@example.com')->managers);
     }
 
+    public function testListManagerSuggestions(): void
+    {
+        // Enabled mailboxes of the list's domain, except bob (already a manager); not dave (other domain).
+        $crawler = $this->listPage($this->data->alice);
+
+        self::assertSame(
+            ['admin@example.com', 'alice@example.com'],
+            $crawler->filter('datalist#manager-candidates option')->extract(['value'])
+        );
+    }
+
     public function testIneligibleManagerShowsError(): void
     {
         $form = $this->listPage($this->data->alice)->filter('form[name="manager"]')->form(['manager[email]' => 'dave@example.org']);

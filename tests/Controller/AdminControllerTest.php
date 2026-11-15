@@ -112,6 +112,17 @@ final class AdminControllerTest extends WebTestCase
         self::assertSame(['alice@example.com'], array_map('strval', $domain->managers->toArray()));
     }
 
+    public function testDomainManagerSuggestions(): void
+    {
+        $this->data->bob->disable();
+        $this->entityManager->flush();
+
+        // Only enabled mailboxes of the domain, which are not yet managers (alice is), are suggested.
+        $crawler = $this->get('/manage/domain/example.com/accounts');
+        self::assertSame('manager-candidates', $crawler->filter('input[name="manager[email]"]')->attr('list'));
+        self::assertSame(['admin@example.com'], $crawler->filter('datalist#manager-candidates option')->extract(['value']));
+    }
+
     public function testIneligibleDomainManagerShowsError(): void
     {
         $crawler = $this->get('/manage/domain/example.com/accounts');

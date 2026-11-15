@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Account;
 use App\Entity\Domain;
 use App\Form\Model\ManagerData;
 use App\Form\Type\ManagerType;
@@ -60,7 +61,12 @@ abstract class AbstractDomainController extends AbstractController
         return $this->render('pages/manage/domain.html.twig', [
             'domain' => $domain,
             'accounts' => $this->accountRepository->findBy(['domain' => $domain], ['username' => 'ASC']),
-            'managerForm' => $managerForm ?? $this->createManagerForm($domain)
+            'managerForm' => $managerForm ?? $this->createManagerForm($domain),
+            // Suggestions for the manager form (eligible accounts which are not yet managers).
+            'managerCandidates' => array_values(array_filter(
+                $this->accountRepository->findEligibleManagers($domain),
+                static fn (Account $account): bool => !$domain->managers->contains($account)
+            ))
         ], new Response(status: ($managerForm?->isSubmitted() ?? false) ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 

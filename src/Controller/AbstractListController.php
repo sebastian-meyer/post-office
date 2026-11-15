@@ -27,6 +27,7 @@ use App\Form\MailingListForms;
 use App\Form\Model\AccountData;
 use App\Form\Model\ManagerData;
 use App\Form\Model\MemberData;
+use App\Repository\AccountRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,15 +59,22 @@ abstract class AbstractListController extends AbstractController
             'list' => $list,
             'settingsForm' => $settings ?? $this->listForms->settings($list),
             'memberForm' => $member ?? $this->listForms->member($list),
-            'managerForm' => $manager ?? $this->listForms->manager($list)
+            'managerForm' => $manager ?? $this->listForms->manager($list),
+            // Suggestions for the manager form (eligible accounts which are not yet managers).
+            'managerCandidates' => array_values(array_filter(
+                $this->accountRepository->findEligibleManagers($list->domain),
+                static fn (Account $account): bool => !$list->managers->contains($account)
+            ))
         ], new Response(status: $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     /**
      * @param MailingListForms $listForms The factory for the forms of the mailing list page.
+     * @param AccountRepository $accountRepository The repository for accounts.
      */
     public function __construct(
-        protected readonly MailingListForms $listForms
+        protected readonly MailingListForms $listForms,
+        private readonly AccountRepository $accountRepository
     ) {
     }
 }
