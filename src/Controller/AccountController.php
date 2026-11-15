@@ -30,12 +30,14 @@ use LogicException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Controller for the user's account settings and mailing list memberships.
@@ -43,20 +45,39 @@ use Symfony\Component\Translation\TranslatableMessage;
 final class AccountController extends AbstractController
 {
     /**
-     * Shows the user's account settings and mailing list memberships.
+     * Shows the user's account settings and mailing list memberships, and lets the user change their name.
      *
      * @param Account $account The current user.
+     * @param Request $request The current request.
      * @param AccountRepository $accountRepository The repository for accounts.
      *
-     * @return array<string, mixed> The template variables.
+     * @return array<string, mixed>|Response The template variables, or a redirect after saving the name.
      */
     #[IsGranted('IS_AUTHENTICATED')]
-    #[Route('/account', name: 'account', methods: ['GET'])]
+    #[Route('/account', name: 'account', methods: ['GET', 'POST'])]
     #[Template('pages/account.html.twig')]
-    public function index(#[CurrentUser] Account $account, AccountRepository $accountRepository): array
+    public function index(#[CurrentUser] Account $account, Request $request, AccountRepository $accountRepository): array|Response
     {
+        $labelForm = $this->createFormBuilder(['label' => $account->label])
+            ->add('label', TextType::class, [
+                'label' => 'label',
+                'required' => false,
+                'constraints' => [new Assert\Length(max: 255), new Assert\NoSuspiciousCharacters()]
+            ])
+            ->getForm()
+            ->handleRequest($request);
+
+        if ($labelForm->isSubmitted() && $labelForm->isValid()) {
+            $label = $labelForm->get('label')->getData();
+            $accountRepository->save($account->setLabel(\is_string($label) ? $label : ''));
+            $this->addFlash('success', new TranslatableMessage('labelSaved'));
+
+            return $this->redirectToRoute('account', [], Response::HTTP_SEE_OTHER);
+        }
+
         return [
             'account' => $account,
+            'labelForm' => $labelForm,
             'memberships' => $accountRepository->findListsByMember($account)
         ];
     }

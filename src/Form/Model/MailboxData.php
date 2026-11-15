@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Form data for creating or editing a mailbox.
  */
-final class MailboxData extends AccountData
+final class MailboxData extends SendOnlyData
 {
     /**
      * The quota in megabytes (0 means unlimited).
@@ -38,18 +38,11 @@ final class MailboxData extends AccountData
     public ?int $quota = Account::DEFAULT_QUOTA;
 
     /**
-     * The new password. Required when creating a mailbox, optional when editing (empty means unchanged).
-     */
-    #[Assert\NotBlank(groups: ['create'])]
-    #[Assert\NotCompromisedPassword]
-    #[Assert\PasswordStrength(minScore: Assert\PasswordStrength::STRENGTH_STRONG)]
-    public ?string $plainPassword = null;
-
-    /**
      * Creates the form data from an existing mailbox.
      *
      * @param Account $account The mailbox.
      */
+    #[\Override]
     public static function fromAccount(Account $account): self
     {
         $data = new self();

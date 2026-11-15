@@ -28,9 +28,11 @@ use App\Form\Model\AccountData;
 use App\Form\Model\AliasData;
 use App\Form\Model\MailboxData;
 use App\Form\Model\MailingListData;
+use App\Form\Model\SendOnlyData;
 use App\Form\Type\AliasType;
 use App\Form\Type\MailboxType;
 use App\Form\Type\MailingListType;
+use App\Form\Type\SendOnlyType;
 use App\Security\Voter\AccountVoter;
 use App\Security\Voter\DomainVoter;
 use App\Service\AccountManager;
@@ -45,7 +47,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
 
 /**
- * Controller for creating mailboxes, aliases and mailing lists, and for editing mailboxes and aliases.
+ * Controller for creating accounts of all types, and for editing mailboxes, aliases and send-only addresses.
  *
  * Existing mailing lists have their own page (see MailingListController).
  */
@@ -57,29 +59,31 @@ final class AccountFormController extends AbstractController
      */
     private const array FORM_TYPES = [
         MailboxData::class => MailboxType::class,
+        SendOnlyData::class => SendOnlyType::class,
         AliasData::class => AliasType::class,
         MailingListData::class => MailingListType::class
     ];
 
     /**
-     * Creates a new mailbox, alias or mailing list in the domain.
+     * Creates a new mailbox, alias, mailing list or send-only address in the domain.
      *
      * @param Domain $domain The domain.
-     * @param string $type The account type ("mailbox", "alias" or "list").
+     * @param string $type The account type ("mailbox", "alias", "list" or "sendonly").
      * @param Request $request The current request.
      */
     #[IsGranted(DomainVoter::MANAGE, subject: 'domain')]
-    #[Route('/manage/domain/{domain}/new/{type}', name: 'manage_account_new', requirements: ['domain' => '[^/]+', 'type' => 'mailbox|alias|list'], methods: ['GET', 'POST'])]
+    #[Route('/manage/domain/{domain}/new/{type}', name: 'manage_account_new', requirements: ['domain' => '[^/]+', 'type' => 'mailbox|alias|list|sendonly'], methods: ['GET', 'POST'])]
     public function new(#[MapEntity(id: 'domain')] Domain $domain, string $type, Request $request): Response
     {
         $data = match ($type) {
             'mailbox' => new MailboxData(),
             'alias' => new AliasData(),
+            'sendonly' => new SendOnlyData(),
             default => new MailingListData()
         };
         $data->domain = $domain;
 
-        $form = $this->createForm(self::FORM_TYPES[$data::class], $data, [
+        $form = $this->createForm(self::FORM_TYPES[$data::class] ?? throw $this->createNotFoundException('Unknown account type.'), $data, [
             'is_new' => true,
             'domains' => [$domain]
         ]);
@@ -88,6 +92,7 @@ final class AccountFormController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $account = match (true) {
                 $data instanceof MailboxData => $this->accountManager->createMailbox($data),
+                $data instanceof SendOnlyData => $this->accountManager->createSendOnly($data),
                 $data instanceof AliasData => $this->accountManager->createAlias($data),
                 default => $this->accountManager->createMailingList($data)
             };
@@ -103,7 +108,7 @@ final class AccountFormController extends AbstractController
     }
 
     /**
-     * Edits a mailbox or alias.
+     * Edits a mailbox, alias or send-only address.
      *
      * @param Account $account The account to edit.
      * @param Account $user The current user.
@@ -116,10 +121,11 @@ final class AccountFormController extends AbstractController
         $data = match (true) {
             $account->isMailbox() => MailboxData::fromAccount($account),
             $account->isAlias() => AliasData::fromAccount($account),
-            default => throw $this->createNotFoundException('Only mailboxes and aliases can be edited here.')
+            $account->isSendOnly() => SendOnlyData::fromAccount($account),
+            default => throw $this->createNotFoundException('Mailing lists are edited on their own page.')
         };
 
-        $form = $this->createForm(self::FORM_TYPES[$data::class], $data, [
+        $form = $this->createForm(self::FORM_TYPES[$data::class] ?? throw $this->createNotFoundException('Unknown account type.'), $data, [
             // Prevent users from locking themselves out.
             'allow_disable' => $account !== $user
         ]);
@@ -128,6 +134,8 @@ final class AccountFormController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($data instanceof MailboxData) {
                 $this->accountManager->updateMailbox($account, $data);
+            } elseif ($data instanceof SendOnlyData) {
+                $this->accountManager->updateSendOnly($account, $data);
             } else {
                 $this->accountManager->updateAlias($account, $data);
             }
@@ -157,6 +165,7 @@ final class AccountFormController extends AbstractController
             'account' => $account,
             'newHeading' => match (true) {
                 $data instanceof MailboxData => 'newMailbox',
+                $data instanceof SendOnlyData => 'newSendOnly',
                 $data instanceof AliasData => 'newAlias',
                 default => 'newMailingList'
             }

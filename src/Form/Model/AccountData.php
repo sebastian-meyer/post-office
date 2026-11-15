@@ -23,8 +23,11 @@ declare(strict_types=1);
 namespace App\Form\Model;
 
 use App\Entity\Account;
+use App\Entity\AccountType;
+use App\Entity\Destination;
 use App\Entity\Domain;
 use App\Validator\AvailableAddress;
+use LogicException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -62,6 +65,42 @@ abstract class AccountData
      * Whether the account is enabled.
      */
     public bool $enabled = true;
+
+    /**
+     * Applies the fields common to all account types to an account.
+     *
+     * @param Account $account The account.
+     */
+    public function applyTo(Account $account): void
+    {
+        $account->setLabel($this->label ?? '');
+
+        if ($this->enabled) {
+            $account->enable();
+        } else {
+            $account->disable();
+        }
+    }
+
+    /**
+     * Creates a new (not yet saved) account from the form data.
+     *
+     * @param AccountType $type The type of the new account.
+     * @param Destination ...$destinations The destination (for aliases) or members (for mailing lists).
+     *
+     * @throws LogicException if the domain is missing.
+     */
+    public function createAccount(AccountType $type, Destination ...$destinations): Account
+    {
+        if ($this->domain === null) {
+            throw new LogicException('A new account requires a domain.');
+        }
+
+        $account = new Account($this->username, $this->domain, $type, null, ...$destinations);
+        $this->applyTo($account);
+
+        return $account;
+    }
 
     /**
      * Requires a username for account types that cannot be catch-all addresses.

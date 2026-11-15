@@ -62,6 +62,17 @@ final class AccountControllerTest extends WebTestCase
         self::assertCount(3, $this->reloadTeam()->destinations);
     }
 
+    public function testUserCanChangeTheirName(): void
+    {
+        $this->client->loginUser($this->data->dave);
+        $crawler = $this->client->request('GET', '/account');
+        $this->client->submit($crawler->filter('form[name="form"]')->form(['form[label]' => 'Dave Example']), [], ['HTTP_ORIGIN' => 'http://localhost']);
+
+        self::assertResponseRedirects('/account', 303);
+        $this->entityManager->clear();
+        self::assertSame('Dave Example', $this->entityManager->find(Account::class, $this->data->dave->id)?->label);
+    }
+
     public function testLeavingRequiresValidToken(): void
     {
         $this->client->loginUser($this->data->dave);

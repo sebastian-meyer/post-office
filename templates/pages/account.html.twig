@@ -13,10 +13,18 @@
                 <dt class="col-sm-4">{{ 'email'|trans }}</dt>
                 <dd class="col-sm-8 font-monospace">{{ account.userIdentifier }}</dd>
 
-                {% if account.label is not empty %}
-                <dt class="col-sm-4">{{ 'label'|trans }}</dt>
-                <dd class="col-sm-8">{{ account.label }}</dd>
-                {% endif %}
+                <dt class="col-sm-4">{{ form_label(labelForm.label) }}</dt>
+                <dd class="col-sm-8">
+                    {{ form_start(labelForm) }}
+                    <div class="input-group input-group-sm has-validation">
+                        {{ form_widget(labelForm.label, {attr: {placeholder: 'labelPlaceholder'}}) }}
+                        <button type="submit" class="btn btn-outline-primary">
+                            {{ ux_icon('mdi:content-save', {class: 'me-1'}) }} {{ 'save'|trans }}
+                        </button>
+                        {{ form_errors(labelForm.label) }}
+                    </div>
+                    {{ form_end(labelForm) }}
+                </dd>
 
                 <dt class="col-sm-4">{{ 'accountType'|trans }}</dt>
                 <dd class="col-sm-8">{{ ('accountType.' ~ account.type.value)|trans }}</dd>

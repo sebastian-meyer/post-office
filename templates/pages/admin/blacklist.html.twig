@@ -39,7 +39,7 @@
                         <tr>
                             <td class="font-monospace">{{ address }}</td>
                             <td>{{ ('blacklistAction.' ~ entry.action)|trans }}</td>
-                            <td>{{ include('admin/_status.html.twig', {enabled: entry.enabled}) }}</td>
+                            <td>{{ include('components/status-toggle.html.twig', {enabled: entry.enabled, url: path('admin_blacklist_toggle', {id: entry.id}), token: 'toggle-blacklist-' ~ entry.id}) }}</td>
                             <td class="text-end text-nowrap">
                                 {{ include('admin/_actions.html.twig', {
                                     edit: path('admin_blacklist_edit', {id: entry.id}),

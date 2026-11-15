@@ -123,6 +123,27 @@ final class TlsPolicyController extends AbstractController
     }
 
     /**
+     * Enables or disables a TLS policy (with a click on its status in the table).
+     *
+     * @param Request $request The current request (with the domain of the policy).
+     */
+    #[Route('/admin/tls-policies/toggle', name: 'admin_tls_policy_toggle', methods: ['POST'])]
+    public function toggle(Request $request): Response
+    {
+        $tlsPolicy = $this->findTlsPolicy($request->getPayload()->getString('domain'));
+
+        if (!$this->isCsrfTokenValid('toggle-tls-policy-' . $tlsPolicy->domain, $request->getPayload()->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $tlsPolicy->enabled ? $tlsPolicy->disable() : $tlsPolicy->enable();
+        $this->tlsPolicyRepository->save($tlsPolicy);
+        $this->addFlash('success', new TranslatableMessage($tlsPolicy->enabled ? 'entryEnabled' : 'entryDisabled', ['%name%' => $tlsPolicy->domain]));
+
+        return $this->redirectToRoute('admin_tls_policies', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
      * Finds the policy for the domain.
      *
      * @param string $domain The domain.

@@ -28,6 +28,8 @@ catchAll: Catch-all
 catchAllHelp: Leave empty for a catch-all address that receives all emails for the domain.
 change_password: Change password
 changePassword: Change password
+clickToDisable: Click to disable
+clickToEnable: Click to enable
 close: Close
 currentPassword: Current password
 datatables.emptyTable: "No entries available."
@@ -67,6 +69,8 @@ editBlacklistEntry: "Edit blacklist entry for %address%"
 editTlsPolicy: "Edit TLS policy for %domain%"
 email: E-mail address
 enabled: Enabled
+entryDisabled: "%name% has been disabled."
+entryEnabled: "%name% has been enabled."
 error403: You are not allowed to access this page.
 error404: The requested page could not be found.
 errorGeneric: An unexpected error occurred. Please try again later.
@@ -78,6 +82,8 @@ homepage: Homepage
 homePasswordText: Change the password of your email account.
 homeTlsPoliciesText: Encryption requirements for sending emails to other domains.
 label: Name
+labelPlaceholder: Your name
+labelSaved: Your name has been saved.
 leaveList: Leave
 leaveListConfirm: "Do you really want to leave the mailing list %list%? Only a list manager can add you again."
 listDeleted: "The mailing list %list% has been deleted."
@@ -109,6 +115,7 @@ newMailbox: New mailbox
 newMailingList: New mailing list
 newPassword: New password
 newPasswordRepeat: New password (repeat)
+newSendOnly: New send-only address
 newTlsPolicy: New TLS policy
 open: Open
 password: Password

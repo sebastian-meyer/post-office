@@ -3,7 +3,7 @@
 <a class="btn btn-sm btn-outline-primary" href="{{ path('manage_list', {id: account.id}) }}">
     {{ ux_icon('mdi:account-multiple', {class: 'me-1'}) }} {{ 'manageList'|trans }}
 </a>
-{% elseif (account.mailbox or account.alias) and is_granted('ACCOUNT_MANAGE', account) %}
+{% elseif (account.mailbox or account.alias or account.sendOnly) and is_granted('ACCOUNT_MANAGE', account) %}
 <a class="btn btn-sm btn-outline-primary" href="{{ path('manage_account_edit', {id: account.id}) }}">
     {{ ux_icon('mdi:pencil', {class: 'me-1'}) }} {{ 'edit'|trans }}
 </a>

@@ -26,14 +26,13 @@ use App\Entity\Account;
 use App\Form\Model\AccountData;
 use App\Form\Model\MailboxData;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Form for creating or editing a mailbox.
  */
-final class MailboxType extends AbstractAccountType
+final class MailboxType extends SendOnlyType
 {
     /**
      * Adds the mailbox fields.
@@ -50,27 +49,11 @@ final class MailboxType extends AbstractAccountType
     {
         parent::buildForm($builder, $options);
 
-        $builder
-            ->add('quota', IntegerType::class, [
-                'label' => 'quotaInMegabytes',
-                'help' => 'quotaHelp',
-                'attr' => ['min' => 0, 'max' => Account::MAX_QUOTA]
-            ])
-            ->add('plainPassword', PasswordType::class, [
-                'label' => $options['is_new'] === true ? 'password' : 'newPassword',
-                'help' => $options['is_new'] === true ? null : 'passwordUnchangedHelp',
-                'required' => $options['is_new'] === true,
-                'attr' => ['autocomplete' => 'new-password']
-            ]);
-    }
-
-    /**
-     * Mailboxes cannot be catch-all addresses.
-     */
-    #[\Override]
-    protected function isUsernameRequired(): bool
-    {
-        return true;
+        $builder->add('quota', IntegerType::class, [
+            'label' => 'quotaInMegabytes',
+            'help' => 'quotaHelp',
+            'attr' => ['min' => 0, 'max' => Account::MAX_QUOTA]
+        ]);
     }
 
     /**

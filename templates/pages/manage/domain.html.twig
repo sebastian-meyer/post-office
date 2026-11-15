@@ -25,6 +25,9 @@
             <a class="btn btn-outline-primary" href="{{ path('manage_account_new', {domain: domain.domain, type: 'list'}) }}">
                 {{ ux_icon('mdi:email-multiple', {class: 'me-1'}) }} {{ 'newMailingList'|trans }}
             </a>
+            <a class="btn btn-outline-primary" href="{{ path('manage_account_new', {domain: domain.domain, type: 'sendonly'}) }}">
+                {{ ux_icon('mdi:send', {class: 'me-1'}) }} {{ 'newSendOnly'|trans }}
+            </a>
         </div>
     </div>
 
@@ -60,11 +63,12 @@
                             <td class="text-end" data-order="-1">–</td>
                             {% endif %}
                             <td>
-                                {% if account.enabled %}
-                                <span class="badge text-bg-success">{{ 'statusEnabled'|trans }}</span>
-                                {% else %}
-                                <span class="badge text-bg-secondary">{{ 'statusDisabled'|trans }}</span>
-                                {% endif %}
+                                {# Users cannot disable their own account (to prevent lock-outs). #}
+                                {{ include('components/status-toggle.html.twig', {
+                                    enabled: account.enabled,
+                                    url: is_granted('ACCOUNT_MANAGE', account) and account.id != app.user.id ? path('manage_account_toggle', {id: account.id}) : null,
+                                    token: 'toggle-account-' ~ account.id
+                                }) }}
                             </td>
                             <td class="text-end text-nowrap">{{ include('manage/_account_actions.html.twig') }}</td>
                         </tr>

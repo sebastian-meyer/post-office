@@ -28,6 +28,8 @@ catchAll: Catch-all
 catchAllHelp: Leer lassen für eine Catch-all-Adresse, die alle E-Mails der Domain empfängt.
 change_password: Passwort ändern
 changePassword: Passwort ändern
+clickToDisable: Klicken zum Deaktivieren
+clickToEnable: Klicken zum Aktivieren
 close: Schließen
 currentPassword: Aktuelles Passwort
 datatables.emptyTable: "Keine Einträge vorhanden."
@@ -67,6 +69,8 @@ editBlacklistEntry: "Sperrlisteneintrag für %address% bearbeiten"
 editTlsPolicy: "TLS-Richtlinie für %domain% bearbeiten"
 email: E-Mail-Adresse
 enabled: Aktiviert
+entryDisabled: "%name% wurde deaktiviert."
+entryEnabled: "%name% wurde aktiviert."
 error403: Sie haben keine Berechtigung, diese Seite aufzurufen.
 error404: Die angeforderte Seite wurde nicht gefunden.
 errorGeneric: Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.
@@ -78,6 +82,8 @@ homepage: Startseite
 homePasswordText: Ändern Sie das Passwort Ihres E-Mail-Kontos.
 homeTlsPoliciesText: Verschlüsselungsanforderungen für den Versand an andere Domains.
 label: Name
+labelPlaceholder: Ihr Name
+labelSaved: Ihr Name wurde gespeichert.
 leaveList: Austreten
 leaveListConfirm: "Möchten Sie wirklich aus dem Verteiler %list% austreten? Nur ein Verteilerverwalter kann Sie wieder hinzufügen."
 listDeleted: "Der Verteiler %list% wurde gelöscht."
@@ -109,6 +115,7 @@ newMailbox: Neues Postfach
 newMailingList: Neuer Verteiler
 newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
+newSendOnly: Neue Nur-Senden-Adresse
 newTlsPolicy: Neue TLS-Richtlinie
 open: Öffnen
 password: Passwort

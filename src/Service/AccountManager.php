@@ -24,10 +24,10 @@ namespace App\Service;
 
 use App\Entity\Account;
 use App\Entity\AccountType;
-use App\Form\Model\AccountData;
 use App\Form\Model\AliasData;
 use App\Form\Model\MailboxData;
 use App\Form\Model\MailingListData;
+use App\Form\Model\SendOnlyData;
 use App\Repository\AccountRepository;
 use App\Repository\DestinationRepository;
 use LogicException;
@@ -35,36 +35,13 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 /**
- * Creates, updates and deletes accounts.
+ * Creates, updates, enables, disables and deletes accounts.
  *
  * The form data is expected to be validated already; the resulting entities are validated again before saving.
  * Authorization is not checked here, but by the controllers (see App\Security\Voter).
  */
 final class AccountManager
 {
-    /**
-     * Creates a new mailbox.
-     *
-     * @param MailboxData $data The validated form data.
-     *
-     * @throws LogicException if username, domain or password are missing.
-     * @throws ValidationFailedException if the new account is not valid.
-     */
-    public function createMailbox(MailboxData $data): Account
-    {
-        if ($data->plainPassword === null || $data->plainPassword === '') {
-            throw new LogicException('A new mailbox requires a password.');
-        }
-
-        $account = $this->newAccount($data, AccountType::Mailbox);
-        $account->setQuota($data->quota ?? Account::DEFAULT_QUOTA);
-        $account->setPassword($this->hasher->hashPassword($account, $data->plainPassword));
-
-        $this->accountRepository->save($account);
-
-        return $account;
-    }
-
     /**
      * Creates a new alias (or catch-all alias).
      *
@@ -75,11 +52,30 @@ final class AccountManager
      */
     public function createAlias(AliasData $data): Account
     {
-        $account = $this->newAccount($data, AccountType::Alias, $data->destination);
+        if ($data->destination === null) {
+            throw new LogicException('A new alias requires a destination.');
+        }
 
+        $account = $data->createAccount(AccountType::Alias, $this->destinationRepo->getEntity($data->destination));
         $this->accountRepository->save($account);
 
         return $account;
+    }
+
+    /**
+     * Creates a new mailbox.
+     *
+     * @param MailboxData $data The validated form data.
+     *
+     * @throws LogicException if username, domain or password are missing.
+     * @throws ValidationFailedException if the new account is not valid.
+     */
+    public function createMailbox(MailboxData $data): Account
+    {
+        $account = $data->createAccount(AccountType::Mailbox);
+        $account->setQuota($data->quota ?? Account::DEFAULT_QUOTA);
+
+        return $this->saveNew($account, $data);
     }
 
     /**
@@ -92,12 +88,25 @@ final class AccountManager
      */
     public function createMailingList(MailingListData $data): Account
     {
-        $account = $this->newAccount($data, AccountType::MailingList);
+        $account = $data->createAccount(AccountType::MailingList);
         $account->setListOptions($data->replyToList, $data->strictList);
 
         $this->accountRepository->save($account);
 
         return $account;
+    }
+
+    /**
+     * Creates a new send-only address.
+     *
+     * @param SendOnlyData $data The validated form data.
+     *
+     * @throws LogicException if username, domain or password are missing.
+     * @throws ValidationFailedException if the new account is not valid.
+     */
+    public function createSendOnly(SendOnlyData $data): Account
+    {
+        return $this->saveNew($data->createAccount(AccountType::SendOnly), $data);
     }
 
     /**
@@ -112,6 +121,28 @@ final class AccountManager
         $this->membershipManager->revokeManagerRoles($account);
 
         $this->accountRepository->remove($account);
+    }
+
+    /**
+     * Enables or disables an account.
+     *
+     * A disabled mailbox loses all manager roles.
+     *
+     * @param Account $account The account.
+     * @param bool $enabled Whether the account should be enabled.
+     *
+     * @throws ValidationFailedException if the account is not valid afterwards.
+     */
+    public function setEnabled(Account $account, bool $enabled): void
+    {
+        if ($enabled) {
+            $account->enable();
+        } else {
+            $account->disable();
+            $this->membershipManager->revokeManagerRoles($account);
+        }
+
+        $this->accountRepository->save($account);
     }
 
     /**
@@ -131,7 +162,7 @@ final class AccountManager
             throw new LogicException('Invalid alias data.');
         }
 
-        $this->updateCommon($account, $data);
+        $data->applyTo($account);
         $account->makeAlias($this->destinationRepo->getEntity($destination));
 
         $this->accountRepository->save($account);
@@ -154,12 +185,9 @@ final class AccountManager
             throw new LogicException('Only mailboxes can be updated with mailbox data.');
         }
 
-        $this->updateCommon($account, $data);
+        $data->applyTo($account);
         $account->setQuota($data->quota ?? Account::DEFAULT_QUOTA);
-
-        if ($data->plainPassword !== null && $data->plainPassword !== '') {
-            $account->setPassword($this->hasher->hashPassword($account, $data->plainPassword));
-        }
+        $this->changePassword($account, $data->plainPassword);
 
         if (!$data->enabled) {
             $this->membershipManager->revokeManagerRoles($account);
@@ -179,50 +207,65 @@ final class AccountManager
      */
     public function updateMailingList(Account $account, MailingListData $data): void
     {
-        $this->updateCommon($account, $data);
+        $data->applyTo($account);
         $account->setListOptions($data->replyToList, $data->strictList);
 
         $this->accountRepository->save($account);
     }
 
     /**
-     * Creates a new (not yet saved) account from form data.
+     * Updates an existing send-only address.
      *
-     * @param AccountData $data The validated form data.
-     * @param AccountType $type The type of the new account.
-     * @param ?string $destination The destination for aliases.
+     * @param Account $account The send-only address.
+     * @param SendOnlyData $data The validated form data. An empty password leaves the password unchanged.
      *
-     * @throws LogicException if the domain is missing.
+     * @throws LogicException if the account is not a send-only address.
+     * @throws ValidationFailedException if the account is not valid afterwards.
      */
-    private function newAccount(AccountData $data, AccountType $type, ?string $destination = null): Account
+    public function updateSendOnly(Account $account, SendOnlyData $data): void
     {
-        if ($data->domain === null) {
-            throw new LogicException('A new account requires a domain.');
+        if (!$account->isSendOnly()) {
+            throw new LogicException('Only send-only addresses can be updated with send-only data.');
         }
 
-        $destinations = $destination !== null ? [$this->destinationRepo->getEntity($destination)] : [];
+        $data->applyTo($account);
+        $this->changePassword($account, $data->plainPassword);
 
-        $account = new Account($data->username, $data->domain, $type, null, ...$destinations);
-        $this->updateCommon($account, $data);
-
-        return $account;
+        $this->accountRepository->save($account);
     }
 
     /**
-     * Applies the fields common to all account types.
+     * Sets a new password, if one is given.
      *
      * @param Account $account The account.
-     * @param AccountData $data The validated form data.
+     * @param ?string $plainPassword The new password, or NULL/empty to leave it unchanged.
      */
-    private function updateCommon(Account $account, AccountData $data): void
+    private function changePassword(Account $account, ?string $plainPassword): void
     {
-        $account->setLabel($data->label ?? '');
-
-        if ($data->enabled) {
-            $account->enable();
-        } else {
-            $account->disable();
+        if ($plainPassword !== null && $plainPassword !== '') {
+            $account->setPassword($this->hasher->hashPassword($account, $plainPassword));
         }
+    }
+
+    /**
+     * Sets the password of a new account and saves it.
+     *
+     * @param Account $account The new account.
+     * @param SendOnlyData $data The validated form data (with the password).
+     *
+     * @throws LogicException if the password is missing.
+     * @throws ValidationFailedException if the new account is not valid.
+     */
+    private function saveNew(Account $account, SendOnlyData $data): Account
+    {
+        if ($data->plainPassword === null || $data->plainPassword === '') {
+            throw new LogicException('A new account requires a password.');
+        }
+
+        $this->changePassword($account, $data->plainPassword);
+        $this->accountRepository->save($account);
+
+        return $account;
     }
 
     /**

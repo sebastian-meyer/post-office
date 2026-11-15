@@ -333,6 +333,14 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     }
 
     /**
+     * Whether the account is only allowed to send email.
+     */
+    public function isSendOnly(): bool
+    {
+        return $this->type === AccountType::SendOnly;
+    }
+
+    /**
      * Makes the account an alias for the given destination.
      *
      * @param Destination $destination The destination email address.

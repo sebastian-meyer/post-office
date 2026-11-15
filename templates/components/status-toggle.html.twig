@@ -1,0 +1,18 @@
+{#
+    Status badge of an entry, which enables or disables the entry when clicked.
+    Variables: enabled, url (URL of the toggle action, or null if the user cannot toggle the entry),
+               token (CSRF token ID), fields (optional hidden fields)
+#}
+{% set badge = enabled ? 'text-bg-success' : 'text-bg-secondary' %}
+{% set text = (enabled ? 'statusEnabled' : 'statusDisabled')|trans %}
+{% if url ?? null %}
+<form method="post" action="{{ url }}" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token(token) }}">
+    {% for name, value in fields ?? {} %}
+    <input type="hidden" name="{{ name }}" value="{{ value }}">
+    {% endfor %}
+    <button type="submit" class="badge border-0 {{ badge }}" title="{{ (enabled ? 'clickToDisable' : 'clickToEnable')|trans }}">{{ text }}</button>
+</form>
+{% else %}
+<span class="badge {{ badge }}">{{ text }}</span>
+{% endif %}

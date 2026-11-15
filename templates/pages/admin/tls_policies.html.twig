@@ -40,7 +40,7 @@
                             <td class="font-monospace">{{ policy.domain }}</td>
                             <td class="font-monospace">{{ policy.policy }}</td>
                             <td class="font-monospace small">{{ policy.params }}</td>
-                            <td>{{ include('admin/_status.html.twig', {enabled: policy.enabled}) }}</td>
+                            <td>{{ include('components/status-toggle.html.twig', {enabled: policy.enabled, url: path('admin_tls_policy_toggle'), token: 'toggle-tls-policy-' ~ policy.domain, fields: {domain: policy.domain}}) }}</td>
                             <td class="text-end text-nowrap">
                                 {{ include('admin/_actions.html.twig', {
                                     edit: path('admin_tls_policy_edit', {domain: policy.domain}),

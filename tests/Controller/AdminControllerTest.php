@@ -156,6 +156,25 @@ final class AdminControllerTest extends WebTestCase
         self::assertNull($this->find(TlsPolicy::class, '.example.net'));
     }
 
+    public function testToggleTlsPolicyAndBlacklistEntry(): void
+    {
+        $policy = new TlsPolicy('.example.net');
+        $entry = new Blacklist('spammer@example.net');
+        $this->entityManager->persist($policy);
+        $this->entityManager->persist($entry);
+        $this->entityManager->flush();
+
+        $crawler = $this->get('/admin/tls-policies');
+        $this->client->submit($crawler->filter('form[action="/admin/tls-policies/toggle"]')->form());
+        self::assertResponseRedirects('/admin/tls-policies', 303);
+        self::assertFalse($this->find(TlsPolicy::class, '.example.net')?->enabled);
+
+        $crawler = $this->get('/admin/blacklist');
+        $this->client->submit($crawler->filter('form[action="/admin/blacklist/' . $entry->id . '/toggle"]')->form());
+        self::assertResponseRedirects('/admin/blacklist', 303);
+        self::assertFalse($this->find(Blacklist::class, $entry->id)?->enabled);
+    }
+
     public function testInvalidTlsPolicyDomainIsRejected(): void
     {
         $crawler = $this->get('/admin/tls-policies/new');

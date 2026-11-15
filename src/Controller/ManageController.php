@@ -86,6 +86,37 @@ final class ManageController extends AbstractDomainController
     }
 
     /**
+     * Enables or disables an account (with a click on its status in the domain's account table).
+     *
+     * @param Account $account The account.
+     * @param Account $user The current user.
+     * @param Request $request The current request.
+     * @param AccountManager $accountManager The service for managing accounts.
+     */
+    #[IsGranted(AccountVoter::MANAGE, subject: 'account')]
+    #[Route('/manage/account/{id}/toggle', name: 'manage_account_toggle', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function toggle(
+        #[MapEntity(id: 'id')] Account $account,
+        #[CurrentUser] Account $user,
+        Request $request,
+        AccountManager $accountManager
+    ): Response {
+        if (!$this->isCsrfTokenValid('toggle-account-' . $account->id, $request->getPayload()->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        // Prevent users from locking themselves out.
+        if ($account === $user) {
+            throw $this->createAccessDeniedException('Users cannot disable their own account.');
+        }
+
+        $accountManager->setEnabled($account, !$account->enabled);
+        $this->addFlash('success', new TranslatableMessage($account->enabled ? 'entryEnabled' : 'entryDisabled', ['%name%' => (string) $account]));
+
+        return $this->redirectToRoute('manage_domain', ['domain' => $account->domain->domain], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
      * Deletes an account.
      *
      * The mail storage of a mailbox is not deleted (the user is warned about this before).

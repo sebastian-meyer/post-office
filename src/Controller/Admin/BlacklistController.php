@@ -126,6 +126,26 @@ final class BlacklistController extends AbstractController
     }
 
     /**
+     * Enables or disables a blacklist entry (with a click on its status in the table).
+     *
+     * @param Blacklist $entry The entry.
+     * @param Request $request The current request.
+     */
+    #[Route('/admin/blacklist/{id}/toggle', name: 'admin_blacklist_toggle', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function toggle(#[MapEntity(id: 'id')] Blacklist $entry, Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('toggle-blacklist-' . $entry->id, $request->getPayload()->getString('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $entry->enabled ? $entry->disable() : $entry->enable();
+        $this->blacklistRepository->save($entry);
+        $this->addFlash('success', new TranslatableMessage($entry->enabled ? 'entryEnabled' : 'entryDisabled', ['%name%' => self::address($entry)]));
+
+        return $this->redirectToRoute('admin_blacklist', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
      * Returns the blacklisted address (email address or domain) of an entry.
      *
      * @param Blacklist $entry The entry.

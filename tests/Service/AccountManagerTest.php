@@ -8,6 +8,7 @@ use App\Entity\Account;
 use App\Form\Model\AliasData;
 use App\Form\Model\MailboxData;
 use App\Form\Model\MailingListData;
+use App\Form\Model\SendOnlyData;
 use App\Service\AccountManager;
 use App\Tests\DatabaseTrait;
 use App\Tests\ServiceTestTrait;
@@ -134,6 +135,35 @@ final class AccountManagerTest extends KernelTestCase
         $team = $accounts->findOneByEmail('team@example.com');
         self::assertInstanceOf(Account::class, $team);
         self::assertCount(0, $team->managers);
+    }
+
+    public function testCreateAndUpdateSendOnly(): void
+    {
+        $data = new SendOnlyData();
+        $data->username = 'newsletter';
+        $data->domain = $this->data->exampleCom;
+        $data->plainPassword = 'correct horse battery staple';
+
+        $account = $this->manager->createSendOnly($data);
+        self::assertTrue($account->isSendOnly());
+        self::assertNull($account->quota);
+        $hash = $account->password;
+        self::assertNotNull($hash);
+
+        $data = SendOnlyData::fromAccount($account);
+        $data->label = 'Newsletter';
+        $this->manager->updateSendOnly($account, $data);
+
+        self::assertSame('Newsletter', $account->label);
+        self::assertSame($hash, $account->password);
+    }
+
+    public function testDisablingWithToggleRevokesManagerRoles(): void
+    {
+        $this->manager->setEnabled($this->data->alice, false);
+        self::assertFalse($this->data->alice->enabled);
+        $this->em->clear();
+        self::assertSame([], $this->domainRepository($this->em)->findByManager($this->data->alice));
     }
 
     public function testDeleteMailingList(): void

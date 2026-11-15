@@ -181,6 +181,44 @@ final class ManageControllerTest extends WebTestCase
         $this->get($this->data->admin, '/manage/account/' . $this->data->admin->id);
     }
 
+    public function testToggleAccount(): void
+    {
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
+        $this->client->submit($crawler->filter('form[action="/manage/account/' . $this->data->bob->id . '/toggle"]')->form());
+
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
+        self::assertFalse($this->reload('bob@example.com')->enabled);
+    }
+
+    public function testOwnAndAdminAccountsCannotBeToggled(): void
+    {
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
+        self::assertCount(0, $crawler->filter('form[action="/manage/account/' . $this->data->alice->id . '/toggle"]'));
+        self::assertCount(0, $crawler->filter('form[action="/manage/account/' . $this->data->admin->id . '/toggle"]'));
+
+        foreach ([$this->data->alice, $this->data->admin] as $account) {
+            $this->client->request('POST', '/manage/account/' . $account->id . '/toggle', ['_token' => 'irrelevant']);
+            self::assertResponseStatusCodeSame(403);
+        }
+    }
+
+    public function testCreateAndEditSendOnlyAddress(): void
+    {
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com/new/sendonly');
+        $this->client->submit($crawler->selectButton('Save')->form([
+            'send_only[username]' => 'newsletter',
+            'send_only[plainPassword]' => 'correct horse battery staple'
+        ]), [], self::SAME_ORIGIN);
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
+        $newsletter = $this->reload('newsletter@example.com');
+        self::assertTrue($newsletter->isSendOnly());
+
+        $crawler = $this->get($this->data->alice, '/manage/account/' . $newsletter->id);
+        self::assertSelectorNotExists('input[name="send_only[quota]"]');
+        $this->client->submit($crawler->selectButton('Save')->form(['send_only[label]' => 'Newsletter']), [], self::SAME_ORIGIN);
+        self::assertSame('Newsletter', $this->reload('newsletter@example.com')->label);
+    }
+
     public function testCannotManageOtherDomainsAccounts(): void
     {
         $this->client->loginUser($this->data->carol);
