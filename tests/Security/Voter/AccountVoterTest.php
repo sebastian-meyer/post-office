@@ -45,6 +45,9 @@ final class AccountVoterTest extends TestCase
         yield 'domain manager on own mailbox' => ['alice', 'alice', [true, false, false, false, false]];
         yield 'domain manager on other mailbox' => ['alice', 'bob', [true, true, false, false, false]];
         yield 'admin on own mailbox' => ['admin', 'admin', [true, false, false, false, false]];
+
+        // Administrator accounts can only be edited by administrators, and never be deleted.
+        yield 'domain manager on admin mailbox' => ['alice', 'admin', [false, false, false, false, false]];
         yield 'regular user on own mailbox' => ['dave', 'dave', [false, false, false, false, false]];
         yield 'manager of other domain on mailbox' => ['carol', 'bob', [false, false, false, false, false]];
     }
@@ -56,7 +59,7 @@ final class AccountVoterTest extends TestCase
     public function testPermissions(string $userName, string $subjectName, array $expected): void
     {
         $data = new TestData();
-        $voter = new AccountVoter(self::decisionManager(), new ManagerPolicy());
+        $voter = new AccountVoter(self::decisionManager(), new ManagerPolicy(), self::adminAccounts($data));
         $user = self::user($data, $userName);
         $subject = self::user($data, $subjectName);
 
@@ -73,7 +76,7 @@ final class AccountVoterTest extends TestCase
         $data = new TestData();
         $data->bob->disable();
 
-        self::assertFalse(self::isGranted(new AccountVoter(self::decisionManager(), new ManagerPolicy()), $data->bob, AccountVoter::LIST_MANAGE, $data->team));
+        self::assertFalse(self::isGranted(new AccountVoter(self::decisionManager(), new ManagerPolicy(), self::adminAccounts($data)), $data->bob, AccountVoter::LIST_MANAGE, $data->team));
     }
 
     public function testMembershipIsCaseInsensitive(): void

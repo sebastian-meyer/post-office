@@ -9,7 +9,10 @@ accountType.list: Mailing list
 accountType.mailbox: Mailbox
 accountType.sendonly: Send-only address
 actions: Actions
+addManager: Add manager
+addMember: Add member
 address: Address
+administrator: Administrator
 backToHomepage: Back to homepage
 cancel: Cancel
 catchAll: Catch-all
@@ -31,6 +34,8 @@ datatables.search: "Search:"
 datatables.zeroRecords: "No matching entries found."
 delete: Delete
 deleteAccountConfirm: "Do you really want to delete %address%?"
+deleteList: Delete mailing list
+deleteListConfirm: "Do you really want to delete the mailing list %list%? Its members will no longer receive emails sent to it."
 deleteMailboxConfirm: "Do you really want to delete the mailbox %address%? Emails stored on the server are not deleted and have to be removed by the server administrator."
 destination: Destination address
 domain: Domain
@@ -47,19 +52,31 @@ homepage: Homepage
 label: Name
 leaveList: Leave
 leaveListConfirm: "Do you really want to leave the mailing list %list%? Only a list manager can add you again."
+listDeleted: "The mailing list %list% has been deleted."
 listLeaveFailed: "You cannot leave the mailing list %list%. Please contact a list manager."
 listLeft: "You have left the mailing list %list%."
+listManagers: List managers
+listManagersHelp: List managers can change the settings and members of this mailing list, and delete it.
+listSaved: "The settings of %list% have been saved."
+listSettings: Settings
 login: Log in
 logout: Log out
 mailboxDeleted: "The mailbox %address% has been deleted. Emails stored on the server have to be removed by the server administrator."
 manage: Manage
 managedMailingLists: Mailing lists I manage
+manageList: Manage
+managerAdded: "%email% is now a list manager."
 managerHelp: Must be an enabled mailbox of the same domain.
+managerRemoved: "%email% is no longer a list manager."
+memberAdded: "%email% has been added to the mailing list."
+memberRemoved: "%email% has been removed from the mailing list."
+memberRemoveFailed: "%email% cannot be removed, because a catch-all address needs at least one destination."
 members: Members
 myMailingLists: My mailing lists
 myMailingListsHelp: You receive emails sent to these mailing lists.
 newAlias: New alias
 newMailbox: New mailbox
+newMailingList: New mailing list
 newPassword: New password
 newPasswordRepeat: New password (repeat)
 open: Open
@@ -71,6 +88,9 @@ quotaHelp: 0 means unlimited.
 quotaInMegabytes: Storage quota (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unlimited
+remove: Remove
+removeManagerConfirm: "Do you really want to remove %email% as manager of %list%?"
+removeMemberConfirm: "Do you really want to remove %email% from %list%?"
 replyToList: Replies go to the list
 replyToListHelp: Adds a Reply-To header with the list address.
 save: Save

@@ -17,7 +17,3 @@ services:
     App\:
         resource: '../src/'
         exclude: '../src/{Entity,Kernel.php}'
-
-    App\Repository\AccountRepository:
-        arguments:
-            $adminIds: '%app.admin_ids%'

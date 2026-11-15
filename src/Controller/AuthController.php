@@ -23,7 +23,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Account;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Security\AccountUserProvider;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -54,7 +54,7 @@ final class AuthController extends AbstractController
     public function changePassword(
         Request $request,
         #[CurrentUser] Account $user,
-        EntityManagerInterface $entityManager,
+        AccountUserProvider $userProvider,
         UserPasswordHasherInterface $hasher,
         #[MapQueryParameter('success')] ?bool $success = false
     ): array|Response {
@@ -105,7 +105,7 @@ final class AuthController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && \is_string($newPassword)) {
             $hashedPassword = $hasher->hashPassword($user, $newPassword);
-            $entityManager->getRepository(Account::class)->upgradePassword($user, $hashedPassword);
+            $userProvider->upgradePassword($user, $hashedPassword);
 
             return $this->redirectToRoute('change_password', ['success' => true]);
         }

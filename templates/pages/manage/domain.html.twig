@@ -22,6 +22,9 @@
             <a class="btn btn-outline-primary" href="{{ path('manage_account_new', {domain: domain.domain, type: 'alias'}) }}">
                 {{ ux_icon('mdi:email-arrow-right', {class: 'me-1'}) }} {{ 'newAlias'|trans }}
             </a>
+            <a class="btn btn-outline-primary" href="{{ path('manage_account_new', {domain: domain.domain, type: 'list'}) }}">
+                {{ ux_icon('mdi:email-multiple', {class: 'me-1'}) }} {{ 'newMailingList'|trans }}
+            </a>
         </div>
     </div>
 
@@ -45,6 +48,7 @@
                             <td class="font-monospace">
                                 {{ account }}
                                 {% if account.catchAll %}<span class="badge text-bg-secondary ms-1">{{ 'catchAll'|trans }}</span>{% endif %}
+                                {% if is_admin_account(account) %}<span class="badge text-bg-primary ms-1">{{ 'administrator'|trans }}</span>{% endif %}
                             </td>
                             <td>{{ ('accountType.' ~ account.type.value)|trans }}</td>
                             <td>{{ account.label }}</td>

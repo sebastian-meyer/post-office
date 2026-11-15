@@ -513,7 +513,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      *
      * @param ?string $hashedPassword The hashed password using algorithm bcrypt(10), or NULL to disable login.
      *
-     * @see AccountRepository::upgradePassword()
+     * @see \App\Security\AccountUserProvider::upgradePassword()
      */
     public function setPassword(?string $hashedPassword): static
     {

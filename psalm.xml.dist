@@ -44,16 +44,8 @@
                 <directory name="src/Repository"/>
             </errorLevel>
         </PossiblyUnusedParam>
-        <PossiblyUnusedProperty>
-            <errorLevel type="suppress">
-                <!-- Used in AccountRepository::isAdminId() (see above). -->
-                <referencedProperty name="App\Repository\AccountRepository::$adminIds"/>
-            </errorLevel>
-        </PossiblyUnusedProperty>
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
-                <!-- Used in AccountRepository::loadUserByIdentifier() and ::refreshUser() (see above). -->
-                <referencedMethod name="App\Entity\Account::setAdmin"/>
                 <!-- Only used inside repositories (see above). -->
                 <referencedMethod name="App\Repository\EntityRepository::getEntityResult"/>
                 <!-- Magic getter, called implicitly when accessing @property-read properties. -->

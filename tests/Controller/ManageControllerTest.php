@@ -159,6 +159,28 @@ final class ManageControllerTest extends WebTestCase
         self::assertNull($this->accounts()->findOneByEmail('bob@example.com'));
     }
 
+    public function testAdminAccountCannotBeDeleted(): void
+    {
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        self::assertCount(0, $crawler->filter('form[action="/manage/account/' . $this->data->admin->id . '/delete"]'));
+        self::assertSelectorTextContains('.badge.text-bg-primary', 'Administrator');
+
+        $this->client->request('POST', '/manage/account/' . $this->data->admin->id . '/delete', ['_token' => 'irrelevant']);
+        self::assertResponseStatusCodeSame(403);
+        self::assertInstanceOf(Account::class, $this->accounts()->findOneByEmail('admin@example.com'));
+    }
+
+    public function testOnlyAdminsCanEditAdminAccounts(): void
+    {
+        $crawler = $this->get($this->data->alice, '/manage/domain/example.com');
+        self::assertCount(0, $crawler->filter('a[href="/manage/account/' . $this->data->admin->id . '"]'));
+
+        $this->client->request('GET', '/manage/account/' . $this->data->admin->id);
+        self::assertResponseStatusCodeSame(403);
+
+        $this->get($this->data->admin, '/manage/account/' . $this->data->admin->id);
+    }
+
     public function testCannotManageOtherDomainsAccounts(): void
     {
         $this->client->loginUser($this->data->carol);

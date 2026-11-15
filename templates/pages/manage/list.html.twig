@@ -1,0 +1,155 @@
+{% extends 'layout.html.twig' %}
+
+{% import 'macros/datatable.html.twig' as datatable %}
+
+{% block title %}{{ app_name }} - {{ list }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('manage') }}">{{ 'manage'|trans }}</a></li>
+            {% if is_granted('DOMAIN_MANAGE', list.domain) %}
+            <li class="breadcrumb-item"><a class="font-monospace" href="{{ path('manage_domain', {domain: list.domain.domain}) }}">{{ list.domain }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active font-monospace" aria-current="page">{{ list }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <h1 class="h3 mb-0">
+            <span class="font-monospace">{{ list }}</span>
+            {% if not list.enabled %}<span class="badge text-bg-secondary fs-6 align-middle ms-1">{{ 'statusDisabled'|trans }}</span>{% endif %}
+        </h1>
+        <form method="post" action="{{ path('manage_list_delete', {id: list.id}) }}"
+              data-controller="confirm" data-action="confirm#ask"
+              data-confirm-message-value="{{ 'deleteListConfirm'|trans({'%list%': list ~ ''}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete-list-' ~ list.id) }}">
+            <button type="submit" class="btn btn-outline-danger">
+                {{ ux_icon('mdi:delete', {class: 'me-1'}) }} {{ 'deleteList'|trans }}
+            </button>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card bg-body-tertiary shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">{{ 'listSettings'|trans }}</h2>
+                </div>
+                {{ form_start(settingsForm) }}
+                <div class="card-body">
+                    {{ form_rest(settingsForm) }}
+                </div>
+                <div class="card-footer text-end">
+                    <button type="submit" class="btn btn-primary">
+                        {{ ux_icon('mdi:content-save', {class: 'me-1'}) }} {{ 'save'|trans }}
+                    </button>
+                </div>
+                {{ form_end(settingsForm) }}
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card bg-body-tertiary shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">{{ 'members'|trans }}</h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(memberForm) }}
+                    <div class="input-group has-validation mb-3">
+                        {{ form_widget(memberForm.email, {attr: {placeholder: 'email'|trans}}) }}
+                        <button type="submit" class="btn btn-primary">
+                            {{ ux_icon('mdi:account-plus', {class: 'me-1'}) }} {{ 'addMember'|trans }}
+                        </button>
+                        {{ form_errors(memberForm.email) }}
+                    </div>
+                    {{ form_end(memberForm) }}
+
+                    <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'email'|trans }}</th>
+                                    <th class="text-end" data-orderable="false" data-searchable="false">{{ 'actions'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in list.destinations %}
+                                <tr>
+                                    <td class="font-monospace">{{ member }}</td>
+                                    <td class="text-end">
+                                        <form method="post" action="{{ path('manage_list_member_remove', {id: list.id}) }}" class="d-inline"
+                                              data-controller="confirm" data-action="confirm#ask"
+                                              data-confirm-message-value="{{ 'removeMemberConfirm'|trans({'%email%': member ~ '', '%list%': list ~ ''}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('remove-member-' ~ list.id) }}">
+                                            <input type="hidden" name="email" value="{{ member }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                {{ ux_icon('mdi:account-remove', {class: 'me-1'}) }} {{ 'remove'|trans }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if is_granted('LIST_MANAGE_MANAGERS', list) %}
+        <div class="col-lg-7 offset-lg-5">
+            <div class="card bg-body-tertiary shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">{{ 'listManagers'|trans }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-body-secondary">{{ 'listManagersHelp'|trans }}</p>
+                    {{ form_start(managerForm) }}
+                    <div class="input-group has-validation">
+                        {{ form_widget(managerForm.email, {attr: {placeholder: 'email'|trans}}) }}
+                        <button type="submit" class="btn btn-primary">
+                            {{ ux_icon('mdi:account-plus', {class: 'me-1'}) }} {{ 'addManager'|trans }}
+                        </button>
+                        {{ form_errors(managerForm.email) }}
+                    </div>
+                    <div class="form-text mb-3">{{ 'managerHelp'|trans }}</div>
+                    {{ form_end(managerForm, {render_rest: true}) }}
+
+                    <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'email'|trans }}</th>
+                                    <th>{{ 'label'|trans }}</th>
+                                    <th class="text-end" data-orderable="false" data-searchable="false">{{ 'actions'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for manager in list.managers %}
+                                <tr>
+                                    <td class="font-monospace">{{ manager }}</td>
+                                    <td>{{ manager.label }}</td>
+                                    <td class="text-end">
+                                        <form method="post" action="{{ path('manage_list_manager_remove', {id: list.id, manager: manager.id}) }}" class="d-inline"
+                                              data-controller="confirm" data-action="confirm#ask"
+                                              data-confirm-message-value="{{ 'removeManagerConfirm'|trans({'%email%': manager ~ '', '%list%': list ~ ''}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('remove-manager-' ~ list.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                {{ ux_icon('mdi:account-remove', {class: 'me-1'}) }} {{ 'remove'|trans }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

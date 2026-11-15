@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace App\Security\Voter;
 
 use App\Entity\Account;
+use App\Security\AdminAccounts;
 use App\Security\ManagerPolicy;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -31,11 +32,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 /**
  * Decides about permissions on accounts (mailboxes, aliases, mailing lists, send-only addresses).
  *
- * - Administrators and managers of the account's domain can manage all accounts of the domain.
+ * - Administrators and managers of the account's domain can manage all accounts of the domain, except that only
+ *   administrators can edit administrator accounts (e.g. to prevent domain managers from taking them over).
  * - List managers can change settings and members of their mailing lists, and delete them.
  * - Only administrators and domain managers can appoint list managers.
  * - Members of a mailing list can leave it.
- * - Nobody can delete their own account.
+ * - Nobody can delete their own account or an administrator account (see also AdminAccountGuard).
  *
  * @extends Voter<string, Account>
  */
@@ -117,7 +119,8 @@ final class AccountVoter extends Voter
 
         return match ($attribute) {
             self::LIST_LEAVE => $this->policy->isListMember($user, $subject),
-            self::DELETE => $subject !== $user && $this->managesDomainOf($token, $user, $subject),
+            self::DELETE => $subject !== $user && !$this->adminAccounts->isAdmin($subject) && $this->managesDomainOf($token, $user, $subject),
+            self::MANAGE => $this->adminAccounts->isAdmin($subject) ? $this->isAdmin($token) : $this->managesDomainOf($token, $user, $subject),
             self::LIST_MANAGE => $this->policy->isListManager($user, $subject) || $this->managesDomainOf($token, $user, $subject),
             default => $this->managesDomainOf($token, $user, $subject)
         };
@@ -132,16 +135,28 @@ final class AccountVoter extends Voter
      */
     private function managesDomainOf(TokenInterface $token, Account $user, Account $subject): bool
     {
-        return $this->decisionManager->decide($token, ['ROLE_ADMIN']) || $subject->domain->isManagedBy($user);
+        return $this->isAdmin($token) || $subject->domain->isManagedBy($user);
+    }
+
+    /**
+     * Whether the current user is an administrator.
+     *
+     * @param TokenInterface $token The security token.
+     */
+    private function isAdmin(TokenInterface $token): bool
+    {
+        return $this->decisionManager->decide($token, ['ROLE_ADMIN']);
     }
 
     /**
      * @param AccessDecisionManagerInterface $decisionManager The access decision manager (to check for admins).
      * @param ManagerPolicy $policy The rules for list managers and members.
+     * @param AdminAccounts $adminAccounts The service knowing the administrator accounts.
      */
     public function __construct(
         private readonly AccessDecisionManagerInterface $decisionManager,
-        private readonly ManagerPolicy $policy
+        private readonly ManagerPolicy $policy,
+        private readonly AdminAccounts $adminAccounts
     ) {
     }
 }

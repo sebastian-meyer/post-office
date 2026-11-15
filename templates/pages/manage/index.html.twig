@@ -53,6 +53,7 @@
                             <th>{{ 'address'|trans }}</th>
                             <th>{{ 'label'|trans }}</th>
                             <th class="text-end">{{ 'members'|trans }}</th>
+                            <th class="text-end" data-orderable="false" data-searchable="false">{{ 'actions'|trans }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,6 +62,11 @@
                             <td class="font-monospace">{{ list.userIdentifier }}</td>
                             <td>{{ list.label }}</td>
                             <td class="text-end">{{ list.destinations|length }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" href="{{ path('manage_list', {id: list.id}) }}">
+                                    {{ ux_icon('mdi:account-multiple', {class: 'me-1'}) }} {{ 'manageList'|trans }}
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

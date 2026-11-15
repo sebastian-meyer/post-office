@@ -1,6 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% set heading = account ? 'editAccount'|trans({'%address%': account ~ ''}) : (isMailbox ? 'newMailbox' : 'newAlias')|trans %}
+{% set heading = account ? 'editAccount'|trans({'%address%': account ~ ''}) : newHeading|trans %}
 
 {% block title %}{{ app_name }} - {{ heading }}{% endblock %}
 

@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace App\Twig;
 
 use App\Entity\Account;
+use App\Security\AdminAccounts;
 use App\Service\ManagementScope;
 use Symfony\Bundle\SecurityBundle\Security;
 use Twig\Extension\AbstractExtension;
@@ -44,6 +45,7 @@ final class ManagementExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
+            new TwigFunction('is_admin_account', $this->adminAccounts->isAdmin(...)),
             new TwigFunction('manages_anything', $this->managesAnything(...))
         ];
     }
@@ -61,10 +63,12 @@ final class ManagementExtension extends AbstractExtension
     /**
      * @param Security $security The security helper (to get the current user).
      * @param ManagementScope $managementScope The service determining what a user can manage.
+     * @param AdminAccounts $adminAccounts The service knowing the administrator accounts.
      */
     public function __construct(
         private readonly Security $security,
-        private readonly ManagementScope $managementScope
+        private readonly ManagementScope $managementScope,
+        private readonly AdminAccounts $adminAccounts
     ) {
     }
 }

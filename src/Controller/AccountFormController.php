@@ -27,8 +27,10 @@ use App\Entity\Domain;
 use App\Form\Model\AccountData;
 use App\Form\Model\AliasData;
 use App\Form\Model\MailboxData;
+use App\Form\Model\MailingListData;
 use App\Form\Type\AliasType;
 use App\Form\Type\MailboxType;
+use App\Form\Type\MailingListType;
 use App\Security\Voter\AccountVoter;
 use App\Security\Voter\DomainVoter;
 use App\Service\AccountManager;
@@ -43,38 +45,58 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
 
 /**
- * Controller for creating and editing mailboxes and aliases.
+ * Controller for creating mailboxes, aliases and mailing lists, and for editing mailboxes and aliases.
  *
- * Mailing lists have their own pages (members, managers).
+ * Existing mailing lists have their own page (see MailingListController).
  */
 #[IsGranted('IS_AUTHENTICATED')]
 final class AccountFormController extends AbstractController
 {
     /**
-     * Creates a new mailbox or alias in the domain.
+     * The form types for the form data classes.
+     */
+    private const array FORM_TYPES = [
+        MailboxData::class => MailboxType::class,
+        AliasData::class => AliasType::class,
+        MailingListData::class => MailingListType::class
+    ];
+
+    /**
+     * Creates a new mailbox, alias or mailing list in the domain.
      *
      * @param Domain $domain The domain.
-     * @param string $type The account type ("mailbox" or "alias").
+     * @param string $type The account type ("mailbox", "alias" or "list").
      * @param Request $request The current request.
      */
     #[IsGranted(DomainVoter::MANAGE, subject: 'domain')]
-    #[Route('/manage/domain/{domain}/new/{type}', name: 'manage_account_new', requirements: ['domain' => '[^/]+', 'type' => 'mailbox|alias'], methods: ['GET', 'POST'])]
+    #[Route('/manage/domain/{domain}/new/{type}', name: 'manage_account_new', requirements: ['domain' => '[^/]+', 'type' => 'mailbox|alias|list'], methods: ['GET', 'POST'])]
     public function new(#[MapEntity(id: 'domain')] Domain $domain, string $type, Request $request): Response
     {
-        $data = $type === 'mailbox' ? new MailboxData() : new AliasData();
+        $data = match ($type) {
+            'mailbox' => new MailboxData(),
+            'alias' => new AliasData(),
+            default => new MailingListData()
+        };
         $data->domain = $domain;
 
-        $form = $this->createForm($data instanceof MailboxData ? MailboxType::class : AliasType::class, $data, [
+        $form = $this->createForm(self::FORM_TYPES[$data::class], $data, [
             'is_new' => true,
             'domains' => [$domain]
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $account = $data instanceof MailboxData ? $this->accountManager->createMailbox($data) : $this->accountManager->createAlias($data);
+            $account = match (true) {
+                $data instanceof MailboxData => $this->accountManager->createMailbox($data),
+                $data instanceof AliasData => $this->accountManager->createAlias($data),
+                default => $this->accountManager->createMailingList($data)
+            };
             $this->addFlash('success', new TranslatableMessage('accountCreated', ['%address%' => (string) $account]));
 
-            return $this->redirectToRoute('manage_domain', ['domain' => $domain->domain], Response::HTTP_SEE_OTHER);
+            // New mailing lists have no members yet, so continue on the list's page.
+            return $account->isMailingList()
+                ? $this->redirectToRoute('manage_list', ['id' => $account->id], Response::HTTP_SEE_OTHER)
+                : $this->redirectToRoute('manage_domain', ['domain' => $domain->domain], Response::HTTP_SEE_OTHER);
         }
 
         return $this->renderForm($form, $domain, null);
@@ -97,7 +119,7 @@ final class AccountFormController extends AbstractController
             default => throw $this->createNotFoundException('Only mailboxes and aliases can be edited here.')
         };
 
-        $form = $this->createForm($data instanceof MailboxData ? MailboxType::class : AliasType::class, $data, [
+        $form = $this->createForm(self::FORM_TYPES[$data::class], $data, [
             // Prevent users from locking themselves out.
             'allow_disable' => $account !== $user
         ]);
@@ -127,11 +149,17 @@ final class AccountFormController extends AbstractController
      */
     private function renderForm(FormInterface $form, Domain $domain, ?Account $account): Response
     {
+        $data = $form->getData();
+
         return $this->render('pages/manage/account_form.html.twig', [
             'form' => $form,
             'domain' => $domain,
             'account' => $account,
-            'isMailbox' => $form->getData() instanceof MailboxData
+            'newHeading' => match (true) {
+                $data instanceof MailboxData => 'newMailbox',
+                $data instanceof AliasData => 'newAlias',
+                default => 'newMailingList'
+            }
         ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
