@@ -21,6 +21,9 @@ security:
                 check_path: /login
                 default_target_path: homepage
                 enable_csrf: true
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
             logout:
                 path: /logout
 
