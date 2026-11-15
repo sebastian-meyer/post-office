@@ -34,12 +34,18 @@
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                    <a class="dropdown-item" href="{{ logout_path() }}" title="{{ 'logout'|trans }}">
+                    <button type="submit" form="logout" class="dropdown-item" title="{{ 'logout'|trans }}">
                         {{ ux_icon('mdi:logout', {class: 'fs-4 me-1'}) }} {{ 'logout'|trans }}
-                    </a>
+                    </button>
                 </li>
             </ul>
         </li>
         {% endif %}
     </ul>
 </nav>
+{% if is_granted('IS_AUTHENTICATED') %}
+{# Logout buttons submit this form via their "form" attribute, so they also work inside other forms (e.g. on the login page). #}
+<form id="logout" method="post" action="{{ path('_logout_main') }}" hidden>
+    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('logout') }}">
+</form>
+{% endif %}

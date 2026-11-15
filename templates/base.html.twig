@@ -5,7 +5,7 @@
         <meta http-equiv="cache-control" content="no-cache">
         <meta name="robots" content="noindex,nofollow">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        {# Don't let Turbo load pages when hovering links (GET links like logout must not be followed by accident). #}
+        {# Don't let Turbo load pages when hovering links (GET links must not trigger actions by accident). #}
         <meta name="turbo-prefetch" content="false">
         <title>{% block title %}{{ app_name }}{% endblock %}</title>
         {% if app.current_route %}

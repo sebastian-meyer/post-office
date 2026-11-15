@@ -16,6 +16,6 @@
 {% if not is_granted('IS_AUTHENTICATED') %}
 <button type="submit" class="btn btn-primary">{{ ux_icon('mdi:login', {class: 'fs-4 me-1'}) }} {{ 'login'|trans }}</button>
 {% else %}
-<a class="btn btn-danger" href="{{ logout_path() }}">{{ ux_icon('mdi:logout', {class: 'fs-4 me-1'}) }} {{ 'logout'|trans }}</a>
+<button type="submit" form="logout" class="btn btn-danger">{{ ux_icon('mdi:logout', {class: 'fs-4 me-1'}) }} {{ 'logout'|trans }}</button>
 {% endif %}
 {% endblock %}
