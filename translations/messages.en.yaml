@@ -1,4 +1,8 @@
 account: Account settings
+accountCreated: "The account %address% has been created."
+accountDeleted: "The account %address% has been deleted."
+accounts: Accounts
+accountSaved: "The account %address% has been saved."
 accountType: Account type
 accountType.alias: Alias
 accountType.list: Mailing list
@@ -7,6 +11,8 @@ accountType.sendonly: Send-only address
 actions: Actions
 address: Address
 backToHomepage: Back to homepage
+cancel: Cancel
+catchAll: Catch-all
 catchAllHelp: Leave empty for a catch-all address that receives all emails for the domain.
 change_password: Change password
 changePassword: Change password
@@ -23,8 +29,14 @@ datatables.next: "Next"
 datatables.previous: "Previous"
 datatables.search: "Search:"
 datatables.zeroRecords: "No matching entries found."
+delete: Delete
+deleteAccountConfirm: "Do you really want to delete %address%?"
+deleteMailboxConfirm: "Do you really want to delete the mailbox %address%? Emails stored on the server are not deleted and have to be removed by the server administrator."
 destination: Destination address
 domain: Domain
+domains: Domains
+edit: Edit
+editAccount: "Edit %address%"
 email: E-mail address
 enabled: Enabled
 error403: You are not allowed to access this page.
@@ -39,11 +51,18 @@ listLeaveFailed: "You cannot leave the mailing list %list%. Please contact a lis
 listLeft: "You have left the mailing list %list%."
 login: Log in
 logout: Log out
+mailboxDeleted: "The mailbox %address% has been deleted. Emails stored on the server have to be removed by the server administrator."
+manage: Manage
+managedMailingLists: Mailing lists I manage
 managerHelp: Must be an enabled mailbox of the same domain.
+members: Members
 myMailingLists: My mailing lists
 myMailingListsHelp: You receive emails sent to these mailing lists.
+newAlias: New alias
+newMailbox: New mailbox
 newPassword: New password
 newPasswordRepeat: New password (repeat)
+open: Open
 password: Password
 passwordChanged: Password changed!
 passwordUnchangedHelp: Leave empty to keep the current password.
@@ -54,7 +73,11 @@ quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unlimited
 replyToList: Replies go to the list
 replyToListHelp: Adds a Reply-To header with the list address.
+save: Save
 showPassword: Show/hide password
+status: Status
+statusDisabled: Disabled
+statusEnabled: Enabled
 strictList: Members only
 strictListHelp: Only members of the list are allowed to send emails to it.
 username: Username

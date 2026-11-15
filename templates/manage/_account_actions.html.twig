@@ -1,0 +1,16 @@
+{# Edit and delete buttons for a row of the domain's account table (account: the account). #}
+{% if (account.mailbox or account.alias) and is_granted('ACCOUNT_MANAGE', account) %}
+<a class="btn btn-sm btn-outline-primary" href="{{ path('manage_account_edit', {id: account.id}) }}">
+    {{ ux_icon('mdi:pencil', {class: 'me-1'}) }} {{ 'edit'|trans }}
+</a>
+{% endif %}
+{% if is_granted('ACCOUNT_DELETE', account) %}
+<form method="post" action="{{ path('manage_account_delete', {id: account.id}) }}" class="d-inline"
+      data-controller="confirm" data-action="confirm#ask"
+      data-confirm-message-value="{{ (account.mailbox ? 'deleteMailboxConfirm' : 'deleteAccountConfirm')|trans({'%address%': account ~ ''}) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete-account-' ~ account.id) }}">
+    <button type="submit" class="btn btn-sm btn-outline-danger">
+        {{ ux_icon('mdi:delete', {class: 'me-1'}) }} {{ 'delete'|trans }}
+    </button>
+</form>
+{% endif %}

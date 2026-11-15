@@ -1,0 +1,47 @@
+{% extends 'layout.html.twig' %}
+
+{% set heading = account ? 'editAccount'|trans({'%address%': account ~ ''}) : (isMailbox ? 'newMailbox' : 'newAlias')|trans %}
+
+{% block title %}{{ app_name }} - {{ heading }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('manage') }}">{{ 'manage'|trans }}</a></li>
+            <li class="breadcrumb-item"><a class="font-monospace" href="{{ path('manage_domain', {domain: domain.domain}) }}">{{ domain }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ heading }}</li>
+        </ol>
+    </nav>
+
+    <div class="card bg-body-tertiary shadow-sm mx-auto" style="max-width: 40rem;">
+        <div class="card-header">
+            <h1 class="h4 mb-0">{{ heading }}</h1>
+        </div>
+        {{ form_start(form) }}
+        <div class="card-body">
+            {% if form.username is defined %}
+            <div class="mb-3">
+                {{ form_label(form.username) }}
+                <div class="input-group has-validation">
+                    {{ form_widget(form.username) }}
+                    <span class="input-group-text font-monospace">@{{ domain }}</span>
+                    {{ form_errors(form.username) }}
+                </div>
+                {{ form_help(form.username) }}
+            </div>
+            {% endif %}
+            {{ form_rest(form) }}
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a class="btn btn-outline-secondary" href="{{ path('manage_domain', {domain: domain.domain}) }}">
+                {{ ux_icon('mdi:arrow-left', {class: 'me-1'}) }} {{ 'cancel'|trans }}
+            </a>
+            <button type="submit" class="btn btn-primary">
+                {{ ux_icon('mdi:content-save', {class: 'me-1'}) }} {{ 'save'|trans }}
+            </button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

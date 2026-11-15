@@ -36,11 +36,21 @@ trait DatabaseTrait
                 throw new LogicException(\sprintf('Refusing to recreate the schema of database "%s".', (string) $database));
             }
 
+            // Drop everything (not only the mapped tables), so even a half-created schema (e.g. after an aborted run)
+            // doesn't break the tests.
             $schemaTool = new SchemaTool($entityManager);
-            $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
-            $schemaTool->dropSchema($metadata);
-            $schemaTool->createSchema($metadata);
+            $schemaTool->dropDatabase();
+            $schemaTool->createSchema($entityManager->getMetadataFactory()->getAllMetadata());
             self::$schemaCreated = true;
+        }
+
+        // Rolled back transactions don't reset auto-increment values, so reset them to get the same IDs in every test
+        // (e.g. ID 1 for the administrator, see TestData and ADMIN_IDS in .env.test). This must happen outside of the
+        // transaction, since DDL statements commit implicitly.
+        foreach ($entityManager->getMetadataFactory()->getAllMetadata() as $metadata) {
+            if ($metadata->isIdGeneratorIdentity()) {
+                $entityManager->getConnection()->executeStatement(\sprintf('ALTER TABLE %s AUTO_INCREMENT = 1', $metadata->getTableName()));
+            }
         }
 
         $entityManager->getConnection()->beginTransaction();

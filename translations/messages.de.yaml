@@ -1,4 +1,8 @@
 account: Kontoeinstellungen
+accountCreated: "Das Konto %address% wurde angelegt."
+accountDeleted: "Das Konto %address% wurde gelöscht."
+accounts: Konten
+accountSaved: "Das Konto %address% wurde gespeichert."
 accountType: Kontotyp
 accountType.alias: Weiterleitung
 accountType.list: Verteiler
@@ -7,6 +11,8 @@ accountType.sendonly: Nur-Senden-Adresse
 actions: Aktionen
 address: Adresse
 backToHomepage: Zurück zur Startseite
+cancel: Abbrechen
+catchAll: Catch-all
 catchAllHelp: Leer lassen für eine Catch-all-Adresse, die alle E-Mails der Domain empfängt.
 change_password: Passwort ändern
 changePassword: Passwort ändern
@@ -23,8 +29,14 @@ datatables.next: "Nächste"
 datatables.previous: "Vorherige"
 datatables.search: "Suche:"
 datatables.zeroRecords: "Keine passenden Einträge gefunden."
+delete: Löschen
+deleteAccountConfirm: "Möchten Sie %address% wirklich löschen?"
+deleteMailboxConfirm: "Möchten Sie das Postfach %address% wirklich löschen? Auf dem Server gespeicherte E-Mails werden nicht gelöscht und müssen vom Server-Administrator entfernt werden."
 destination: Zieladresse
 domain: Domain
+domains: Domains
+edit: Bearbeiten
+editAccount: "%address% bearbeiten"
 email: E-Mail-Adresse
 enabled: Aktiviert
 error403: Sie haben keine Berechtigung, diese Seite aufzurufen.
@@ -39,11 +51,18 @@ listLeaveFailed: "Sie können nicht aus dem Verteiler %list% austreten. Bitte we
 listLeft: "Sie sind aus dem Verteiler %list% ausgetreten."
 login: Anmelden
 logout: Abmelden
+mailboxDeleted: "Das Postfach %address% wurde gelöscht. Auf dem Server gespeicherte E-Mails müssen vom Server-Administrator entfernt werden."
+manage: Verwaltung
+managedMailingLists: Von mir verwaltete Verteiler
 managerHelp: Muss ein aktiviertes Postfach derselben Domain sein.
+members: Mitglieder
 myMailingLists: Meine Verteiler
 myMailingListsHelp: Sie erhalten E-Mails, die an diese Verteiler gesendet werden.
+newAlias: Neue Weiterleitung
+newMailbox: Neues Postfach
 newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
+open: Öffnen
 password: Passwort
 passwordChanged: Passwort geändert!
 passwordUnchangedHelp: Leer lassen, um das aktuelle Passwort zu behalten.
@@ -54,7 +73,11 @@ quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unbegrenzt
 replyToList: Antworten gehen an den Verteiler
 replyToListHelp: Fügt einen Reply-To-Header mit der Verteileradresse hinzu.
+save: Speichern
 showPassword: Passwort ein-/ausblenden
+status: Status
+statusDisabled: Deaktiviert
+statusEnabled: Aktiviert
 strictList: Nur Mitglieder
 strictListHelp: Nur Mitglieder des Verteilers dürfen E-Mails an ihn senden.
 username: Benutzername

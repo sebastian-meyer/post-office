@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 /**
  * A small, consistent set of entities for tests (mirrors the sample data of app:dev:reset-database).
  *
- * - admin@example.com: administrator (no other roles)
+ * - admin@example.com: administrator (no other roles); persisted first to get ID 1 (see ADMIN_IDS in .env.test)
  * - alice@example.com: domain manager of example.com, member of team@
  * - bob@example.com: list manager of team@, member of team@
  * - carol@example.org: domain manager of example.org
@@ -75,7 +75,7 @@ final class TestData
             $this->exampleCom,
             $this->exampleOrg,
             ...array_values($this->destinations),
-            $this->admin,
+            $this->admin, // must be the first account (ID 1)
             $this->alice,
             $this->bob,
             $this->carol,

@@ -10,6 +10,13 @@
             </a>
         </li>
         {% else %}
+        {% if manages_anything() %}
+        <li class="nav-item me-2">
+            <a class="btn btn-outline-primary" href="{{ path('manage') }}" title="{{ 'manage'|trans }}">
+                {{ ux_icon('mdi:cog', {class: 'fs-4'}) }}
+            </a>
+        </li>
+        {% endif %}
         <li class="nav-item dropdown">
             <a class="btn btn-outline-success" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 {{ ux_icon('mdi:account-check', {class: 'fs-4'}) }}

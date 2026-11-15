@@ -1,0 +1,74 @@
+{% extends 'layout.html.twig' %}
+
+{% import 'macros/datatable.html.twig' as datatable %}
+
+{% block title %}{{ app_name }} - {{ domain }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('manage') }}">{{ 'manage'|trans }}</a></li>
+            <li class="breadcrumb-item active font-monospace" aria-current="page">{{ domain }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <h1 class="h3 mb-0 font-monospace">{{ domain }}</h1>
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary" href="{{ path('manage_account_new', {domain: domain.domain, type: 'mailbox'}) }}">
+                {{ ux_icon('mdi:email-plus', {class: 'me-1'}) }} {{ 'newMailbox'|trans }}
+            </a>
+            <a class="btn btn-outline-primary" href="{{ path('manage_account_new', {domain: domain.domain, type: 'alias'}) }}">
+                {{ ux_icon('mdi:email-arrow-right', {class: 'me-1'}) }} {{ 'newAlias'|trans }}
+            </a>
+        </div>
+    </div>
+
+    <div class="card bg-body-tertiary shadow-sm">
+        <div class="card-body">
+            <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>{{ 'address'|trans }}</th>
+                            <th>{{ 'accountType'|trans }}</th>
+                            <th>{{ 'label'|trans }}</th>
+                            <th class="text-end">{{ 'quota'|trans }}</th>
+                            <th>{{ 'status'|trans }}</th>
+                            <th class="text-end" data-orderable="false" data-searchable="false">{{ 'actions'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                        <tr>
+                            <td class="font-monospace">
+                                {{ account }}
+                                {% if account.catchAll %}<span class="badge text-bg-secondary ms-1">{{ 'catchAll'|trans }}</span>{% endif %}
+                            </td>
+                            <td>{{ ('accountType.' ~ account.type.value)|trans }}</td>
+                            <td>{{ account.label }}</td>
+                            {% if account.mailbox %}
+                            <td class="text-end" data-order="{{ account.quota == 0 ? 2147483647 : account.quota }}">
+                                {% if account.quota == 0 %}{{ 'quotaUnlimited'|trans }}{% else %}{{ 'quotaMegabytes'|trans({'%quota%': account.quota}) }}{% endif %}
+                            </td>
+                            {% else %}
+                            <td class="text-end" data-order="-1">–</td>
+                            {% endif %}
+                            <td>
+                                {% if account.enabled %}
+                                <span class="badge text-bg-success">{{ 'statusEnabled'|trans }}</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">{{ 'statusDisabled'|trans }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end text-nowrap">{{ include('manage/_account_actions.html.twig') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -37,7 +37,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  *
  * Options:
  * - is_new: Whether a new account is created. Only then username and domain can be set.
- * - domains: The domains to choose from when creating a new account (i.e. those the user can manage).
+ * - domains: The domains to choose from when creating a new account (i.e. those the user can manage). With only one
+ *   domain, no domain field is shown and the domain has to be set in the form data.
+ * - allow_disable: Whether the "enabled" field is shown (e.g. not for the user's own account, to prevent lock-outs).
  *
  * @extends AbstractType<AccountData>
  */
@@ -57,29 +59,33 @@ abstract class AbstractAccountType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['is_new'] === true) {
-            $builder
-                ->add('username', TextType::class, [
-                    'label' => 'username',
-                    'required' => $this->isUsernameRequired(),
-                    'help' => $this->isUsernameRequired() ? null : 'catchAllHelp'
-                ])
-                ->add('domain', EntityType::class, [
+            $builder->add('username', TextType::class, [
+                'label' => 'username',
+                'required' => $this->isUsernameRequired(),
+                'help' => $this->isUsernameRequired() ? null : 'catchAllHelp'
+            ]);
+
+            if (\is_array($options['domains']) && \count($options['domains']) > 1) {
+                $builder->add('domain', EntityType::class, [
                     'label' => 'domain',
                     'class' => Domain::class,
                     'choices' => $options['domains'],
                     'choice_label' => static fn (Domain $domain): string => '@' . $domain->domain
                 ]);
+            }
         }
 
-        $builder
-            ->add('label', TextType::class, [
-                'label' => 'label',
-                'required' => false
-            ])
-            ->add('enabled', CheckboxType::class, [
+        $builder->add('label', TextType::class, [
+            'label' => 'label',
+            'required' => false
+        ]);
+
+        if ($options['allow_disable'] === true) {
+            $builder->add('enabled', CheckboxType::class, [
                 'label' => 'enabled',
                 'required' => false
             ]);
+        }
     }
 
     /**
@@ -96,9 +102,11 @@ abstract class AbstractAccountType extends AbstractType
             ->setDefaults([
                 'is_new' => false,
                 'domains' => [],
+                'allow_disable' => true,
                 'validation_groups' => static fn (Options $options): array => $options['is_new'] === true ? ['Default', 'create'] : ['Default']
             ])
             ->setAllowedTypes('is_new', 'bool')
+            ->setAllowedTypes('allow_disable', 'bool')
             ->setAllowedTypes('domains', Domain::class . '[]');
     }
 
