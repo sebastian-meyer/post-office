@@ -46,8 +46,8 @@ final class AccountControllerTest extends WebTestCase
         self::assertStringContainsString('team@example.com', $rows->text());
         self::assertCount(1, $rows->filter('form[action="/account/lists/' . $this->data->team->id . '/leave"]'));
 
-        // carol@example.org is not a member of any list
-        self::assertCount(0, $this->membershipTable($this->data->carol)->filter('tbody tr'));
+        // carol@example.org is not a member of any list, so the table isn't shown at all
+        self::assertCount(0, $this->membershipTable($this->data->carol));
     }
 
     public function testMemberCanLeaveList(): void
@@ -58,7 +58,7 @@ final class AccountControllerTest extends WebTestCase
         self::assertResponseRedirects('/account', 303);
         $this->client->followRedirect();
         self::assertSelectorTextContains('.alert-success', 'team@example.com');
-        self::assertCount(0, $this->membershipTable($this->data->dave)->filter('tbody tr'));
+        self::assertCount(0, $this->membershipTable($this->data->dave));
         self::assertCount(3, $this->reloadTeam()->destinations);
     }
 

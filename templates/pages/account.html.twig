@@ -42,6 +42,7 @@
         </div>
     </div>
 
+    {% if memberships is not empty %}
     <div class="card bg-body-tertiary shadow-sm mx-auto" style="max-width: 60rem;">
         <div class="card-header">
             <h2 class="h5 mb-0">{{ 'myMailingLists'|trans }}</h2>
@@ -70,5 +71,6 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
