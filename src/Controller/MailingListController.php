@@ -85,9 +85,13 @@ final class MailingListController extends AbstractListController
         $domain = $list->domain;
         $address = (string) $list;
 
-        $accountManager->delete($list);
+        $dependents = $accountManager->delete($list);
 
         $this->addFlash('success', new TranslatableMessage('listDeleted', ['%list%' => $address]));
+
+        foreach ($dependents as $dependent) {
+            $this->addFlash('warning', new TranslatableMessage('dependentAccountDeleted', ['%address%' => $dependent['address'], '%destination%' => $dependent['destination']]));
+        }
 
         // List managers without access to the domain go back to the overview.
         return $this->isGranted(DomainVoter::MANAGE, $domain)

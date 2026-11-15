@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Service;
 
 use App\Entity\Account;
+use App\Entity\AccountType;
 use App\Form\Model\AliasData;
 use App\Form\Model\MailboxData;
 use App\Form\Model\MailingListData;
@@ -137,6 +138,80 @@ final class AccountManagerTest extends KernelTestCase
         self::assertCount(0, $team->managers);
     }
 
+    public function testDeleteRemovesAddressFromMailingLists(): void
+    {
+        // dave@example.org is a member of team@example.com (in another domain)
+        self::assertSame([], $this->manager->delete($this->data->dave));
+        $this->em->clear();
+
+        $team = $this->accountRepository($this->em)->findOneByEmail('team@example.com');
+        self::assertInstanceOf(Account::class, $team);
+        self::assertSame(
+            ['alice@example.com', 'bob@example.com', 'external@example.net'],
+            array_map(strval(...), $team->destinations->toArray())
+        );
+    }
+
+    public function testDeleteAlsoDeletesCatchAllListWithoutMembers(): void
+    {
+        $catchAll = new Account(
+            null,
+            $this->data->exampleOrg,
+            AccountType::MailingList,
+            null,
+            $this->destinationRepository($this->em)->getEntity('bob@example.com')
+        );
+        $this->em->persist($catchAll);
+        $this->em->flush();
+
+        self::assertSame(
+            [['address' => '@example.org', 'destination' => 'bob@example.com']],
+            $this->manager->delete($this->data->bob)
+        );
+        $this->em->clear();
+
+        $accounts = $this->accountRepository($this->em);
+        self::assertNull($accounts->findOneByEmail('@example.org'));
+        $team = $accounts->findOneByEmail('team@example.com');
+        self::assertInstanceOf(Account::class, $team);
+        self::assertCount(3, $team->destinations);
+    }
+
+    public function testDeleteAlsoDeletesForwardingAliases(): void
+    {
+        // contact@ -> info@ -> alice@
+        $contact = $this->alias('contact', 'info@example.com');
+
+        self::assertSame(
+            [
+                ['address' => 'info@example.com', 'destination' => 'alice@example.com'],
+                ['address' => 'contact@example.com', 'destination' => 'info@example.com']
+            ],
+            $this->manager->delete($this->data->alice)
+        );
+        $this->em->clear();
+
+        $accounts = $this->accountRepository($this->em);
+        self::assertNull($accounts->findOneByEmail('info@example.com'));
+        self::assertNull($accounts->findOneByEmail((string) $contact));
+        // Mailing lists without a catch-all address are kept, even without members.
+        self::assertInstanceOf(Account::class, $accounts->findOneByEmail('team@example.com'));
+    }
+
+    public function testDeleteStopsAtCircularAliases(): void
+    {
+        $ping = $this->alias('ping', 'pong@example.com');
+        $this->alias('pong', 'ping@example.com');
+
+        self::assertSame(
+            [['address' => 'pong@example.com', 'destination' => 'ping@example.com']],
+            $this->manager->delete($ping)
+        );
+        $this->em->clear();
+
+        self::assertNull($this->accountRepository($this->em)->findOneByEmail('pong@example.com'));
+    }
+
     public function testCreateAndUpdateSendOnly(): void
     {
         $data = new SendOnlyData();
@@ -172,5 +247,20 @@ final class AccountManagerTest extends KernelTestCase
         $this->em->clear();
 
         self::assertNull($this->accountRepository($this->em)->findOneByEmail('team@example.com'));
+    }
+
+    private function alias(string $username, string $destination): Account
+    {
+        $alias = new Account(
+            $username,
+            $this->data->exampleCom,
+            AccountType::Alias,
+            null,
+            $this->destinationRepository($this->em)->getEntity($destination)
+        );
+        $this->em->persist($alias);
+        $this->em->flush();
+
+        return $alias;
     }
 }

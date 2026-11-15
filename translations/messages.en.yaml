@@ -51,6 +51,7 @@ deleteList: Delete mailing list
 deleteListConfirm: "Do you really want to delete the mailing list %list%? Its members will no longer receive emails sent to it."
 deleteMailboxConfirm: "Do you really want to delete the mailbox %address%? Emails stored on the server are not deleted and have to be removed by the server administrator."
 deleteTlsPolicyConfirm: "Do you really want to delete the TLS policy for %domain%?"
+dependentAccountDeleted: "%address% has been deleted as well, because it only forwarded to %destination%."
 destination: Destination address
 domain: Domain
 domainCreated: "The domain %domain% has been created."

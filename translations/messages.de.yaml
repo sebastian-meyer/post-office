@@ -51,6 +51,7 @@ deleteList: Verteiler löschen
 deleteListConfirm: "Möchten Sie den Verteiler %list% wirklich löschen? Seine Mitglieder erhalten dann keine E-Mails mehr, die an ihn gesendet werden."
 deleteMailboxConfirm: "Möchten Sie das Postfach %address% wirklich löschen? Auf dem Server gespeicherte E-Mails werden nicht gelöscht und müssen vom Server-Administrator entfernt werden."
 deleteTlsPolicyConfirm: "Möchten Sie die TLS-Richtlinie für %domain% wirklich löschen?"
+dependentAccountDeleted: "%address% wurde ebenfalls gelöscht, da es nur an %destination% weitergeleitet hat."
 destination: Zieladresse
 domain: Domain
 domainCreated: "Die Domain %domain% wurde angelegt."

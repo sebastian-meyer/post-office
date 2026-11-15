@@ -112,15 +112,55 @@ final class AccountManager
     /**
      * Deletes an account.
      *
-     * The account is removed from all manager roles first. Note that the mail storage of a mailbox is not deleted.
+     * The account is removed from all manager roles and its address from all mailing lists first. Aliases forwarding
+     * to the address, and catch-all mailing lists having it as their last member, are deleted as well (and so on, for
+     * aliases and lists forwarding to those), so no address keeps forwarding to the deleted one. Otherwise, whoever
+     * gets the address next would receive their emails. Note that the mail storage of a mailbox is not deleted.
      *
      * @param Account $account The account to delete.
+     *
+     * @return list<array{address: string, destination: string}> The aliases and catch-all lists deleted as well, each
+     *                                                             with the deleted destination that caused it.
      */
-    public function delete(Account $account): void
+    public function delete(Account $account): array
     {
+        $dependents = [];
+        $deleted = [];
+
+        $this->deleteWithDependents($account, $dependents, $deleted);
+
+        return $dependents;
+    }
+
+    /**
+     * Deletes an account and, recursively, the aliases and catch-all lists depending on it (see delete()).
+     *
+     * @param Account $account The account to delete.
+     * @param list<array{address: string, destination: string}> $dependents The dependent accounts deleted so far.
+     * @param array<int, true> $deleted The object IDs of all accounts deleted so far (to stop at circular forwards).
+     */
+    private function deleteWithDependents(Account $account, array &$dependents, array &$deleted): void
+    {
+        $address = (string) $account;
+        $deleted[spl_object_id($account)] = true;
+
         $this->membershipManager->revokeManagerRoles($account);
+        $orphans = [
+            ...$this->membershipManager->removeFromAllLists($account),
+            ...$this->accountRepository->findAliasesByDestination($account)
+        ];
 
         $this->accountRepository->remove($account);
+
+        foreach ($orphans as $orphan) {
+            // The orphan may already be gone, e.g. with aliases forwarding to each other.
+            if (isset($deleted[spl_object_id($orphan)])) {
+                continue;
+            }
+
+            $dependents[] = ['address' => (string) $orphan, 'destination' => $address];
+            $this->deleteWithDependents($orphan, $dependents, $deleted);
+        }
     }
 
     /**

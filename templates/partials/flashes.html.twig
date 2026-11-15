@@ -1,4 +1,4 @@
-{% set flashes = app.flashes(['success', 'danger']) %}
+{% set flashes = app.flashes(['success', 'warning', 'danger']) %}
 {% if flashes is not empty %}
 <div class="container pt-3">
     {% for type, messages in flashes %}

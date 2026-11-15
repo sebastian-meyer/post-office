@@ -131,6 +131,44 @@ final class MembershipManager
     }
 
     /**
+     * Removes the account's email address from all mailing lists (e.g. before the account is deleted).
+     *
+     * Otherwise, the lists would keep forwarding to the address, and whoever gets the address next would receive
+     * the list's emails. The address cannot be removed from catch-all lists of which it is the last member; these
+     * lists are returned unchanged, so they can be deleted as well (see AccountManager::delete()).
+     *
+     * This does not flush the changes.
+     *
+     * @param Account $account The (former) member.
+     *
+     * @return list<Account> The catch-all lists the address could not be removed from.
+     */
+    public function removeFromAllLists(Account $account): array
+    {
+        if ($account->isCatchAll()) {
+            return [];
+        }
+
+        $remaining = [];
+
+        foreach ($this->accountRepository->findListsByMember($account) as $list) {
+            $destination = $this->findMember($list, $account->getUserIdentifier());
+
+            if ($destination === null) {
+                continue;
+            }
+
+            try {
+                $list->removeDestination($destination);
+            } catch (LogicException) {
+                $remaining[] = $list;
+            }
+        }
+
+        return $remaining;
+    }
+
+    /**
      * Removes the account from all domain and list manager roles (e.g. before it is disabled or deleted).
      *
      * This does not flush the changes.

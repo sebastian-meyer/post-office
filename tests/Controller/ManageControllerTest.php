@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Entity\Account;
+use App\Entity\AccountType;
 use App\Repository\AccountRepository;
 use App\Tests\DatabaseTrait;
 use App\Tests\TestData;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -157,6 +159,29 @@ final class ManageControllerTest extends WebTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('.alert-success', 'bob@example.com');
         self::assertNull($this->accounts()->findOneByEmail('bob@example.com'));
+    }
+
+    public function testDeleteMailboxReportsDependentAccounts(): void
+    {
+        $catchAll = new Account(null, $this->data->exampleCom, AccountType::MailingList, null, $this->data->team->destinations->first() ?: throw new \LogicException());
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        \assert($entityManager instanceof EntityManagerInterface);
+        $entityManager->persist($catchAll);
+        $entityManager->flush();
+
+        // info@ forwards to alice@, and so does the new catch-all list (alice@ is the first member of team@).
+        $crawler = $this->get($this->data->admin, '/manage/domain/example.com/accounts');
+        $form = $crawler->filter('form[action="/manage/account/' . $this->data->alice->id . '/delete"]')->form();
+        $this->client->submit($form);
+        $this->client->followRedirect();
+
+        self::assertSelectorTextContains('.alert-success', 'alice@example.com');
+        $warnings = $this->client->getCrawler()->filter('.alert-warning')->each(static fn (Crawler $alert): string => $alert->text());
+        self::assertCount(2, $warnings);
+        self::assertStringStartsWith('@example.com ', $warnings[0]);
+        self::assertStringStartsWith('info@example.com ', $warnings[1]);
+        self::assertNull($this->accounts()->findOneByEmail('@example.com'));
+        self::assertNull($this->accounts()->findOneByEmail('info@example.com'));
     }
 
     public function testAdminAccountCannotBeDeleted(): void

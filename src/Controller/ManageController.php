@@ -137,9 +137,13 @@ final class ManageController extends AbstractDomainController
         $wasMailbox = $account->isMailbox();
         $address = (string) $account;
 
-        $accountManager->delete($account);
+        $dependents = $accountManager->delete($account);
 
         $this->addFlash('success', new TranslatableMessage($wasMailbox ? 'mailboxDeleted' : 'accountDeleted', ['%address%' => $address]));
+
+        foreach ($dependents as $dependent) {
+            $this->addFlash('warning', new TranslatableMessage('dependentAccountDeleted', ['%address%' => $dependent['address'], '%destination%' => $dependent['destination']]));
+        }
 
         return $this->redirectToRoute('manage_domain', ['domain' => $domain->domain], Response::HTTP_SEE_OTHER);
     }

@@ -58,6 +58,26 @@ final class AccountRepository extends EntityRepository
     }
 
     /**
+     * Returns all aliases (including catch-all aliases) forwarding to the given account.
+     *
+     * Destinations are identified by their email address, which the database collation compares case-insensitively.
+     *
+     * @param Account $destination The destination.
+     *
+     * @return list<Account> The aliases, ordered by domain and username.
+     */
+    public function findAliasesByDestination(Account $destination): array
+    {
+        return $this->getEntityResult(
+            $this->createQueryBuilder('account')
+                ->andWhere('account.type = :type')->setParameter('type', AccountType::Alias)
+                ->andWhere(':email MEMBER OF account.destinations')->setParameter('email', $destination->getUserIdentifier())
+                ->addOrderBy('account.domain', SortDirection::Ascending)
+                ->addOrderBy('account.username', SortDirection::Ascending)
+        );
+    }
+
+    /**
      * Returns all mailing lists the given account is a member of.
      *
      * Destinations are identified by their email address, which the database collation compares case-insensitively.
