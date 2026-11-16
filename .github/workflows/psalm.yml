@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Build the dev cache (e.g. the service container XML used by the static analyzers).
+  APP_ENV: dev
+
 jobs:
   Psalm:
     name: Psalm Scanner
@@ -22,21 +26,37 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v7
 
-      - name: Setup Environment
-        uses: php-actions/composer@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          command: install
-          php_version: "8.4"
+          php-version: "8.4"
+          extensions: intl
+          coverage: none
+          tools: composer
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --no-progress
 
       - name: Run Psalm
-        uses: docker://ghcr.io/psalm/psalm-github-actions
-        with:
-          composer_ignore_platform_reqs: true
-          security_analysis: true
-          report_file: psalm-results.sarif
+        run: vendor/bin/psalm --no-progress --output-format=github --report=psalm-results.sarif
+
+      - name: Run Psalm Taint Analysis
+        # Run the security analysis even if the regular analysis found issues.
+        if: ${{ !cancelled() }}
+        run: vendor/bin/psalm --no-progress --output-format=github --taint-analysis --report=psalm-taint-results.sarif
 
       - name: Upload Analysis Results
+        if: ${{ !cancelled() && hashFiles('psalm-results.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: psalm-results.sarif
+          category: psalm
+          wait-for-processing: true
+
+      - name: Upload Taint Analysis Results
+        if: ${{ !cancelled() && hashFiles('psalm-taint-results.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: psalm-taint-results.sarif
+          category: psalm-taint
           wait-for-processing: true

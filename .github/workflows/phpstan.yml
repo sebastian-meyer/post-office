@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Build the dev cache (e.g. the service container XML used by the static analyzers).
+  APP_ENV: dev
+
 jobs:
   PHPStan:
     name: PHPStan Scanner
@@ -21,11 +25,16 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v7
 
-      - name: Setup Environment
-        uses: php-actions/composer@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          command: install
-          php_version: "8.4"
+          php-version: "8.4"
+          extensions: intl
+          coverage: none
+          tools: composer
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --no-progress
 
       - name: Run PHPStan
         run: composer phpstan:check

@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: "weekly"
     versioning-strategy: "increase-if-necessary"
+    ignore:
+      # Stay on Symfony 7.4 LTS. Dependabot doesn't respect Flex's "extra.symfony.require", so it would otherwise update
+      # single components to 8.x. Remove this when upgrading to Symfony 8.
+      - dependency-name: "symfony/*"
+        versions: [ ">=8.0" ]
     assignees:
       - "sebastian-meyer"
     labels: [ ]

@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Build the dev cache (e.g. the service container XML used by the static analyzers).
+  APP_ENV: dev
+
 jobs:
   PHPMD:
     name: PHPMD Scanner
@@ -22,23 +26,25 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v7
 
-      - name: Setup Environment
-        uses: php-actions/composer@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          command: install
-          php_version: "8.4"
+          php-version: "8.4"
+          extensions: intl
+          coverage: none
+          tools: composer
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --no-progress
 
       - name: Run PHP Mess Detector
-        uses: php-actions/phpmd@v2
-        with:
-          path: bin/,public/,src/
-          php_version: "8.4"
-          ruleset: .phpmd.dist.xml
-          output: sarif
-          reportfile: phpmd-results.sarif
+        run: vendor/bin/phpmd bin/,public/,src/ sarif .phpmd.dist.xml --reportfile phpmd-results.sarif
 
       - name: Upload Analysis Results
+        # Upload the results even if PHPMD found violations (and therefore failed).
+        if: ${{ !cancelled() && hashFiles('phpmd-results.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: phpmd-results.sarif
+          category: phpmd
           wait-for-processing: true
