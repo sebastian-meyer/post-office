@@ -1,44 +1,16 @@
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Navigation">
-    <span class="navbar-toggler-icon"></span>
-</button>
-<nav class="collapse navbar-collapse justify-content-end" id="navigation">
+<nav class="ms-auto">
     <ul class="navbar-nav">
         {% if not is_granted('IS_AUTHENTICATED') %}
         <li class="nav-item">
             <a class="btn btn-outline-primary" href="{{ path('login') }}" title="{{ 'login'|trans }}">
-                {{ ux_icon('mdi:account', {class: 'fs-4'}) }}
+                {{ ux_icon('mdi:login', {class: 'fs-4'}) }}
             </a>
         </li>
         {% else %}
-        {% if manages_anything() %}
-        <li class="nav-item me-2">
-            <a class="btn btn-outline-primary" href="{{ path('manage') }}" title="{{ 'manage'|trans }}">
-                {{ ux_icon('mdi:cog', {class: 'fs-4'}) }}
-            </a>
-        </li>
-        {% endif %}
-        <li class="nav-item dropdown">
-            <a class="btn btn-outline-success" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ ux_icon('mdi:account-check', {class: 'fs-4'}) }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="{{ path('account') }}" title="{{ 'account'|trans }}">
-                        {{ 'account'|trans }}
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{{ path('change_password') }}" title="{{ 'changePassword'|trans }}">
-                        {{ 'changePassword'|trans }}
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <button type="submit" form="logout" class="dropdown-item" title="{{ 'logout'|trans }}">
-                        {{ ux_icon('mdi:logout', {class: 'fs-4 me-1'}) }} {{ 'logout'|trans }}
-                    </button>
-                </li>
-            </ul>
+        <li class="nav-item">
+            <button class="btn btn-outline-danger" type="submit" form="logout" title="{{ 'logout'|trans }}">
+                {{ ux_icon('mdi:logout', {class: 'fs-4'}) }}
+            </button>
         </li>
         {% endif %}
     </ul>

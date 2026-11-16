@@ -3,7 +3,7 @@
 {% block title %}{{ parent() }} - {{ app.current_route|trans }}{% endblock %}
 
 {% block body %}
-<header class="navbar navbar-expand-md bg-body-tertiary shadow-sm">
+<header class="navbar bg-body-tertiary shadow-sm">
     <div class="container-fluid">
         <a class="navbar-brand font-monospace d-flex align-items-center" href="{{ path('homepage') }}">
             {{ ux_icon('streamline-freehand:stamps-portrait', {class: 'fs-3 me-2', fill: '#fd7e14'}) }} Post Office

@@ -41,12 +41,6 @@
     --bs-btn-disabled-color: var(--bs-primary);
     --bs-btn-disabled-border-color: var(--bs-primary);
 }
-.dropdown-menu {
-    --bs-dropdown-link-active-bg: var(--bs-primary);
-}
-.dropdown-menu-dark {
-    --bs-dropdown-link-active-bg: var(--bs-primary);
-}
 .form-check-input:focus,
 .form-control:focus {
     border-color: #fdb271;
