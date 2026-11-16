@@ -88,7 +88,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      */
     #[ORM\Column(name: 'username', type: 'string', length: 64, nullable: true)]
     #[Assert\NotBlank(allowNull: true)]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/", message: 'invalidUsername')]
+    #[Assert\Regex(pattern: "/^[a-zA-Z0-9.!#$%&'*\/=?^_`{|}~-]+$/", message: 'invalidUsername')]
     private ?string $username;
 
     /**

@@ -45,7 +45,7 @@ abstract class AccountData
      */
     #[Assert\NotBlank(allowNull: true, groups: ['create'])]
     #[Assert\Length(max: 64, groups: ['create'])]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/", message: 'invalidUsername', groups: ['create'])]
+    #[Assert\Regex(pattern: "/^[a-zA-Z0-9.!#$%&'*\/=?^_`{|}~-]+$/", message: 'invalidUsername', groups: ['create'])]
     public ?string $username = null;
 
     /**
