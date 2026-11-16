@@ -1,0 +1,10 @@
+# /etc/postfix/sql/sendonly.cf
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+user = vmail
+password = [PASSWORD]
+hosts = 127.0.0.1
+dbname = vmail
+query = SELECT 'REJECT Recipient does not have a mailbox.' AS action FROM accounts WHERE username='%u' AND domain='%d' AND type='sendonly' AND enabled=true LIMIT 1;
+require_result_set = no

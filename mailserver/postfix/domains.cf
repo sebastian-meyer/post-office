@@ -1,0 +1,9 @@
+# /etc/postfix/sql/domains.cf
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+user = vmail
+password = [PASSWORD]
+hosts = 127.0.0.1
+dbname = vmail
+query = SELECT domain FROM domains WHERE domain='%s';

@@ -1,0 +1,9 @@
+# /etc/postfix/sql/accounts.cf
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+user = vmail
+password = [PASSWORD]
+hosts = 127.0.0.1
+dbname = vmail
+query = SELECT 1 AS found FROM accounts WHERE username='%u' AND domain='%d' AND type='mailbox' AND enabled=true LIMIT 1;

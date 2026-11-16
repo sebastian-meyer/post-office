@@ -1,0 +1,10 @@
+# /etc/postfix/sql/replyto.cf
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+user = vmail
+password = [PASSWORD]
+hosts = 127.0.0.1
+dbname = vmail
+query = SELECT CONCAT('PREPEND Reply-To: ',username,'@',domain) AS action FROM accounts WHERE username='%u' AND domain='%d' AND type='list' AND replytolist=true AND enabled=true LIMIT 1;
+require_result_set = no

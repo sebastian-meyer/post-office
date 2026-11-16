@@ -1,0 +1,9 @@
+# /etc/postfix/sql/aliases.cf
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+user = vmail
+password = [PASSWORD]
+hosts = 127.0.0.1
+dbname = vmail
+query = SELECT t2.destination AS destination FROM accounts t1 JOIN account_destinations t2 ON t2.account=t1.id WHERE t1.domain='%d' AND t1.type IN ('alias','list') AND t1.enabled=true AND (t1.username='%u' OR (t1.username IS NULL AND NOT EXISTS (SELECT 1 FROM accounts t3 WHERE t3.username=SUBSTRING_INDEX('%u','+',1) AND t3.domain='%d' AND t3.enabled=true)));

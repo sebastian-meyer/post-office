@@ -1,0 +1,4 @@
+# /etc/postfix/whitelist_client
+
+# Exclude clients from PTR check
+127.0.0.1 OK

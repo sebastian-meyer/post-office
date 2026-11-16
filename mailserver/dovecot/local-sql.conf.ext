@@ -1,0 +1,13 @@
+# /etc/dovecot/local-sql.conf.ext
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+# Database Connection
+driver = mysql
+connect = "host=127.0.0.1 dbname=vmail user=vmail password=[PASSWORD]"
+default_pass_scheme = BLF-CRYPT
+
+# Database Queries
+password_query = SELECT username,domain,password,CONCAT('*:storage=',quota,'M') AS userdb_quota_rule FROM accounts WHERE username='%Ln' AND domain='%Ld' AND password IS NOT NULL AND enabled=true AND (type='mailbox' OR (type='sendonly' AND '%s'='smtp'));
+user_query = SELECT CONCAT('*:storage=',quota,'M') AS quota_rule FROM accounts WHERE username='%Ln' AND domain='%Ld' AND type='mailbox' AND enabled=true;
+iterate_query = SELECT username,domain FROM accounts WHERE type='mailbox' AND enabled=true;

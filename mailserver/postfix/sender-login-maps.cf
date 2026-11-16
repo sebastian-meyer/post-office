@@ -1,0 +1,9 @@
+# /etc/postfix/sql/sender-login-maps.cf
+
+# Search for everything in square brackets. Replace those with the actual values for your setup.
+
+user = vmail
+password = [PASSWORD]
+hosts = 127.0.0.1
+dbname = vmail
+query = SELECT CONCAT(username,'@',domain) AS owns FROM accounts WHERE username='%u' AND domain='%d' AND enabled=true;
