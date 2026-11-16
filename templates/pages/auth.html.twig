@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<form action="{{ path(app.current_route) }}" method="post" data-controller="auth" class="card bg-body-tertiary shadow-sm position-absolute top-50 start-50 translate-middle" style="min-width: 20vw;">
+<form action="{{ path(app.current_route) }}" method="post" data-controller="auth" class="card shadow-sm position-absolute top-50 start-50 translate-middle" style="width: min(24rem, 100% - 2rem);">
     <div class="card-img-top" data-auth-target="bear">
         <div>
             {{ include('components/bear.svg.twig') }}

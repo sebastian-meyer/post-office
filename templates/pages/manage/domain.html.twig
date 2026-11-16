@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <div class="card bg-body-tertiary shadow-sm">
+    <div class="card shadow-sm">
         <div class="card-body">
             <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
                 <table class="table table-striped table-hover align-middle">
@@ -80,7 +80,7 @@
     </div>
 
     {% if is_granted('DOMAIN_MANAGE_MANAGERS', domain) %}
-    <div class="card bg-body-tertiary shadow-sm mt-4">
+    <div class="card shadow-sm mt-4">
         <div class="card-header">
             <h2 class="h5 mb-0">{{ 'domainManagers'|trans }}</h2>
         </div>
