@@ -39,6 +39,13 @@ Step by Step
 
      Available versions can be found on `Packagist <https://packagist.org/packages/sebastian-meyer/post-office>`_.
 
+#. Set the database connection in ``DATABASE_URL`` of your ``.env.local`` file and create the database schema.
+
+   .. code-block:: shell
+
+     # Create all database tables
+     php bin/console doctrine:migrations:migrate
+
 #. To finish installation configure your web server to use the `./public/` directory as document root and `index.php`
    as default entry point.
 

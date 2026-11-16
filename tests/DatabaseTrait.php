@@ -7,12 +7,15 @@ namespace App\Tests;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use LogicException;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * Provides a clean test database for kernel and web test cases.
  *
- * The schema is recreated from the entity mapping once per test class (there are no migrations yet), and every test
- * runs inside a transaction which is rolled back afterwards.
+ * The schema is recreated by running all migrations once per test class, and every test runs inside a transaction
+ * which is rolled back afterwards. MigrationsTest makes sure the migrations match the entity mapping.
  */
 trait DatabaseTrait
 {
@@ -36,11 +39,10 @@ trait DatabaseTrait
                 throw new LogicException(\sprintf('Refusing to recreate the schema of database "%s".', (string) $database));
             }
 
-            // Drop everything (not only the mapped tables), so even a half-created schema (e.g. after an aborted run)
-            // doesn't break the tests.
-            $schemaTool = new SchemaTool($entityManager);
-            $schemaTool->dropDatabase();
-            $schemaTool->createSchema($entityManager->getMetadataFactory()->getAllMetadata());
+            // Drop everything (not only the mapped tables, but also the migrations' version table), so even a
+            // half-created schema (e.g. after an aborted run) doesn't break the tests.
+            (new SchemaTool($entityManager))->dropDatabase();
+            $this->migrateDatabase();
             self::$schemaCreated = true;
         }
 
@@ -56,6 +58,23 @@ trait DatabaseTrait
         $entityManager->getConnection()->beginTransaction();
 
         return $entityManager;
+    }
+
+    /**
+     * Runs all migrations on the test database.
+     */
+    private function migrateDatabase(): void
+    {
+        $kernel = self::$kernel ?? throw new LogicException('The kernel must be booted before migrating the database.');
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+        $output = new BufferedOutput();
+        $input = new ArrayInput(['command' => 'doctrine:migrations:migrate', '--no-interaction' => true]);
+        $input->setInteractive(false);
+
+        if ($application->run($input, $output) !== 0) {
+            throw new LogicException(\sprintf('Migrating the test database failed: %s', $output->fetch()));
+        }
     }
 
     protected function tearDown(): void
