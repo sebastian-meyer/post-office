@@ -19,6 +19,25 @@
 
         {% block body %}{% endblock %}
 
+        <!-- Confirmation Dialog (used by the "confirm" Stimulus controller) -->
+        <div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="confirm-modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="confirm-modal-title">
+                            {{ ux_icon('mdi:alert-outline', {class: 'text-danger me-2'}) }}{{ 'confirmTitle'|trans }}
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'close'|trans }}"></button>
+                    </div>
+                    <div class="modal-body" data-confirm-modal-message></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-confirm-modal-cancel>{{ 'cancel'|trans }}</button>
+                        <button type="button" class="btn btn-danger" data-confirm-modal-accept data-label="{{ 'delete'|trans }}"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Scroll to Top Button -->
         <a class="btn btn-outline-secondary scroll-to-top" href="#page-top" role="button">
             {{ ux_icon('tabler:chevrons-up') }}

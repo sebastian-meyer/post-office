@@ -31,6 +31,7 @@ changePassword: Passwort ändern
 clickToDisable: Klicken zum Deaktivieren
 clickToEnable: Klicken zum Aktivieren
 close: Schließen
+confirmTitle: Bitte bestätigen
 currentPassword: Aktuelles Passwort
 datatables.emptyTable: "Keine Einträge vorhanden."
 datatables.first: "Erste"

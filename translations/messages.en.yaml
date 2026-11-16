@@ -31,6 +31,7 @@ changePassword: Change password
 clickToDisable: Click to disable
 clickToEnable: Click to enable
 close: Close
+confirmTitle: Please confirm
 currentPassword: Current password
 datatables.emptyTable: "No entries available."
 datatables.first: "First"

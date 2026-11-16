@@ -17,9 +17,11 @@
  */
 
 import { Controller } from '@hotwired/stimulus';
+import { Modal } from 'bootstrap';
 
 /**
- * Asks for confirmation before submitting a form.
+ * Asks for confirmation in a modal dialog (#confirm-modal in base.html.twig) before submitting a form.
+ * The confirm button of the dialog repeats the label of the form's submit button.
  *
  * Usage: <form data-controller="confirm" data-confirm-message-value="Are you sure?" data-action="confirm#ask">
  */
@@ -29,9 +31,55 @@ export default class extends Controller {
     };
 
     ask(event) {
-        if (!window.confirm(this.messageValue)) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
+        // Second pass: the user has confirmed in the dialog, let the submission through.
+        if (this.confirmed) {
+            this.confirmed = false;
+            return;
         }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const dialog = document.getElementById('confirm-modal');
+        if (!dialog) {
+            if (window.confirm(this.messageValue)) {
+                this.submit(event.submitter);
+            }
+            return;
+        }
+
+        const modal = Modal.getOrCreateInstance(dialog);
+        const accept = dialog.querySelector('[data-confirm-modal-accept]');
+        dialog.querySelector('[data-confirm-modal-message]').textContent = this.messageValue;
+        accept.innerHTML = event.submitter ? event.submitter.innerHTML : accept.dataset.label;
+        accept.onclick = () => {
+            accept.onclick = null;
+            modal.hide();
+            this.submit(event.submitter);
+        };
+        // Focus "Cancel" so that pressing Enter does not delete anything by accident.
+        dialog.addEventListener('shown.bs.modal', () => {
+            dialog.querySelector('[data-confirm-modal-cancel]').focus();
+        }, { once: true });
+        modal.show();
+    }
+
+    submit(submitter) {
+        this.confirmed = true;
+        this.element.requestSubmit(submitter ?? null);
     }
 }
+
+// Don't let Turbo cache a page snapshot with an open dialog.
+document.addEventListener('turbo:before-cache', () => {
+    const dialog = document.getElementById('confirm-modal');
+    if (dialog) {
+        Modal.getInstance(dialog)?.dispose();
+        dialog.classList.remove('show');
+        dialog.style.display = '';
+        document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
+});
