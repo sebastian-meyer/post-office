@@ -70,7 +70,7 @@
         "symfony/twig-bundle": "7.4.*",
         "symfony/ux-icons": "^2.36.1",
         "symfony/ux-turbo": "^2.36",
-        "symfony/ux-twig-component": "^2.36",
+        "symfony/ux-twig-component": "^3.7",
         "symfony/validator": "7.4.*",
         "symfony/web-link": "7.4.*",
         "symfony/yaml": "7.4.*",
