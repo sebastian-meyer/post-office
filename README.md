@@ -23,3 +23,5 @@ The full documentation is available on [GitHub Pages](https://sebastian-meyer.gi
 
 [![PHPStan](https://github.com/sebastian-meyer/post-office/actions/workflows/phpstan.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/phpstan.yml)
 [![Psalm](https://github.com/sebastian-meyer/post-office/actions/workflows/psalm.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/psalm.yml)
+
+[![PHPUnit](https://github.com/sebastian-meyer/post-office/actions/workflows/phpunit.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/phpunit.yml)
