@@ -29,31 +29,6 @@
                 <directory name="src/Entity"/>
             </errorLevel>
         </ClassMustBeFinal>
-        <!--
-            Psalm does not analyze method bodies of classes extending Doctrine's ServiceEntityRepository, because it is
-            declared conditionally (for ORM 2 and ORM 3). Therefore, usages inside repositories are not detected.
-            PHPStan still analyzes the repositories completely.
-        -->
-        <UnusedParam>
-            <errorLevel type="suppress">
-                <directory name="src/Repository"/>
-            </errorLevel>
-        </UnusedParam>
-        <PossiblyUnusedParam>
-            <errorLevel type="suppress">
-                <directory name="src/Repository"/>
-            </errorLevel>
-        </PossiblyUnusedParam>
-        <PossiblyUnusedMethod>
-            <errorLevel type="suppress">
-                <!-- Only used inside repositories (see above). -->
-                <referencedMethod name="App\Repository\EntityRepository::getEntityResult"/>
-                <!-- Used in Twig templates (account.catchAll), which Psalm doesn't analyze. -->
-                <referencedMethod name="App\Entity\Account::isCatchAll"/>
-                <!-- Magic getter, called implicitly when accessing @property-read properties. -->
-                <referencedMethod name="App\Entity\Entity::__get"/>
-            </errorLevel>
-        </PossiblyUnusedMethod>
     </issueHandlers>
     <projectFiles>
         <directory name="src"/>

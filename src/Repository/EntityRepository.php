@@ -98,6 +98,9 @@ abstract class EntityRepository extends ServiceEntityRepository
      * Sets the validator service during instantiation.
      *
      * @param ValidatorInterface $validator The validator service instance.
+     *
+     * @psalm-suppress InaccessibleProperty PHP allows initializing readonly properties in any method of the declaring
+     *                                      class, but Psalm only expects it in the constructor.
      */
     #[Required]
     public function setValidator(ValidatorInterface $validator): void

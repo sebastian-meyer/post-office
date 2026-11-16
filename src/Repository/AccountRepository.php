@@ -25,6 +25,7 @@ namespace App\Repository;
 use App\Entity\Account;
 use App\Entity\AccountType;
 use App\Entity\Domain;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
 
@@ -50,7 +51,7 @@ final class AccountRepository extends EntityRepository
     {
         return $this->getEntityResult(
             $this->createQueryBuilder('account')
-                ->andWhere('account.domain = :domain')->setParameter('domain', $domain)
+                ->andWhere('account.domain = :domain')->setParameter('domain', $domain->domain, Types::STRING)
                 ->andWhere('account.type = :type')->setParameter('type', AccountType::Mailbox)
                 ->andWhere('account.enabled = true')
                 ->addOrderBy('account.username', SortDirection::Ascending)
@@ -112,7 +113,7 @@ final class AccountRepository extends EntityRepository
         return $this->getEntityResult(
             $this->createQueryBuilder('account')
                 ->andWhere('account.type = :type')->setParameter('type', AccountType::MailingList)
-                ->andWhere(':manager MEMBER OF account.managers')->setParameter('manager', $manager)
+                ->andWhere(':manager MEMBER OF account.managers')->setParameter('manager', $manager->id, Types::INTEGER)
                 ->addOrderBy('account.domain', SortDirection::Ascending)
                 ->addOrderBy('account.username', SortDirection::Ascending)
         );

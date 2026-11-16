@@ -37,7 +37,7 @@ final class ManageControllerTest extends WebTestCase
     public function testRegularUserHasNoManagementArea(): void
     {
         $this->client->loginUser($this->data->dave);
-        $this->client->request('GET', '/account');
+        $this->client->request('GET', '/');
         self::assertSelectorNotExists('a[href="/manage"]');
 
         $this->client->request('GET', '/manage');
@@ -46,8 +46,10 @@ final class ManageControllerTest extends WebTestCase
 
     public function testDomainManagerSeesOwnDomainOnly(): void
     {
+        $this->get($this->data->alice, '/');
+        self::assertSelectorExists('a.card[href="/manage"]');
+
         $crawler = $this->get($this->data->alice, '/manage');
-        self::assertSelectorExists('a[href="/manage"]');
         self::assertSame(['example.com'], $this->column($crawler, 0));
 
         $this->client->request('GET', '/manage/domain/example.org/accounts');

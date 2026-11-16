@@ -24,6 +24,7 @@ namespace App\Repository;
 
 use App\Entity\Account;
 use App\Entity\Domain;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
 
@@ -48,7 +49,7 @@ final class DomainRepository extends EntityRepository
     {
         return $this->getEntityResult(
             $this->createQueryBuilder('domain')
-                ->andWhere(':manager MEMBER OF domain.managers')->setParameter('manager', $manager)
+                ->andWhere(':manager MEMBER OF domain.managers')->setParameter('manager', $manager->id, Types::INTEGER)
                 ->addOrderBy('domain.domain', SortDirection::Ascending)
         );
     }
