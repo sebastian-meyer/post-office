@@ -7,8 +7,15 @@ doctrine:
         #server_version: '16'
 
         profiling_collect_backtrace: '%kernel.debug%'
+
+        types:
+            # DBAL 4.6 deprecated the mutable "datetime" type, but doctrine/migrations (<= 3.9.8) still uses it for the
+            # "executed_at" column of its metadata table, which triggers a deprecation on every migrations command. Both
+            # types map to the same SQL column, so the schema is unaffected. Remove this when doctrine/migrations is fixed.
+            datetime: Doctrine\DBAL\Types\DateTimeImmutableType
     orm:
         enable_native_lazy_objects: true
+        use_schema_editor_api: true
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         identity_generation_preferences:
