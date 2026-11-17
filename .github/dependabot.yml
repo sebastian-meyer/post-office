@@ -10,6 +10,12 @@ updates:
       # single components to 8.x. Remove this when upgrading to Symfony 8.
       - dependency-name: "symfony/*"
         versions: [ ">=8.0" ]
+    groups:
+      # Symfony UX packages are released together and have to be updated in lockstep.
+      symfony-ux:
+        patterns:
+          - "symfony/ux-*"
+          - "symfony/stimulus-bundle"
     assignees:
       - "sebastian-meyer"
     labels: [ ]
