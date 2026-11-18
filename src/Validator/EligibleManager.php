@@ -25,9 +25,9 @@ namespace App\Validator;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * Ensures that the given email address belongs to an account that can be a manager for the domain.
+ * Ensures that the given email address belongs to an account that can be a manager.
  *
- * Applies to ManagerData objects. Only enabled mailboxes of the same domain can be managers.
+ * Applies to ManagerData objects. Only enabled mailboxes (of any domain) can be managers.
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final class EligibleManager extends Constraint

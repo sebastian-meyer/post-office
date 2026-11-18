@@ -12,6 +12,7 @@ use App\Security\ManagerPolicy;
 use App\Service\ManagementScope;
 use App\Tests\DatabaseTrait;
 use App\Tests\TestData;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class ManagementScopeTest extends KernelTestCase
@@ -22,10 +23,12 @@ final class ManagementScopeTest extends KernelTestCase
 
     private ManagementScope $scope;
 
+    private EntityManagerInterface $entityManager;
+
     protected function setUp(): void
     {
         self::bootKernel();
-        $entityManager = $this->startDatabase();
+        $entityManager = $this->entityManager = $this->startDatabase();
         $this->data = (new TestData())->persist($entityManager);
 
         $accountRepository = $entityManager->getRepository(Account::class);
@@ -52,6 +55,17 @@ final class ManagementScopeTest extends KernelTestCase
         self::assertSame([], $this->scope->getManagedDomains($this->data->bob));
         self::assertSame([$this->data->team], $this->scope->getManagedLists($this->data->bob));
         self::assertTrue($this->scope->managesAnything($this->data->bob));
+    }
+
+    public function testManagersOfOtherDomains(): void
+    {
+        $this->data->exampleCom->addManager($this->data->carol);
+        $this->data->team->addManager($this->data->dave);
+        $this->entityManager->flush();
+
+        self::assertSame([$this->data->exampleCom, $this->data->exampleOrg], $this->scope->getManagedDomains($this->data->carol));
+        self::assertSame([], $this->scope->getManagedDomains($this->data->dave));
+        self::assertSame([$this->data->team], $this->scope->getManagedLists($this->data->dave));
     }
 
     public function testRegularUserManagesNothing(): void

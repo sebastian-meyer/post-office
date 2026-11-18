@@ -62,7 +62,7 @@ abstract class AbstractListController extends AbstractController
             'managerForm' => $manager ?? $this->listForms->manager($list),
             // Suggestions for the manager form (eligible accounts which are not yet managers).
             'managerCandidates' => array_values(array_filter(
-                $this->accountRepository->findEligibleManagers($list->domain),
+                $this->accountRepository->findManagerCandidates($list->domain),
                 static fn (Account $account): bool => !$list->managers->contains($account)
             ))
         ], new Response(status: $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));

@@ -31,8 +31,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * Form for appointing a domain or list manager.
  *
- * The form must be created with a ManagerData object for the domain in question.
- *
  * @extends AbstractType<ManagerData>
  */
 final class ManagerType extends AbstractType

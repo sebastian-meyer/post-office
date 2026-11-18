@@ -94,7 +94,7 @@ final class FormValidationTest extends KernelTestCase
     public function testManagerEligibility(): void
     {
         self::assertSame([], $this->errors($this->submitManager('bob@example.com'), 'email'));
-        self::assertSame(['managerNotEligible'], $this->errors($this->submitManager('dave@example.org'), 'email'));
+        self::assertSame([], $this->errors($this->submitManager('dave@example.org'), 'email'));
         self::assertSame(['managerNotEligible'], $this->errors($this->submitManager('info@example.com'), 'email'));
         self::assertSame(['managerNotFound'], $this->errors($this->submitManager('nobody@example.com'), 'email'));
     }
@@ -122,7 +122,7 @@ final class FormValidationTest extends KernelTestCase
      */
     private function submitManager(string $email): FormInterface
     {
-        $form = $this->forms->create(ManagerType::class, new ManagerData($this->data->exampleCom), ['csrf_protection' => false]);
+        $form = $this->forms->create(ManagerType::class, new ManagerData(), ['csrf_protection' => false]);
         $form->submit(['email' => $email]);
 
         return $form;

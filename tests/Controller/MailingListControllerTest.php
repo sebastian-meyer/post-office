@@ -127,9 +127,21 @@ final class MailingListControllerTest extends WebTestCase
         );
     }
 
-    public function testIneligibleManagerShowsError(): void
+    public function testManagerOfOtherDomainCanBeAppointed(): void
     {
         $form = $this->listPage($this->data->alice)->filter('form[name="manager"]')->form(['manager[email]' => 'dave@example.org']);
+        $this->client->submit($form, [], self::SAME_ORIGIN);
+
+        self::assertResponseRedirects($this->listUrl(), 303);
+        self::assertSame(
+            ['bob@example.com', 'dave@example.org'],
+            array_map('strval', $this->reload('team@example.com')->managers->toArray())
+        );
+    }
+
+    public function testIneligibleManagerShowsError(): void
+    {
+        $form = $this->listPage($this->data->alice)->filter('form[name="manager"]')->form(['manager[email]' => 'info@example.com']);
         $this->client->submit($form, [], self::SAME_ORIGIN);
 
         self::assertResponseStatusCodeSame(422);

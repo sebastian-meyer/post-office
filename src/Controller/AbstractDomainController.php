@@ -45,7 +45,7 @@ abstract class AbstractDomainController extends AbstractController
      */
     protected function createManagerForm(Domain $domain): FormInterface
     {
-        return $this->createForm(ManagerType::class, new ManagerData($domain), [
+        return $this->createForm(ManagerType::class, new ManagerData(), [
             'action' => $this->generateUrl('manage_domain_manager_add', ['domain' => $domain->domain])
         ]);
     }
@@ -64,7 +64,7 @@ abstract class AbstractDomainController extends AbstractController
             'managerForm' => $managerForm ?? $this->createManagerForm($domain),
             // Suggestions for the manager form (eligible accounts which are not yet managers).
             'managerCandidates' => array_values(array_filter(
-                $this->accountRepository->findEligibleManagers($domain),
+                $this->accountRepository->findManagerCandidates($domain),
                 static fn (Account $account): bool => !$domain->managers->contains($account)
             ))
         ], new Response(status: ($managerForm?->isSubmitted() ?? false) ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));

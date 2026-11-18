@@ -43,7 +43,7 @@ final class ManagerPolicy
     public function isListManager(Account $user, Account $list): bool
     {
         return $list->isMailingList()
-            && $list->domain->acceptsManager($user)
+            && $user->canBeManager()
             && $list->managers->contains($user);
     }
 

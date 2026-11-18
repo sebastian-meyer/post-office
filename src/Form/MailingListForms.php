@@ -80,7 +80,7 @@ final class MailingListForms
      */
     public function manager(Account $list): FormInterface
     {
-        return $this->formFactory->createNamed('manager', ManagerType::class, new ManagerData($list->domain), [
+        return $this->formFactory->createNamed('manager', ManagerType::class, new ManagerData(), [
             'action' => $this->urlGenerator->generate('manage_list_manager_add', ['id' => $list->id])
         ]);
     }

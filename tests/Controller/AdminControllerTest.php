@@ -123,10 +123,22 @@ final class AdminControllerTest extends WebTestCase
         self::assertSame(['admin@example.com'], $crawler->filter('datalist#manager-candidates option')->extract(['value']));
     }
 
-    public function testIneligibleDomainManagerShowsError(): void
+    public function testDomainManagerOfOtherDomainCanBeAppointed(): void
     {
         $crawler = $this->get('/manage/domain/example.com/accounts');
         $this->client->submit($crawler->filter('form[name="manager"]')->form(['manager[email]' => 'carol@example.org']), [], self::SAME_ORIGIN);
+
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
+
+        $domain = $this->find(Domain::class, 'example.com');
+        self::assertInstanceOf(Domain::class, $domain);
+        self::assertSame(['alice@example.com', 'carol@example.org'], array_map('strval', $domain->managers->toArray()));
+    }
+
+    public function testIneligibleDomainManagerShowsError(): void
+    {
+        $crawler = $this->get('/manage/domain/example.com/accounts');
+        $this->client->submit($crawler->filter('form[name="manager"]')->form(['manager[email]' => 'info@example.com']), [], self::SAME_ORIGIN);
 
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorExists('form[name="manager"] .invalid-feedback');

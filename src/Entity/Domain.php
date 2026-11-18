@@ -64,28 +64,20 @@ class Domain extends Entity
     private Collection $managers;
 
     /**
-     * Whether the account can be a manager for this domain or its mailing lists.
-     *
-     * Only enabled mailboxes of this domain can be managers.
-     *
-     * @param Account $account The (potential) manager.
-     */
-    public function acceptsManager(Account $account): bool
-    {
-        return $account->isMailbox() && $account->enabled && $account->domain === $this;
-    }
-
-    /**
      * Adds a manager for this domain.
      *
      * @param Account $account The account to add as a manager.
      *
-     * @throws LogicException if the account is not eligible as manager for this domain.
+     * Any enabled mailbox can be a domain manager, regardless of its own domain.
+     *
+     * @throws LogicException if the account is not eligible as manager.
+     *
+     * @see Account::canBeManager()
      */
     public function addManager(Account $account): static
     {
-        if (!$this->acceptsManager($account)) {
-            throw new LogicException('A manager must be an enabled mailbox of the same domain.');
+        if (!$account->canBeManager()) {
+            throw new LogicException('A manager must be an enabled mailbox.');
         }
 
         if (!$this->managers->contains($account)) {
@@ -104,7 +96,7 @@ class Domain extends Entity
      */
     public function isManagedBy(Account $account): bool
     {
-        return $this->acceptsManager($account) && $this->managers->contains($account);
+        return $account->canBeManager() && $this->managers->contains($account);
     }
 
     /**

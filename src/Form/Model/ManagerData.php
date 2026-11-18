@@ -22,7 +22,6 @@ declare(strict_types=1);
 
 namespace App\Form\Model;
 
-use App\Entity\Domain;
 use App\Validator\EligibleManager;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -38,12 +37,4 @@ final class ManagerData
     #[Assert\NotBlank]
     #[Assert\Email]
     public ?string $email = null;
-
-    /**
-     * @param Domain $domain The domain to manage (for list managers: the list's domain).
-     */
-    public function __construct(
-        public readonly Domain $domain
-    ) {
-    }
 }

@@ -102,7 +102,7 @@ manage: Manage
 managedMailingLists: Mailing lists I manage
 manageList: Manage
 managerAdded: "%email% is now a list manager."
-managerHelp: Must be an enabled mailbox of the same domain.
+managerHelp: Must be an enabled mailbox (of any domain).
 managerRemoved: "%email% is no longer a list manager."
 memberAdded: "%email% has been added to the mailing list."
 memberRemoved: "%email% has been removed from the mailing list."

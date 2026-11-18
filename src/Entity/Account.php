@@ -158,7 +158,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
     /**
      * The managers of the mailing list.
      *
-     * Only mailing lists can have managers, and only enabled mailboxes of the same domain can be managers.
+     * Only mailing lists can have managers, and only enabled mailboxes (of any domain) can be managers.
      *
      * @var Collection<int, Account>
      */
@@ -210,8 +210,8 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
             throw new LogicException('Only mailing lists can have managers.');
         }
 
-        if (!$this->domain->acceptsManager($account)) {
-            throw new LogicException('A manager must be an enabled mailbox of the same domain.');
+        if (!$account->canBeManager()) {
+            throw new LogicException('A manager must be an enabled mailbox.');
         }
 
         if (!$this->managers->contains($account)) {
@@ -219,6 +219,18 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
         }
 
         return $this;
+    }
+
+    /**
+     * Whether the account can be a domain or list manager.
+     *
+     * Only enabled mailboxes can be managers, but they don't need to belong to the managed domain or list's domain.
+     * Note that domain managers can manage the mailing lists of their domains only, unless they are explicitly
+     * appointed as list managers of other lists.
+     */
+    public function canBeManager(): bool
+    {
+        return $this->isMailbox() && $this->enabled;
     }
 
     /**

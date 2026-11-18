@@ -71,6 +71,28 @@ final class AccountVoterTest extends TestCase
         self::assertSame(array_combine(self::ATTRIBUTES, $expected), array_combine(self::ATTRIBUTES, $actual));
     }
 
+    public function testListManagerOfOtherDomainManagesOnlyTheirList(): void
+    {
+        $data = new TestData();
+        $data->team->addManager($data->carol);
+        $voter = new AccountVoter(self::decisionManager(), new ManagerPolicy(), self::adminAccounts($data));
+
+        self::assertTrue(self::isGranted($voter, $data->carol, AccountVoter::LIST_MANAGE, $data->team));
+        self::assertFalse(self::isGranted($voter, $data->carol, AccountVoter::LIST_MANAGE_MANAGERS, $data->team));
+        self::assertFalse(self::isGranted($voter, $data->carol, AccountVoter::MANAGE, $data->bob));
+    }
+
+    public function testDomainManagerOfOtherDomainManagesAllItsAccounts(): void
+    {
+        $data = new TestData();
+        $data->exampleCom->addManager($data->carol);
+        $voter = new AccountVoter(self::decisionManager(), new ManagerPolicy(), self::adminAccounts($data));
+
+        self::assertTrue(self::isGranted($voter, $data->carol, AccountVoter::LIST_MANAGE, $data->team));
+        self::assertTrue(self::isGranted($voter, $data->carol, AccountVoter::LIST_MANAGE_MANAGERS, $data->team));
+        self::assertTrue(self::isGranted($voter, $data->carol, AccountVoter::MANAGE, $data->bob));
+    }
+
     public function testDisabledListManagerLosesPermissions(): void
     {
         $data = new TestData();

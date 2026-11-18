@@ -61,11 +61,8 @@ final class EligibleManagerValidator extends ConstraintValidator
 
         if ($account === null) {
             $this->context->buildViolation($constraint->notFoundMessage)->atPath('email')->addViolation();
-        } elseif (!$value->domain->acceptsManager($account)) {
-            $this->context->buildViolation($constraint->notEligibleMessage)
-                ->setParameter('%domain%', (string) $value->domain)
-                ->atPath('email')
-                ->addViolation();
+        } elseif (!$account->canBeManager()) {
+            $this->context->buildViolation($constraint->notEligibleMessage)->atPath('email')->addViolation();
         }
     }
 

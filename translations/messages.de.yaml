@@ -102,7 +102,7 @@ manage: Verwaltung
 managedMailingLists: Von mir verwaltete Verteiler
 manageList: Verwalten
 managerAdded: "%email% ist jetzt Verteilerverwalter."
-managerHelp: Muss ein aktiviertes Postfach derselben Domain sein.
+managerHelp: Muss ein aktiviertes Postfach sein (beliebige Domain).
 managerRemoved: "%email% ist kein Verteilerverwalter mehr."
 memberAdded: "%email% wurde dem Verteiler hinzugefügt."
 memberRemoved: "%email% wurde aus dem Verteiler entfernt."

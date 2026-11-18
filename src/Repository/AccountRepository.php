@@ -39,15 +39,18 @@ use SortDirection;
 final class AccountRepository extends EntityRepository
 {
     /**
-     * Returns all accounts that can be managers of the domain or its mailing lists, i.e. its enabled mailboxes.
+     * Returns the enabled mailboxes of the domain as suggestions for appointing managers.
+     *
+     * Enabled mailboxes of other domains can be managers as well, but they are not suggested to avoid disclosing
+     * the accounts of other domains to domain managers.
      *
      * @param Domain $domain The domain.
      *
      * @return list<Account> The accounts, ordered by username.
      *
-     * @see Domain::acceptsManager()
+     * @see Account::canBeManager()
      */
-    public function findEligibleManagers(Domain $domain): array
+    public function findManagerCandidates(Domain $domain): array
     {
         return $this->getEntityResult(
             $this->createQueryBuilder('account')

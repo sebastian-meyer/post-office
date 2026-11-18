@@ -74,10 +74,17 @@ final class MembershipManagerTest extends KernelTestCase
         self::assertFalse($this->data->team->managers->contains($this->data->alice));
     }
 
-    public function testManagerMustBeMailboxOfSameDomain(): void
+    public function testManagerMayBelongToOtherDomain(): void
+    {
+        $this->manager->addListManager($this->data->team, 'dave@example.org');
+
+        self::assertTrue($this->data->team->managers->contains($this->data->dave));
+    }
+
+    public function testManagerMustBeMailbox(): void
     {
         $this->expectException(LogicException::class);
-        $this->manager->addListManager($this->data->team, 'dave@example.org');
+        $this->manager->addListManager($this->data->team, 'info@example.com');
     }
 
     public function testUnknownManager(): void
