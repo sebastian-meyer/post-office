@@ -130,7 +130,7 @@
                             <tbody>
                                 {% for manager in list.managers %}
                                 <tr>
-                                    <td class="font-monospace">{{ manager }}</td>
+                                    <td><span class="font-monospace">{{ manager }}</span>{% if not manager.enabled %}<span class="badge text-bg-secondary ms-1" title="{{ 'managerSuspendedHint'|trans }}">{{ 'statusDisabled'|trans }}</span>{% endif %}</td>
                                     <td>{{ manager.label }}</td>
                                     <td class="text-end">
                                         <form method="post" action="{{ path('manage_list_manager_remove', {id: list.id, manager: manager.id}) }}" class="d-inline"

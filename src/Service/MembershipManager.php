@@ -169,7 +169,7 @@ final class MembershipManager
     }
 
     /**
-     * Removes the account from all domain and list manager roles (e.g. before it is disabled or deleted).
+     * Removes the account from all domain and list manager roles (before it is deleted).
      *
      * This does not flush the changes.
      *

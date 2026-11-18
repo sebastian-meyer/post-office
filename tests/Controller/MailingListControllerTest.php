@@ -8,6 +8,7 @@ use App\Entity\Account;
 use App\Repository\AccountRepository;
 use App\Tests\DatabaseTrait;
 use App\Tests\TestData;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
@@ -47,6 +48,19 @@ final class MailingListControllerTest extends WebTestCase
 
         self::assertSelectorExists('form[name="manager"]');
         self::assertStringContainsString('bob@example.com', $this->tables($crawler)->eq(1)->text());
+    }
+
+    public function testSuspendedManagerIsShownAsDisabled(): void
+    {
+        $this->data->bob->disable();
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        \assert($entityManager instanceof EntityManagerInterface);
+        $entityManager->flush();
+
+        $row = $this->tables($this->listPage($this->data->alice))->eq(1)->filter('tbody tr')->first();
+
+        self::assertStringContainsString('bob@example.com', $row->text());
+        self::assertStringContainsString('Disabled', $row->text());
     }
 
     public function testOthersCannotOpenList(): void

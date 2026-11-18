@@ -102,15 +102,18 @@ final class AccountManagerTest extends KernelTestCase
         self::assertSame(0, $this->data->dave->quota);
     }
 
-    public function testDisablingMailboxRevokesManagerRoles(): void
+    public function testDisablingMailboxKeepsManagerRoles(): void
     {
-        $data = MailboxData::fromAccount($this->data->alice);
+        $data = MailboxData::fromAccount($this->data->bob);
         $data->enabled = false;
 
-        $this->manager->updateMailbox($this->data->alice, $data);
+        $this->manager->updateMailbox($this->data->bob, $data);
         $this->em->clear();
 
-        self::assertSame([], $this->domainRepository($this->em)->findByManager($this->data->alice));
+        $bob = $this->accountRepository($this->em)->findOneByEmail('bob@example.com');
+        self::assertInstanceOf(Account::class, $bob);
+        self::assertFalse($bob->enabled);
+        self::assertCount(1, $this->accountRepository($this->em)->findListsByManager($bob));
     }
 
     public function testUpdateAliasChangesDestination(): void
@@ -233,12 +236,25 @@ final class AccountManagerTest extends KernelTestCase
         self::assertSame($hash, $account->password);
     }
 
-    public function testDisablingWithToggleRevokesManagerRoles(): void
+    public function testDisablingSuspendsAndEnablingReinstatesManagerRoles(): void
     {
         $this->manager->setEnabled($this->data->alice, false);
-        self::assertFalse($this->data->alice->enabled);
         $this->em->clear();
-        self::assertSame([], $this->domainRepository($this->em)->findByManager($this->data->alice));
+
+        $alice = $this->accountRepository($this->em)->findOneByEmail('alice@example.com');
+        self::assertInstanceOf(Account::class, $alice);
+        $domains = $this->domainRepository($this->em)->findByManager($alice);
+        self::assertCount(1, $domains);
+        self::assertFalse($domains[0]->isManagedBy($alice), 'suspended while disabled');
+
+        $this->manager->setEnabled($alice, true);
+        $this->em->clear();
+
+        $alice = $this->accountRepository($this->em)->findOneByEmail('alice@example.com');
+        self::assertInstanceOf(Account::class, $alice);
+        $domains = $this->domainRepository($this->em)->findByManager($alice);
+        self::assertCount(1, $domains);
+        self::assertTrue($domains[0]->isManagedBy($alice), 'reinstated when enabled again');
     }
 
     public function testDeleteMailingList(): void

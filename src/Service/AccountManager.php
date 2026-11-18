@@ -166,7 +166,8 @@ final class AccountManager
     /**
      * Enables or disables an account.
      *
-     * A disabled mailbox loses all manager roles.
+     * Disabling only suspends the account: its manager roles are kept, but have no effect while it is disabled (see
+     * Account::canBeManager()), and come into effect again once it is re-enabled.
      *
      * @param Account $account The account.
      * @param bool $enabled Whether the account should be enabled.
@@ -179,7 +180,6 @@ final class AccountManager
             $account->enable();
         } else {
             $account->disable();
-            $this->membershipManager->revokeManagerRoles($account);
         }
 
         $this->accountRepository->save($account);
@@ -211,7 +211,7 @@ final class AccountManager
     /**
      * Updates an existing mailbox.
      *
-     * If the mailbox gets disabled, it loses all manager roles.
+     * If the mailbox gets disabled, its manager roles are suspended, but kept (see setEnabled()).
      *
      * @param Account $account The mailbox.
      * @param MailboxData $data The validated form data. An empty password leaves the password unchanged.
@@ -228,10 +228,6 @@ final class AccountManager
         $data->applyTo($account);
         $account->setQuota($data->quota ?? Account::DEFAULT_QUOTA);
         $this->changePassword($account, $data->plainPassword);
-
-        if (!$data->enabled) {
-            $this->membershipManager->revokeManagerRoles($account);
-        }
 
         $this->accountRepository->save($account);
     }

@@ -110,7 +110,7 @@
                     <tbody>
                         {% for manager in domain.managers %}
                         <tr>
-                            <td class="font-monospace">{{ manager }}</td>
+                            <td><span class="font-monospace">{{ manager }}</span>{% if not manager.enabled %}<span class="badge text-bg-secondary ms-1" title="{{ 'managerSuspendedHint'|trans }}">{{ 'statusDisabled'|trans }}</span>{% endif %}</td>
                             <td>{{ manager.label }}</td>
                             <td class="text-end">
                                 <form method="post" action="{{ path('manage_domain_manager_remove', {domain: domain.domain, manager: manager.id}) }}" class="d-inline"

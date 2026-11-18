@@ -139,6 +139,7 @@ save: Save
 showPassword: Show/hide password
 status: Status
 statusDisabled: Disabled
+managerSuspendedHint: This account is disabled. Its manager role is suspended until the account is enabled again.
 statusEnabled: Enabled
 strictList: Members only
 strictListHelp: Only members of the list are allowed to send emails to it.

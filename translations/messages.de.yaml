@@ -139,6 +139,7 @@ save: Speichern
 showPassword: Passwort ein-/ausblenden
 status: Status
 statusDisabled: Deaktiviert
+managerSuspendedHint: Dieses Konto ist deaktiviert. Seine Verwalterrolle ruht, bis das Konto wieder aktiviert wird.
 statusEnabled: Aktiviert
 strictList: Nur Mitglieder
 strictListHelp: Nur Mitglieder des Verteilers dürfen E-Mails an ihn senden.
