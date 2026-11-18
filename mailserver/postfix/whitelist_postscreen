@@ -1,4 +1,0 @@
-# /etc/postfix/whitelist_postscreen
-
-# Exclude clients from postscreen checks
-127.0.0.1 permit

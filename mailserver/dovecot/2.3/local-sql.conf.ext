@@ -1,4 +1,4 @@
-# /etc/dovecot/local-sql.conf.ext
+# /etc/dovecot/local-sql.conf.ext (Dovecot 2.3)
 
 # Search for everything in square brackets. Replace those with the actual values for your setup.
 

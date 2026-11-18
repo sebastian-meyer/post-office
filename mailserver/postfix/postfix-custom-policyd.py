@@ -1,8 +1,11 @@
+#!/usr/bin/env python3
+
 # /usr/local/bin/postfix-custom-policyd.py
 
 # Search for everything in square brackets. Replace those with the actual values for your setup.
 
-#!/usr/bin/env python3
+# Policy service for Postfix: rejects emails to "members only" mailing lists from senders who are not members.
+# Requires the MySQL client library for Python (Debian/Ubuntu: python3-mysqldb).
 import socketserver
 import MySQLdb
 
@@ -67,6 +70,7 @@ class PostfixPolicyHandler(socketserver.StreamRequestHandler):
 
 if __name__ == "__main__":
     # Listen locally on port 12345
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     server = socketserver.ThreadingTCPServer(('127.0.0.1', 12345), PostfixPolicyHandler)
     try:
         server.serve_forever()

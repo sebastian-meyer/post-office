@@ -75,5 +75,6 @@ scache    unix  -       -       y       -       1       scache
 submission-header-cleanup unix n - n    -       0       cleanup
     -o header_checks=regexp:/etc/postfix/submission_header_cleanup
 
+# OPTIONAL: Requires postfix-policyd-spf-python (see smtpd_recipient_restrictions in main.cf)
 policyd-spf unix -      n       n       -       0       spawn
     user=policyd-spf argv=/usr/bin/policyd-spf

@@ -1,0 +1,8 @@
+# /etc/postfix/submission_header_cleanup
+
+# Removes headers which reveal details about the sender's device or network from emails sent by authenticated users.
+
+/^Received:/            IGNORE
+/^X-Originating-IP:/    IGNORE
+/^X-Mailer:/            IGNORE
+/^User-Agent:/          IGNORE

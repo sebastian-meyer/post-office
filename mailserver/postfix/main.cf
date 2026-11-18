@@ -1,6 +1,8 @@
 # /etc/postfix/main.cf
 
 # Search for everything in square brackets. Replace those with the actual values for your setup.
+# Sections marked as OPTIONAL depend on additional software. Remove or comment them out if you don't use it,
+# because Postfix temporarily rejects emails if a configured policy service or lookup table is unavailable.
 
 # Basic configuration
 
@@ -27,6 +29,7 @@ proxy_read_maps = proxy:mysql:/etc/postfix/sql/accounts.cf
 # Network Settings
 
 inet_interfaces = 127.0.0.1, ::1, [IP4], [IP6]
+myhostname = [HOSTNAME]
 mydomain = [DOMAIN]
 mynetworks_style = host
 myorigin = $mydomain
@@ -64,7 +67,6 @@ smtpd_tls_security_level = may
 smtpd_tls_auth_only = yes
 smtpd_tls_cert_file = /etc/letsencrypt/live/[DOMAIN]/fullchain.pem
 smtpd_tls_key_file = /etc/letsencrypt/live/[DOMAIN]/privkey.pem
-smtpd_tls_dh1024_param_file = /etc/postfix/dhparams
 smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
 smtpd_tls_protocols = !SSLv2, !SSLv3, !TLSv1, !TLSv1.1
 smtpd_tls_mandatory_ciphers = medium
@@ -86,6 +88,10 @@ smtpd_sender_restrictions = permit_mynetworks
                             reject_unknown_sender_domain
                             reject_non_fqdn_sender
                             check_sender_access proxy:mysql:/etc/postfix/sql/blacklist.cf
+# The first three checks implement send-only addresses, Reply-To headers and members-only mailing lists.
+# The policy service on port 12345 is postfix-custom-policyd.py, it has to be running!
+# OPTIONAL: "check_policy_service unix:private/policyd-spf" requires postfix-policyd-spf-python.
+# OPTIONAL: The DNS blocklists don't answer queries sent via public DNS resolvers, use a local resolver.
 smtpd_recipient_restrictions = check_recipient_access proxy:mysql:/etc/postfix/sql/sendonly.cf
                                check_recipient_access proxy:mysql:/etc/postfix/sql/replyto.cf
                                check_policy_service inet:127.0.0.1:12345
@@ -94,8 +100,6 @@ smtpd_recipient_restrictions = check_recipient_access proxy:mysql:/etc/postfix/s
                                reject_unauth_destination
                                reject_unauth_pipelining
                                check_policy_service unix:private/policyd-spf
-                               reject_invalid_hostname
-                               reject_non_fqdn_hostname
                                reject_non_fqdn_recipient
                                permit_dnswl_client list.dnswl.org
                                reject_rbl_client zen.spamhaus.org=127.0.0.[2..11]
@@ -125,7 +129,8 @@ mua_relay_restrictions = reject_non_fqdn_recipient
                          permit_sasl_authenticated
                          reject
 
-# Spam Prevention
+# Spam Prevention (OPTIONAL)
+# Port 8891 is OpenDKIM, port 11332 is Rspamd. Remove the ones you don't use.
 
 smtpd_milters = inet:127.0.0.1:8891
                 inet:127.0.0.1:11332
@@ -133,16 +138,6 @@ non_smtpd_milters = $smtpd_milters
 milter_protocol = 6
 milter_default_action = accept
 policyd-spf_time_limit = 3600
-
-# Postscreen Blacklisting
-
-postscreen_access_list = permit_mynetworks,
-                         cidr:/etc/postfix/whitelist_postscreen
-postscreen_blacklist_action = drop
-postscreen_greet_action = drop
-postscreen_dnsbl_threshold = 3
-postscreen_dnsbl_sites = zen.spamhaus.org=127.0.0.[2..11]
-postscreen_dnsbl_action = drop
 
 # Mailboxes and Aliases
 
@@ -157,9 +152,11 @@ local_recipient_maps = $virtual_mailbox_maps
 recipient_delimiter = +
 propagate_unmatched_extensions = canonical
 
-# Sender Rewriting Scheme
+# Sender Rewriting Scheme (OPTIONAL, but recommended for aliases and mailing lists with external destinations)
+# This requires PostSRSd. Version 2.x (e.g. Debian 13) uses a socketmap, while version 1.x (e.g. Debian 12) uses
+# "tcp:127.0.0.1:10001" for the sender and "tcp:127.0.0.1:10002" for the recipient canonical maps instead.
 
-sender_canonical_maps = tcp:127.0.0.1:10001
+sender_canonical_maps = socketmap:unix:srs:forward
 sender_canonical_classes = envelope_sender
-recipient_canonical_maps = tcp:127.0.0.1:10002
-recipient_canonical_classes = envelope_recipient
+recipient_canonical_maps = socketmap:unix:srs:reverse
+recipient_canonical_classes = envelope_recipient, header_recipient
