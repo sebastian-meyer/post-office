@@ -32,3 +32,13 @@ Step by Step
 
      MariaDB can't roll back changes to the database schema, so a failed migration may leave the database in an
      intermediate state. In this case restore the backup, fix the cause and run the migrations again.
+
+#. Compile the frontend assets and clear the cache.
+
+   .. code-block:: shell
+
+     php bin/console asset-map:compile
+     php bin/console cache:clear
+
+#. Check the :doc:`changelog <../changelog>` for changes to the :doc:`mail server configuration <../mailserver/index>`.
+   The example configuration files in ``./mailserver/`` are updated together with the application.
