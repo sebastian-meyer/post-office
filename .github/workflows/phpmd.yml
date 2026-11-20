@@ -38,7 +38,7 @@ jobs:
         run: composer install --no-interaction --no-progress
 
       - name: Run PHP Mess Detector
-        run: vendor/bin/phpmd bin/,public/,src/ sarif .phpmd.dist.xml --reportfile phpmd-results.sarif
+        run: vendor/bin/phpmd analyze bin/ public/ src/ --ruleset .phpmd.dist.xml --format sarif --reportfile-sarif phpmd-results.sarif --no-progress
 
       - name: Upload Analysis Results
         # Upload the results even if PHPMD found violations (and therefore failed).

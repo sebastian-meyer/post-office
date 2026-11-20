@@ -23,6 +23,15 @@
             We need to statically access third-party helpers from Symfony.
         -->
         <exclude name="StaticAccess" />
+        <exclude name="MissingImport" />
+    </rule>
+    <rule ref="rulesets/cleancode.xml/MissingImport">
+        <properties>
+            <!--
+                We reference classes in the global namespace (e.g. #[\Override]) fully qualified instead of importing them.
+            -->
+            <property name="ignore-global" value="true" />
+        </properties>
     </rule>
     <rule ref="rulesets/codesize.xml">
         <exclude name="TooManyPublicMethods" />
@@ -33,7 +42,18 @@
         </properties>
     </rule>
     <rule ref="rulesets/controversial.xml" />
-    <rule ref="rulesets/design.xml" />
+    <rule ref="rulesets/design.xml">
+        <exclude name="CouplingBetweenObjects" />
+    </rule>
+    <rule ref="rulesets/design.xml/CouplingBetweenObjects">
+        <properties>
+            <!--
+                Since PHPMD 3, attributes count as dependencies, which particularly affects Symfony controllers (e.g.
+                #[Route], #[IsGranted], #[MapEntity], #[Template], #[CurrentUser]).
+            -->
+            <property name="maximum" value="20" />
+        </properties>
+    </rule>
     <rule ref="rulesets/naming.xml">
         <exclude name="ShortVariable" />
     </rule>
