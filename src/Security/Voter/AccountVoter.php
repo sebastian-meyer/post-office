@@ -28,6 +28,7 @@ use App\Security\ManagerPolicy;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 
 /**
  * Decides about permissions on accounts (mailboxes, aliases, mailing lists, send-only addresses).
@@ -105,7 +106,7 @@ final class AccountVoter extends Voter
      * @see Voter::voteOnAttribute()
      */
     #[\Override]
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         $user = $token->getUser();
 

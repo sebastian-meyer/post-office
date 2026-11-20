@@ -45,9 +45,22 @@ final class ManagementExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('is_admin_account', $this->adminAccounts->isAdmin(...)),
+            new TwigFunction('is_admin_account', $this->isAdminAccount(...)),
             new TwigFunction('manages_anything', $this->managesAnything(...))
         ];
+    }
+
+    /**
+     * Whether the account is an administrator.
+     *
+     * Wraps AdminAccounts::isAdmin() so that getFunctions() does not access any property. The Symfony plugin for
+     * Psalm instantiates Twig extensions without calling the constructor to analyze the templates.
+     *
+     * @param Account $account The account.
+     */
+    public function isAdminAccount(Account $account): bool
+    {
+        return $this->adminAccounts->isAdmin($account);
     }
 
     /**
