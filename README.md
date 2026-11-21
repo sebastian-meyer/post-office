@@ -11,7 +11,7 @@ Users manage their own email accounts, and administrators can hand over the mana
 - **Self-service for users**: everyone logs in with their email address and password to change their name and password, check their storage quota, and see and leave the mailing lists they belong to.
 - **Delegated management**: administrators appoint *domain managers*, who manage all accounts and mailing lists of their domains, and domain managers appoint *list managers*, who look after the members and settings of individual mailing lists.
 - **All common account types**: mailboxes with storage quota, send-only addresses, aliases, mailing lists (open or members-only) and catch-all addresses are supported.
-- **Mail server administration**: TLS policies for outgoing emails and a blacklist of senders, managed right in the browser.
+- **Mail server administration**: TLS policies for outgoing emails and a blacklist of senders, managed right in the browser. Additionally, administrators can perform DNS health checks for mail domains.
 - **Bulk emails and notifications**: managers write emails to selected or all addresses of their domains and mailing lists.
 - **Secure by default**: strong passwords that are checked against known data breaches, rate-limited logins, and permissions that are checked on every action.
 - **Available in English and German**, chosen automatically according to the user's browser language.
@@ -29,7 +29,7 @@ Users manage their own email accounts, and administrators can hand over the mana
 The intended and recommended way of installing this application is via [Composer](https://getcomposer.org/). The following command will get you the latest version:
 
 ```shell
-composer create-project sebastian-meyer/post-office --ask --no-dev
+composer create-project sebastian-meyer/post-office --ask --keep-vcs --no-dev
 ```
 
 All available versions as well as further information about requirements and dependencies can be found on [Packagist](https://packagist.org/packages/sebastian-meyer/post-office).
