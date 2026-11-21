@@ -6,7 +6,8 @@ if environment :matches "imap.mailbox" "*" {
     set "mailbox" "${1}";
 }
 
-if string "${mailbox}" "Trash" {
+# Mailbox names include the namespace prefix "INBOX." (see the Dovecot configuration).
+if string "${mailbox}" ["INBOX.Trash", "Trash"] {
     stop;
 }
 

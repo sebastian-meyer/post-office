@@ -101,7 +101,15 @@ final class SpfCheck implements DomainCheck
             return;
         }
 
-        foreach ($this->lookup->addresses($hostname) as $address) {
+        $addresses = $this->lookup->addresses($hostname);
+
+        if ($addresses === null) {
+            $result->add(CheckStatus::Error, 'lookupFailed');
+
+            return;
+        }
+
+        foreach ($addresses as $address) {
             $authorized = $this->evaluator->authorizes($domain->domain, $address);
 
             if ($authorized === false) {

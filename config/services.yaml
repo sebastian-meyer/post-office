@@ -27,3 +27,7 @@ when@test:
         App\Tests\Dns\FakeResolver:
             public: true
         App\Dns\DnsResolver: '@App\Tests\Dns\FakeResolver'
+        # Don't connect to a mail server in tests.
+        App\Tests\Service\NullSubmissionTransportFactory:
+            autowire: true
+        App\Service\SubmissionTransportFactory: '@App\Tests\Service\NullSubmissionTransportFactory'

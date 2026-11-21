@@ -66,7 +66,7 @@ Step by Step
      The password of the database user ``vmail`` (in ``local-sql.conf.ext`` for Dovecot 2.3).
 
 #. If you don't use Rspamd, remove the "Spam Training" sections (Dovecot 2.4: ``sieve_script learn-spam`` and
-   ``imapsieve_from Junk``, Dovecot 2.3: all ``imapsieve_mailbox*`` settings).
+   ``imapsieve_from INBOX.Junk``, Dovecot 2.3: all ``imapsieve_mailbox*`` settings).
 
 #. Check the configuration and restart Dovecot.
 

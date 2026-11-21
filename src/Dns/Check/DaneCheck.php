@@ -46,7 +46,13 @@ final class DaneCheck implements DomainCheck
     public function check(Domain $domain): CheckResult
     {
         $result = new CheckResult('dane');
-        $hosts = array_values(array_filter($this->lookup->mxHosts($domain->domain) ?? [], static fn (string $host): bool => $host !== ''));
+        $hosts = $this->lookup->mxHosts($domain->domain);
+
+        if ($hosts === null) {
+            return $result->add(CheckStatus::Error, 'lookupFailed');
+        }
+
+        $hosts = array_values(array_filter($hosts, static fn (string $host): bool => $host !== ''));
 
         if ($hosts === []) {
             return $result->add(CheckStatus::Info, 'dane.noMx');

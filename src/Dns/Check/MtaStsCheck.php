@@ -74,7 +74,13 @@ final class MtaStsCheck implements DomainCheck
 
         $result->addRecords(array_map(static fn (string $pattern): string => "{$url}: mx: {$pattern}", $policy['mx']));
 
-        return $this->checkPolicy($result, $policy, $this->lookup->mxHosts($domain->domain) ?? []);
+        $hosts = $this->lookup->mxHosts($domain->domain);
+
+        if ($hosts === null) {
+            return $result->add(CheckStatus::Error, 'lookupFailed');
+        }
+
+        return $this->checkPolicy($result, $policy, $hosts);
     }
 
     /**

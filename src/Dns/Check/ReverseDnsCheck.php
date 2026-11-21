@@ -56,18 +56,22 @@ final class ReverseDnsCheck implements DomainCheck
         $result = new CheckResult('ptr');
         $addresses = $this->lookup->addresses($hostname);
 
+        if ($addresses === null) {
+            return $result->add(CheckStatus::Error, 'lookupFailed');
+        }
+
         if ($addresses === []) {
             return $result->add(CheckStatus::Error, 'ptr.noAddress', ['%hostname%' => $hostname]);
         }
 
         foreach ($addresses as $address) {
-            $names = array_map(
-                static fn (string $name): string => strtolower($name),
-                $this->lookup->resolver->query($this->reverseName($address), 'PTR')->records
-            );
+            $answer = $this->lookup->resolver->query($this->reverseName($address), 'PTR');
+            $names = array_map(static fn (string $name): string => strtolower($name), $answer->records);
             $result->addRecords(array_map(static fn (string $name): string => "{$address} → {$name}", $names));
 
-            if (!\in_array($hostname, $names, true)) {
+            if ($answer->failed()) {
+                $result->add(CheckStatus::Error, 'lookupFailed');
+            } elseif (!\in_array($hostname, $names, true)) {
                 $result->add(CheckStatus::Error, 'ptr.mismatch', ['%address%' => $address, '%hostname%' => $hostname]);
             }
         }

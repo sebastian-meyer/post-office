@@ -11,5 +11,8 @@ database:
     version: "11.8"
 use_dns_when_possible: true
 composer_version: "2"
-web_environment: []
+# Let Mailpit accept any SMTP login, since the Post Office only sends emails after logging in (see MAILER_DSN).
+web_environment:
+    - MP_SMTP_AUTH_ACCEPT_ANY=1
+    - MP_SMTP_AUTH_ALLOW_INSECURE=1
 corepack_enable: false

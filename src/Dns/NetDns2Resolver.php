@@ -104,6 +104,8 @@ final class NetDns2Resolver implements DnsResolver, ResetInterface
 
         $nameservers = array_values(array_filter(array_map(trim(...), $this->nameservers), static fn (string $nameserver): bool => $nameserver !== ''));
 
+        $resolver = null;
+
         try {
             $resolver = new Resolver($nameservers !== [] ? ['nameservers' => $nameservers] : null);
             $resolver->timeout = self::TIMEOUT;
@@ -112,9 +114,15 @@ final class NetDns2Resolver implements DnsResolver, ResetInterface
 
             $response = $resolver->query($name, $type);
         } catch (Exception $exception) {
-            return $exception->getCode() === Error::DNS_NXDOMAIN->value
-                ? new DnsAnswer()
-                : new DnsAnswer(error: $exception->getMessage());
+            // Net_DNS2 tries the next name server after NXDOMAIN, and throws the error of the last one it tried. So a
+            // definite "doesn't exist" of one server can be hidden behind e.g. a timeout of another one.
+            foreach ([$exception, ...($resolver->last_exception_list ?? [])] as $error) {
+                if ($error->getCode() === Error::DNS_NXDOMAIN->value) {
+                    return new DnsAnswer();
+                }
+            }
+
+            return new DnsAnswer(error: $exception->getMessage());
         }
 
         $records = [];

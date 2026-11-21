@@ -22,6 +22,13 @@ final class AccountTest extends TestCase
         $this->domain = new Domain('example.com');
     }
 
+    public function testAddressesAreStoredInLowerCase(): void
+    {
+        $account = new Account('John.Doe', new Domain(' Example.COM '));
+
+        self::assertSame('john.doe@example.com', $account->getUserIdentifier());
+    }
+
     public function testNewAccountIsMailboxByDefault(): void
     {
         $account = new Account('alice', $this->domain);

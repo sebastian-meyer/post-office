@@ -32,11 +32,14 @@ final class DnsLookup
      *
      * @param string $host The host name.
      *
-     * @return list<string> The IP addresses (empty if the lookups failed).
+     * @return ?list<string> The IP addresses, or NULL if one of the lookups failed.
      */
-    public function addresses(string $host): array
+    public function addresses(string $host): ?array
     {
-        return [...$this->resolver->query($host, 'A')->records, ...$this->resolver->query($host, 'AAAA')->records];
+        $ipv4 = $this->resolver->query($host, 'A');
+        $ipv6 = $this->resolver->query($host, 'AAAA');
+
+        return $ipv4->failed() || $ipv6->failed() ? null : [...$ipv4->records, ...$ipv6->records];
     }
 
     /**

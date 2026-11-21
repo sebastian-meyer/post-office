@@ -49,7 +49,7 @@ final class Version20261121120000 extends AbstractMigration
         'outlook.com' => ['secure', 'match=.outlook.com'],
         'posteo.de' => ['dane-only', ''],
         't-online.de' => ['secure', 'match=.t-online.de'],
-        'unitymedia.de' => ['dane-only', ''],
+        'unitymedia.de' => ['secure', 'match=.unitymedia.de'],
         'web.de' => ['dane-only', ''],
         'yahoo.com' => ['secure', 'match=.yahoodns.net'],
         'yahoo.de' => ['secure', 'match=.yahoodns.net']

@@ -36,6 +36,7 @@ final class MigrationsTest extends KernelTestCase
             ->fetchAllKeyValue('SELECT domain, CONCAT(policy, \' \', params) FROM tlspolicies WHERE enabled = 1');
 
         self::assertCount(18, $policies);
+        self::assertSame('secure match=.unitymedia.de', $policies['unitymedia.de'] ?? null);
         self::assertSame('dane-only ', $policies['gmx.de'] ?? null);
         self::assertSame('secure match=.google.com', $policies['gmail.com'] ?? null);
     }

@@ -60,6 +60,33 @@ final class FormValidationTest extends KernelTestCase
         self::assertNotSame([], $this->errors($form, 'plainPassword'));
     }
 
+    public function testUsernamesMustWorkWithTheMailServer(): void
+    {
+        foreach (['a..b', '.a', 'a.', "o'brien", 'a+b'] as $username) {
+            $form = $this->submitNew(MailboxType::class, ['username' => $username, 'quota' => '100', 'plainPassword' => 'correct horse battery staple']);
+            self::assertSame(['invalidUsername'], $this->errors($form, 'username'), $username);
+        }
+
+        $form = $this->submitNew(MailboxType::class, ['username' => 'John.Doe-2_x', 'quota' => '100', 'plainPassword' => 'correct horse battery staple']);
+        self::assertTrue($form->isValid(), (string) $form->getErrors(true));
+    }
+
+    public function testPasswordsLongerThan72BytesAreRejected(): void
+    {
+        // 70 characters, but 74 bytes in UTF-8.
+        $form = $this->submitNew(MailboxType::class, ['username' => 'erin', 'quota' => '100', 'plainPassword' => str_repeat('a', 66) . 'äöüß']);
+
+        self::assertContains('passwordTooLong', $this->errors($form, 'plainPassword'));
+    }
+
+    public function testAddressesAreValidatedLikeTheEntitiesDo(): void
+    {
+        $form = $this->submitNew(AliasType::class, ['username' => 'shop', 'destination' => 'a..b@example.com']);
+
+        self::assertContains('invalidEmail', $this->errors($form, 'destination'));
+        self::assertContains('invalidEmail', $this->errors($this->submitManager('.bob@example.com'), 'email'));
+    }
+
     public function testMailingListRequiresUsername(): void
     {
         $form = $this->submitNew(MailingListType::class, ['username' => '']);

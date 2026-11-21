@@ -77,7 +77,9 @@ Settings
   name and password in ``MAILER_DSN`` are ignored. If the certificate of the mail server doesn't match the host name
   (e.g. when connecting to ``localhost``), add ``?verify_peer=0``.
 
-  The default ``null://null`` discards all emails.
+  Emails are only sent if the mail server asks for the login, so that its rules for authenticated users apply (e.g.
+  that users can only send from their own address). Port 25 usually doesn't ask, and the default ``null://null``
+  disables sending emails.
 
 Languages
 =========

@@ -34,8 +34,12 @@ class SendOnlyData extends AccountData
 {
     /**
      * The new password. Required when creating an account, optional when editing (empty means unchanged).
+     *
+     * Bcrypt only uses the first 72 bytes. Symfony hashes longer passwords before (see NativePasswordHasher), but
+     * Dovecot doesn't, so they would work for the Post Office, but not for the mail server.
      */
     #[Assert\NotBlank(groups: ['create'])]
+    #[Assert\Length(max: 72, maxMessage: 'passwordTooLong', countUnit: Assert\Length::COUNT_BYTES)]
     #[Assert\NotCompromisedPassword]
     #[Assert\PasswordStrength(minScore: Assert\PasswordStrength::STRENGTH_STRONG)]
     public ?string $plainPassword = null;

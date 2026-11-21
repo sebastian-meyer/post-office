@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace App\Form\Model;
 
 use App\Validator\EligibleManager;
+use App\Validator\MailAddress;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -36,5 +37,6 @@ final class ManagerData
      */
     #[Assert\NotBlank]
     #[Assert\Email]
+    #[MailAddress]
     public ?string $email = null;
 }

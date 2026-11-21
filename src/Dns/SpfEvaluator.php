@@ -165,22 +165,34 @@ final class SpfEvaluator
         return match ($name) {
             'include' => $this->evaluateRecord($target, $address, $lookups),
             'a' => $this->matchesHosts([$target], $address, $parts[3] ?? '', $parts[4] ?? ''),
-            default => $this->matchesHosts($this->lookup->mxHosts($target) ?? [], $address, $parts[3] ?? '', $parts[4] ?? '')
+            default => $this->matchesHosts($this->lookup->mxHosts($target), $address, $parts[3] ?? '', $parts[4] ?? '')
         };
     }
 
     /**
      * Whether one of the hosts' addresses matches the IP address.
      *
-     * @param list<string> $hosts The host names.
+     * @param ?list<string> $hosts The host names, or NULL if their lookup failed.
      * @param string $address The IP address.
      * @param string $ipv4Prefix The prefix length for IPv4 addresses (or empty).
      * @param string $ipv6Prefix The prefix length for IPv6 addresses (or empty).
+     *
+     * @return ?bool Whether one of the addresses matches, or NULL if a lookup failed.
      */
-    private function matchesHosts(array $hosts, string $address, string $ipv4Prefix, string $ipv6Prefix): bool
+    private function matchesHosts(?array $hosts, string $address, string $ipv4Prefix, string $ipv6Prefix): ?bool
     {
+        if ($hosts === null) {
+            return null;
+        }
+
         foreach ($hosts as $host) {
-            foreach ($this->lookup->addresses($host) as $hostAddress) {
+            $hostAddresses = $this->lookup->addresses($host);
+
+            if ($hostAddresses === null) {
+                return null;
+            }
+
+            foreach ($hostAddresses as $hostAddress) {
                 if ($this->inRange($address, $hostAddress, str_contains($hostAddress, ':') ? $ipv6Prefix : $ipv4Prefix)) {
                     return true;
                 }

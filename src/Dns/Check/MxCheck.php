@@ -60,21 +60,46 @@ final class MxCheck implements DomainCheck
             return $this->suggest($result, $domain);
         }
 
-        foreach ($hosts as $host) {
-            if ($this->lookup->addresses($host) === []) {
-                $result->add(CheckStatus::Error, 'mx.unresolvable', ['%host%' => $host]);
-            }
-        }
+        $this->verifyAddresses($result, $hosts);
 
-        $hostname = strtolower(rtrim(trim($this->mailHostname), '.'));
-
-        if ($hostname !== '' && !\in_array($hostname, $hosts, true)) {
-            $result->add(CheckStatus::Error, 'mx.foreign', ['%hostname%' => $hostname]);
+        if (!$this->pointsHere($hosts)) {
+            $result->add(CheckStatus::Error, 'mx.foreign', ['%hostname%' => strtolower(rtrim(trim($this->mailHostname), '.'))]);
 
             return $this->suggest($result, $domain);
         }
 
         return $result->status === CheckStatus::Ok ? $result->add(CheckStatus::Ok, 'mx.ok') : $result;
+    }
+
+    /**
+     * Whether one of the mail exchangers is this mail server (always TRUE if MAIL_HOSTNAME is not set).
+     *
+     * @param list<string> $hosts The mail exchangers.
+     */
+    private function pointsHere(array $hosts): bool
+    {
+        $hostname = strtolower(rtrim(trim($this->mailHostname), '.'));
+
+        return $hostname === '' || \in_array($hostname, $hosts, true);
+    }
+
+    /**
+     * Checks that the mail exchangers have IP addresses.
+     *
+     * @param CheckResult $result The result.
+     * @param list<string> $hosts The mail exchangers.
+     */
+    private function verifyAddresses(CheckResult $result, array $hosts): void
+    {
+        foreach ($hosts as $host) {
+            $addresses = $this->lookup->addresses($host);
+
+            if ($addresses === null) {
+                $result->add(CheckStatus::Error, 'lookupFailed');
+            } elseif ($addresses === []) {
+                $result->add(CheckStatus::Error, 'mx.unresolvable', ['%host%' => $host]);
+            }
+        }
     }
 
     /**

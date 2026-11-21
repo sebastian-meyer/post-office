@@ -292,8 +292,10 @@ name and password in <code>MAILER_DSN</code>
 ), add <code>?verify_peer=0</code>
 .</p>
 
-    <p>The default <code>null://null</code>
- discards all emails.</p>
+    <p>Emails are only sent if the mail server asks for the login, so that its rules for authenticated users apply (e.g.
+that users can only send from their own address). Port 25 usually doesn&#039;t ask, and the default <code>null://null</code>
+
+disables sending emails.</p>
 </dd>
             </dl>
 

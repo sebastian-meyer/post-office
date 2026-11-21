@@ -41,7 +41,10 @@ Creating the First Administrator
 
      The password has to be strong, and it must not appear in any known data breach. To check the latter, the command
      sends the first characters of the password's SHA-1 hash to `Have I Been Pwned <https://haveibeenpwned.com/>`_,
-     so the server needs access to the internet.
+     so the server needs access to the internet. It must not be longer than 72 bytes, since the mail server can't
+     check longer passwords.
+
+     Usernames may contain letters, digits, dots, hyphens and underscores. They are stored in lower case.
 
 #. Add the ID of the new account to ``ADMIN_IDS`` in your ``.env.local`` file:
 

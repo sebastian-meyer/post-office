@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace App\Form\Model;
 
 use App\Entity\Account;
+use App\Validator\MailAddress;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -35,6 +36,7 @@ final class AliasData extends AccountData
      */
     #[Assert\NotBlank]
     #[Assert\Email]
+    #[MailAddress]
     #[Assert\Length(max: 254)]
     public ?string $destination = null;
 

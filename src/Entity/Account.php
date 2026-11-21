@@ -88,7 +88,7 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
      */
     #[ORM\Column(name: 'username', type: 'string', length: 64, nullable: true)]
     #[Assert\NotBlank(allowNull: true)]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9.!#$%&'*\/=?^_`{|}~-]+$/", message: 'invalidUsername')]
+    #[Assert\Regex(pattern: "/^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$/", message: 'invalidUsername')]
     private ?string $username;
 
     /**
@@ -566,7 +566,8 @@ class Account extends Entity implements PasswordAuthenticatedUserInterface, User
             throw new InvalidArgumentException(\sprintf('Invalid email address "%s".', "{$username}@{$domain}"));
         }
 
-        $this->username = $username;
+        // Dovecot and Postfix look up addresses in lower case (see mailserver/), so store them that way.
+        $this->username = $username !== null ? strtolower($username) : null;
         $this->domain = $domain;
         $this->password = $hashedPassword;
         $this->destinations = new ArrayCollection();

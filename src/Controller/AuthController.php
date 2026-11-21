@@ -81,6 +81,8 @@ final class AuthController extends AbstractController
                             expression: 'this.getParent().get("currentPassword").getData() !== this.getData()',
                             message: 'newPasswordSameAsCurrent'
                         ),
+                        // Dovecot can't check longer passwords (see SendOnlyData::$plainPassword).
+                        new Assert\Length(max: 72, maxMessage: 'passwordTooLong', countUnit: Assert\Length::COUNT_BYTES),
                         new Assert\NotCompromisedPassword(),
                         new Assert\PasswordStrength(minScore: Assert\PasswordStrength::STRENGTH_STRONG)
                     ]

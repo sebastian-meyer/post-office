@@ -67,6 +67,27 @@ final class ChecksTest extends TestCase
         $this->assertResult(CheckStatus::Error, ['lookupFailed'], (new MxCheck($this->lookup))->check($this->domain));
     }
 
+    public function testFailedLookupsAreNoMisconfiguration(): void
+    {
+        // A timeout of the AAAA lookup must not be reported as "no IP address" or "SPF doesn't allow the server".
+        $this->resolver->fail('mail.example.net', 'AAAA')->set('example.com', 'TXT', ['v=spf1 a:other.example.net -all']);
+        $this->assertResult(CheckStatus::Error, ['lookupFailed'], (new MxCheck($this->lookup, self::HOSTNAME))->check($this->domain));
+        $this->assertResult(CheckStatus::Error, ['lookupFailed'], (new SpfCheck($this->lookup, new SpfEvaluator($this->lookup), self::HOSTNAME))->check($this->domain));
+        $result = (new ReverseDnsCheck($this->lookup, self::HOSTNAME))->check($this->domain);
+        self::assertInstanceOf(CheckResult::class, $result);
+        $this->assertResult(CheckStatus::Error, ['lookupFailed'], $result);
+
+        // The SPF record can't be evaluated if the addresses of its "a" mechanism can't be looked up.
+        $this->resolver->set('mail.example.net', 'AAAA', [])->fail('other.example.net', 'A');
+        $this->assertResult(CheckStatus::Warning, ['spf.unverifiable'], (new SpfCheck($this->lookup, new SpfEvaluator($this->lookup), self::HOSTNAME))->check($this->domain));
+
+        // A failed MX lookup must not let MTA-STS or DANE look fine.
+        $this->resolver->fail('example.com', 'MX')->set('_mta-sts.example.com', 'TXT', ['v=STSv1; id=1']);
+        $policy = new MockHttpClient(new MockResponse("version: STSv1\nmode: enforce\nmx: mx.example.org\nmax_age: 86400\n"));
+        $this->assertResult(CheckStatus::Error, ['lookupFailed'], (new MtaStsCheck($this->lookup, $policy))->check($this->domain));
+        $this->assertResult(CheckStatus::Error, ['lookupFailed'], (new DaneCheck($this->lookup))->check($this->domain));
+    }
+
     public function testReverseDns(): void
     {
         self::assertNull((new ReverseDnsCheck($this->lookup))->check($this->domain));

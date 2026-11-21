@@ -122,7 +122,7 @@ class Domain extends Entity
             throw new InvalidArgumentException(\sprintf('Invalid domain name "%s".', $domain));
         }
 
-        $this->domain = trim($domain);
+        $this->domain = strtolower(trim($domain));
         $this->managers = new ArrayCollection();
     }
 
