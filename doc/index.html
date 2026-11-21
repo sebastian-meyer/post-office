@@ -159,6 +159,34 @@
 
     <p class="phpdocumentor-summary"></p>
 
+    <p><strong>A self-service web frontend for mail servers running <a href="https://www.postfix.org/">Postfix</a> and
+    <a href="https://www.dovecot.org/">Dovecot</a></strong></p>
+
+    <p>The Post Office manages the domains, mailboxes, aliases and mailing lists of your mail server, which Postfix and
+    Dovecot read from a shared <a href="https://mariadb.org/">MariaDB</a> or <a href="https://www.mysql.com/">MySQL</a>
+    database. Every change takes effect immediately, without reloading or restarting anything.</p>
+
+    <p>Users manage their own email accounts, and administrators can hand over the management of individual domains and
+    mailing lists to other users. So you don't have to do everything yourself, and nobody needs shell access to the
+    server.</p>
+
+    <h3>Features</h3>
+
+    <p><strong>Self-service for users:</strong> everyone logs in with their email address and password to change their
+    name and password, check their storage quota, and see and leave the mailing lists they belong to.<br>
+    <strong>Delegated management:</strong> administrators appoint <em>domain managers</em>, who manage all accounts and
+    mailing lists of their domains, and domain managers appoint <em>list managers</em>, who look after the members and
+    settings of individual mailing lists.<br>
+    <strong>All common account types:</strong> mailboxes with storage quota, send-only addresses, aliases, mailing
+    lists (open or members-only) and catch-all addresses are supported.<br>
+    <strong>Mail server administration:</strong> TLS policies for outgoing emails and a blacklist of senders, managed
+    right in the browser. Additionally, administrators can perform DNS health checks for mail domains.<br>
+    <strong>Bulk emails and notifications:</strong> managers write emails to selected or all addresses of their domains
+    and mailing lists.<br>
+    <strong>Secure by default:</strong> strong passwords that are checked against known data breaches, rate-limited
+    logins, and permissions that are checked on every action.<br>
+    <strong>Available in English and German:</strong> chosen automatically according to the user's browser setting.</p>
+
     <p>This application follows the highest coding standards of <a href="https://psalm.dev/">Psalm</a>,
     <a href="https://phpstan.org/">PHPStan</a>, <a href="https://phpmd.org/">PHP Mess Detector</a>,
     <a href="https://github.com/PHPCSStandards/PHP_CodeSniffer/">PHP_CodeSniffer</a>, and complies to
