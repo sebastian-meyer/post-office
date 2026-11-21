@@ -29,4 +29,14 @@ final class MigrationsTest extends KernelTestCase
 
         self::assertSame([], array_values($differences));
     }
+
+    public function testDefaultTlsPoliciesAreInstalled(): void
+    {
+        $policies = $this->startDatabase()->getConnection()
+            ->fetchAllKeyValue('SELECT domain, CONCAT(policy, \' \', params) FROM tlspolicies WHERE enabled = 1');
+
+        self::assertCount(18, $policies);
+        self::assertSame('dane-only ', $policies['gmx.de'] ?? null);
+        self::assertSame('secure match=.google.com', $policies['gmail.com'] ?? null);
+    }
 }
