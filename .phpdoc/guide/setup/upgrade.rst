@@ -15,8 +15,16 @@ Step by Step
 
    .. code-block:: shell
 
-     # Update to the latest version allowed by your composer.json
-     composer update --no-dev
+     # Checkout the new version of the application (e.g. v1.1.0)
+     git fetch --tags
+     git checkout v1.1.0
+
+   Available versions can be found on `Packagist <https://packagist.org/packages/sebastian-meyer/post-office>`_.
+
+   .. code-block:: shell
+
+     # Update the dependencies
+     composer install --no-dev --optimize-autoloader
 
 #. Apply all changes to the database schema that came with the new version.
 

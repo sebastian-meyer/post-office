@@ -180,8 +180,13 @@
 
     <li>
     <p>Update the application and its dependencies.</p>
-<pre><code class="language-shell"># Update to the latest version allowed by your composer.json
-composer update --no-dev</code></pre>
+<pre><code class="language-shell"># Checkout the new version of the application (e.g. v1.1.0)
+git fetch --tags
+git checkout v1.1.0</code></pre>
+
+    <p>Available versions can be found on <a href="https://packagist.org/packages/sebastian-meyer/post-office">Packagist</a>.</p>
+<pre><code class="language-shell"># Update the dependencies
+composer install --no-dev --optimize-autoloader</code></pre>
 </li>
 
     <li>

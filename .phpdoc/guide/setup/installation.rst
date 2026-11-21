@@ -48,7 +48,14 @@ Step by Step
    .. code-block:: shell
 
      # Install the latest stable version suitable for your environment
-     composer create-project sebastian-meyer/post-office --ask --no-dev
+     composer create-project sebastian-meyer/post-office --ask --keep-vcs --no-dev
+
+   .. note::
+
+     The ``--keep-vcs`` option is important if you want to be able to easily :doc:`upgrade the application <upgrade>`
+     later on. It keeps the ``.git/`` directory of the original repository allowing you to pull in new changes and
+     updates. If you don't want to use Git, you can omit this option, but you will have to manually download and
+     install new versions of the application in the future.
 
    .. hint::
 
@@ -58,7 +65,7 @@ Step by Step
      .. code-block:: shell
 
        # Install the latest patch level version of 1.0 (i. e. >=1.0.0 & <1.1.0)
-       composer create-project sebastian-meyer/post-office "1.0.*" --ask --no-dev
+       composer create-project sebastian-meyer/post-office "1.0.*" --ask --keep-vcs --no-dev
 
      Available versions can be found on `Packagist <https://packagist.org/packages/sebastian-meyer/post-office>`_.
 
