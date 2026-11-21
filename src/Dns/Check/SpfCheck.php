@@ -27,6 +27,7 @@ use App\Dns\CheckStatus;
 use App\Dns\DnsLookup;
 use App\Dns\DomainCheck;
 use App\Dns\SpfEvaluator;
+use App\Dns\SpfResult;
 use App\Entity\Domain;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -74,13 +75,21 @@ final class SpfCheck implements DomainCheck
      */
     private function checkAll(CheckResult $result, string $record): void
     {
-        if (preg_match('/\sredirect=/i', $record) === 1) {
+        $qualifier = null;
+
+        // The "all" mechanism may be followed by modifiers (e.g. "exp=").
+        foreach (explode(' ', preg_replace('/\s+/', ' ', trim($record)) ?? '') as $term) {
+            if (preg_match('/^([+?~-]?)all$/i', $term, $matches) === 1) {
+                $qualifier = $matches[1];
+            }
+        }
+
+        // Without "all", a "redirect" decides.
+        if ($qualifier === null && preg_match('/\sredirect=/i', $record) === 1) {
             return;
         }
 
-        preg_match('/\s([+?~-]?)all$/i', trim($record), $matches);
-
-        match ($matches[1] ?? null) {
+        match ($qualifier) {
             '', '+' => $result->add(CheckStatus::Error, 'spf.passAll'),
             '?', null => $result->add(CheckStatus::Warning, 'spf.weak'),
             default => null
@@ -110,13 +119,12 @@ final class SpfCheck implements DomainCheck
         }
 
         foreach ($addresses as $address) {
-            $authorized = $this->evaluator->authorizes($domain->domain, $address);
-
-            if ($authorized === false) {
-                $result->add(CheckStatus::Error, 'spf.serverNotAllowed', ['%hostname%' => $hostname, '%address%' => $address]);
-            } elseif ($authorized === null) {
-                $result->add(CheckStatus::Warning, 'spf.unverifiable', ['%address%' => $address]);
-            }
+            match ($this->evaluator->authorizes($domain->domain, $address)) {
+                SpfResult::NoPass => $result->add(CheckStatus::Error, 'spf.serverNotAllowed', ['%hostname%' => $hostname, '%address%' => $address]),
+                SpfResult::Unknown => $result->add(CheckStatus::Warning, 'spf.unverifiable', ['%address%' => $address]),
+                SpfResult::TooManyLookups => $result->add(CheckStatus::Error, 'spf.tooManyLookups', ['%address%' => $address]),
+                SpfResult::Pass => null
+            };
         }
     }
 

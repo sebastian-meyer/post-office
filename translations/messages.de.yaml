@@ -69,6 +69,7 @@ dns.dane.ok: "Die TLSA-Einträge für %host% sind signiert."
 dns.dane.unsigned: "Die TLSA-Einträge für %host% sind nicht mit DNSSEC signiert, daher werden sie von anderen Mailservern ignoriert."
 dns.dkim: "DKIM"
 dns.dkim.missing: "Unter %name% gibt es keinen DKIM-Schlüssel."
+dns.dkim.multiple: "Unter %name% gibt es mehr als einen DKIM-Schlüssel. Empfangende Mailserver können jeden davon verwenden, daher können Signaturen fehlschlagen. Entfernen Sie den alten Schlüssel."
 dns.dkim.notConfigured: "DKIM_SELECTORS ist nicht konfiguriert, daher können die DKIM-Schlüssel nicht geprüft werden."
 dns.dkim.ok: "Unter %name% gibt es einen DKIM-Schlüssel."
 dns.dkim.revoked: "Der DKIM-Schlüssel unter %name% ist leer (widerrufen)."
@@ -85,7 +86,7 @@ dns.dnssec.unsigned: "Die Zone der Domain ist nicht mit DNSSEC signiert. Ohne DN
 dns.dnssec.validated: "Die DNS-Einträge sind signiert und wurden validiert."
 dns.lookupFailed: "Die DNS-Abfrage ist fehlgeschlagen. Bitte versuchen Sie es später erneut."
 dns.mtasts: "MTA-STS"
-dns.mtasts.invalidPolicy: "Die MTA-STS-Richtlinie ist ungültig (Version oder Modus)."
+dns.mtasts.invalidPolicy: "Die MTA-STS-Richtlinie ist ungültig (Version, Modus, max_age oder fehlende mx-Zeilen), daher wird sie von anderen Mailservern ignoriert."
 dns.mtasts.missing: "MTA-STS ist nicht eingerichtet. Es ist optional und schützt die Zustellung von E-Mails an die Domain vor Downgrade-Angriffen, auch bei Mailservern ohne DANE-Unterstützung."
 dns.mtasts.multiple: "Es gibt mehr als einen MTA-STS-Eintrag, dadurch sind alle ungültig."
 dns.mtasts.mxMismatch: "Der Mail-Exchanger %host% ist nicht von den MX-Mustern der MTA-STS-Richtlinie abgedeckt, daher verweigern andere Mailserver womöglich die Zustellung an ihn."
@@ -109,6 +110,7 @@ dns.spf.multiple: "Die Domain hat mehr als einen SPF-Eintrag, dadurch sind alle 
 dns.spf.ok: "Der SPF-Eintrag ist gültig."
 dns.spf.passAll: "Der SPF-Eintrag erlaubt jedem Server, E-Mails für die Domain zu senden („+all“). Verwenden Sie „-all“ oder „~all“."
 dns.spf.serverNotAllowed: "Der SPF-Eintrag erlaubt diesem Mailserver (%hostname%, %address%) nicht, E-Mails für die Domain zu senden."
+dns.spf.tooManyLookups: "Die Auswertung des SPF-Eintrags für %address% benötigt mehr als 10 DNS-Abfragen (include, a, mx, redirect, …). Empfangende Mailserver werten das als Fehler, SPF schlägt daher fehl. Verringern Sie die Zahl der include-Mechanismen."
 dns.spf.unverifiable: "Es konnte nicht geprüft werden, ob der SPF-Eintrag %address% das Senden erlaubt (z. B. wegen „exists“, „ptr“ oder Makros)."
 dns.spf.weak: "Der SPF-Eintrag endet nicht mit „-all“ oder „~all“ und schützt daher nicht vor gefälschten Absendern."
 dns.status.error: "Fehler"
@@ -144,6 +146,7 @@ email: E-Mail-Adresse
 emailAuthenticationFailed: "Der Mailserver hat Ihr Passwort nicht akzeptiert. Bitte geben Sie es erneut ein."
 emailNotSent: "Die E-Mail konnte nicht versendet werden: %error%"
 emailPartiallySent: "Der Versand ist nach %count% von %total% Empfängern fehlgeschlagen: %error%"
+emailRecipientRejected: "Der Mailserver hat die E-Mail für %address% nicht angenommen: %error%"
 emailSent: "{1} Die E-Mail wurde an einen Empfänger versendet.|]1,Inf[ Die E-Mail wurde an %count% Empfänger versendet."
 enable: "Aktivieren"
 enabled: Aktiviert
@@ -214,7 +217,7 @@ quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unbegrenzt
 recipientDomain: Empfängerdomain
 recipients: "Empfänger"
-recipientsHelp: "Die Empfänger sehen die Adressen der anderen nicht. Sie erhalten eine Kopie der E-Mail. Entfernen Sie die Markierung, um Empfänger auszulassen."
+recipientsHelp: "Jeder Empfänger erhält eine eigene, an ihn adressierte E-Mail. Entfernen Sie die Markierung, um Empfänger auszulassen."
 recipientsSkipped: "Diese markierten Adressen können keine E-Mails empfangen (z. B. weil sie deaktiviert, Nur-Senden-Adressen oder Verteiler nur für Mitglieder sind, in denen Sie nicht Mitglied sind) und wurden ausgelassen: %addresses%"
 remove: Entfernen
 removeDomainManagerConfirm: "Möchten Sie %email% wirklich als Verwalter von %domain% entfernen?"
@@ -224,6 +227,8 @@ removeMemberConfirm: "Möchten Sie %email% wirklich aus %list% entfernen?"
 replyToList: Antworten gehen an den Verteiler
 replyToListHelp: Fügt einen Reply-To-Header mit der Verteileradresse hinzu.
 save: Speichern
+sendCopy: "Kopie an mich senden"
+sendCopyHelp: "Sie erhalten die E-Mail ebenfalls, da sie nicht in Ihrem Ordner „Gesendet“ gespeichert wird. Wenn Sie Ihre eigene Adresse als Empfänger markiert haben, erhalten Sie die E-Mail ohnehin."
 sendEmail: "Senden"
 sender: "Absender"
 showPassword: Passwort ein-/ausblenden

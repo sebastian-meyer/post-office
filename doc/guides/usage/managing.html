@@ -380,13 +380,16 @@ The checkbox in the table header marks all entries matching the current search.<
 </ol>
 
             
-    <p>The email is sent from your own email address with your own account, just like an email from your mail program. The
-recipients don&#039;t see each other&#039;s addresses, and you get a copy of the email, because it isn&#039;t saved in your &quot;Sent&quot;
-folder.</p>
+    <p>The email is sent from your own email address with your own account, just like an email from your mail program. Each
+recipient gets an email of their own, addressed to them, so they don&#039;t see each other&#039;s addresses. The email isn&#039;t
+saved in your &quot;Sent&quot; folder, so if you have a mailbox, you can check &quot;Send me a copy&quot; to get the email as well. If you
+marked your own address as recipient, you get the email anyway (but only once).</p>
 
             
     <p>Addresses which can&#039;t receive emails are left out, and the email form lists them: disabled accounts, send-only
-addresses, catch-all addresses, mailing lists without members, and &quot;members only&quot; lists you aren&#039;t a member of.</p>
+addresses, catch-all addresses, mailing lists without members, &quot;members only&quot; lists you aren&#039;t a member of, and list
+members with an address of one of your domains which doesn&#039;t exist (unless the domain has a catch-all address). If the
+mail server still rejects a recipient, the others get the email anyway, and you see which addresses were rejected.</p>
 
             
     <p>The Post Office keeps your password from the login (encrypted) until you log out, so it can send the email with your

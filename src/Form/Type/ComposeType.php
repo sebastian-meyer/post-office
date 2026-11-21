@@ -24,6 +24,7 @@ namespace App\Form\Type;
 
 use App\Form\Model\ComposeData;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -43,7 +44,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ComposeType extends AbstractType
 {
     /**
-     * Adds the recipients, subject and body fields, and the password field if requested.
+     * Adds the recipients, subject and body fields, and the copy and password fields if requested.
      *
      * @param FormBuilderInterface $builder The form builder.
      * @phpstan-param FormBuilderInterface<ComposeData|null> $builder
@@ -71,6 +72,14 @@ final class ComposeType extends AbstractType
                 'attr' => ['rows' => 12]
             ]);
 
+        if ($options['allow_copy'] === true) {
+            $builder->add('copy', CheckboxType::class, [
+                'label' => 'sendCopy',
+                'help' => 'sendCopyHelp',
+                'required' => false
+            ]);
+        }
+
         if ($options['ask_password'] === true) {
             $builder->add('password', PasswordType::class, [
                 'label' => 'yourPassword',
@@ -81,7 +90,7 @@ final class ComposeType extends AbstractType
     }
 
     /**
-     * Sets the data class and the options for the recipient choices and the password field.
+     * Sets the data class and the options for the recipient choices and the copy and password fields.
      *
      * @param OptionsResolver $resolver The options resolver.
      *
@@ -93,10 +102,12 @@ final class ComposeType extends AbstractType
         $resolver
             ->setDefaults([
                 'data_class' => ComposeData::class,
+                'allow_copy' => false,
                 'ask_password' => false
             ])
             ->setRequired('recipients')
             ->setAllowedTypes('recipients', 'array')
+            ->setAllowedTypes('allow_copy', 'bool')
             ->setAllowedTypes('ask_password', 'bool');
     }
 }

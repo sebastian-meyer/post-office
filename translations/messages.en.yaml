@@ -69,6 +69,7 @@ dns.dane.ok: "The TLSA records for %host% are signed."
 dns.dane.unsigned: "The TLSA records for %host% are not signed with DNSSEC, so other mail servers ignore them."
 dns.dkim: "DKIM"
 dns.dkim.missing: "There is no DKIM key at %name%."
+dns.dkim.multiple: "There is more than one DKIM key at %name%. Receiving mail servers may use any of them, so signatures may fail. Remove the old key."
 dns.dkim.notConfigured: "DKIM_SELECTORS is not configured, so the DKIM keys cannot be checked."
 dns.dkim.ok: "There is a DKIM key at %name%."
 dns.dkim.revoked: "The DKIM key at %name% is empty (revoked)."
@@ -85,7 +86,7 @@ dns.dnssec.unsigned: "The domain's zone is not signed with DNSSEC. Without DNSSE
 dns.dnssec.validated: "The DNS records are signed and have been validated."
 dns.lookupFailed: "The DNS lookup failed. Please try again later."
 dns.mtasts: "MTA-STS"
-dns.mtasts.invalidPolicy: "The MTA-STS policy is invalid (version or mode)."
+dns.mtasts.invalidPolicy: "The MTA-STS policy is invalid (version, mode, max_age or missing mx lines), so other mail servers ignore it."
 dns.mtasts.missing: "MTA-STS is not set up. It is optional and protects the delivery of emails to the domain from downgrade attacks, also for mail servers without DANE support."
 dns.mtasts.multiple: "There is more than one MTA-STS record, which makes all of them invalid."
 dns.mtasts.mxMismatch: "The mail exchanger %host% is not covered by the MX patterns of the MTA-STS policy, so other mail servers may refuse to deliver emails to it."
@@ -109,6 +110,7 @@ dns.spf.multiple: "The domain has more than one SPF record, which makes all of t
 dns.spf.ok: "The SPF record is valid."
 dns.spf.passAll: "The SPF record allows every server to send emails for the domain (\"+all\"). Use \"-all\" or \"~all\"."
 dns.spf.serverNotAllowed: "The SPF record doesn't allow this mail server (%hostname%, %address%) to send emails for the domain."
+dns.spf.tooManyLookups: "Evaluating the SPF record for %address% needs more than 10 DNS lookups (include, a, mx, redirect, …). Receiving mail servers treat this as an error, so SPF fails. Reduce the number of include mechanisms."
 dns.spf.unverifiable: "It could not be verified whether the SPF record allows %address% to send emails (e.g. because of \"exists\", \"ptr\" or macros)."
 dns.spf.weak: "The SPF record doesn't end with \"-all\" or \"~all\", so it doesn't protect against forged senders."
 dns.status.error: "Error"
@@ -144,6 +146,7 @@ email: E-mail address
 emailAuthenticationFailed: "The mail server did not accept your password. Please enter it again."
 emailNotSent: "The email could not be sent: %error%"
 emailPartiallySent: "Sending the email failed after %count% of %total% recipients: %error%"
+emailRecipientRejected: "The mail server did not accept the email for %address%: %error%"
 emailSent: "{1} The email has been sent to one recipient.|]1,Inf[ The email has been sent to %count% recipients."
 enable: "Enable"
 enabled: Enabled
@@ -214,7 +217,7 @@ quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unlimited
 recipientDomain: Recipient domain
 recipients: "Recipients"
-recipientsHelp: "Recipients don't see each other's addresses. You get a copy of the email. Unmark recipients to leave them out."
+recipientsHelp: "Each recipient gets an email of their own, addressed to them. Unmark recipients to leave them out."
 recipientsSkipped: "These marked addresses cannot receive emails (e.g. because they are disabled, send-only addresses or members-only lists you are not a member of) and have been left out: %addresses%"
 remove: Remove
 removeDomainManagerConfirm: "Do you really want to remove %email% as manager of %domain%?"
@@ -224,6 +227,8 @@ removeMemberConfirm: "Do you really want to remove %email% from %list%?"
 replyToList: Replies go to the list
 replyToListHelp: Adds a Reply-To header with the list address.
 save: Save
+sendCopy: "Send me a copy"
+sendCopyHelp: "You get the email as well, since it isn't saved in your \"Sent\" folder. If you marked your own address as recipient, you get the email anyway."
 sendEmail: "Send"
 sender: "Sender"
 showPassword: Show/hide password

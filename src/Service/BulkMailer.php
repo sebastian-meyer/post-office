@@ -26,7 +26,9 @@ use App\Entity\Account;
 use InvalidArgumentException;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\Exception\UnexpectedResponseException;
 use Symfony\Component\Mailer\Transport\Smtp\SmtpTransport;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
@@ -39,16 +41,16 @@ use Symfony\Component\Mime\Email;
  * other email of the user.
  *
  * The email is sent synchronously (without the message queue), so the password is never stored outside the session.
- * The recipients don't see each other: the email is addressed to the sender and sent to the recipients in batches
- * (like Bcc), each batch in one SMTP transaction. The sender gets a copy, since the email isn't saved in their "Sent"
- * folder. An email to a single recipient is addressed to that recipient directly.
+ * Each recipient gets an email of their own, addressed to them, so recipients the mail server rejects don't affect the
+ * others. All emails are sent over the same connection. Senders with a mailbox can get a copy at the end, since the
+ * email isn't saved in their "Sent" folder.
  */
 final class BulkMailer
 {
     /**
-     * The maximum number of recipients per SMTP transaction (Postfix accepts 1000 by default).
+     * The SMTP reply code with which the server closes the connection.
      */
-    public const int BATCH_SIZE = 50;
+    private const int SERVICE_NOT_AVAILABLE = 421;
 
     /**
      * Sends an email.
@@ -58,15 +60,18 @@ final class BulkMailer
      * @param list<string> $recipients The email addresses of the recipients.
      * @param string $subject The subject.
      * @param string $body The plain text body.
+     * @param bool $copy Whether to send a copy to the sender (ignored for senders without mailbox).
      *
-     * @return int The number of recipients (without the sender's copy).
+     * @return BulkMailResult The recipients the email was delivered to, and those the mail server rejected.
      *
      * @throws InvalidArgumentException if there are no recipients.
-     * @throws MailDeliveryException if the email could not be delivered to all recipients.
+     * @throws MailDeliveryException if the connection to the mail server failed (e.g. wrong password), so the email
+     *                               could not be sent to the remaining recipients.
      */
-    public function send(Account $sender, #[\SensitiveParameter] string $password, array $recipients, string $subject, string $body): int
+    public function send(Account $sender, #[\SensitiveParameter] string $password, array $recipients, string $subject, string $body, bool $copy = false): BulkMailResult
     {
-        $recipients = array_values(array_unique($recipients));
+        // Addresses are compared case-insensitively, so nobody gets the email twice.
+        $recipients = array_values(array_intersect_key($recipients, array_unique(array_map(strtolower(...), $recipients))));
 
         if ($recipients === []) {
             throw new InvalidArgumentException('An email requires at least one recipient.');
@@ -74,7 +79,6 @@ final class BulkMailer
 
         $from = new Address($sender->getUserIdentifier(), $sender->label);
         $email = (new Email())->from($from)->subject($subject)->text($body);
-        $email->to(\count($recipients) === 1 ? $recipients[0] : $from);
 
         try {
             $transport = $this->transportFactory->create($sender, $password);
@@ -82,29 +86,85 @@ final class BulkMailer
             throw new MailDeliveryException(0, $exception);
         }
 
-        $delivered = 0;
+        $delivered = [];
+        $rejected = [];
 
         try {
-            foreach (array_chunk($recipients, self::BATCH_SIZE) as $index => $batch) {
-                $envelopeRecipients = $batch;
+            foreach ($recipients as $recipient) {
+                $error = $this->sendTo($transport, $email, $from, $recipient);
 
-                // The sender's copy goes with the first batch (unless the sender is a recipient anyway).
-                if ($index === 0 && !\in_array($sender->getUserIdentifier(), $recipients, true)) {
-                    $envelopeRecipients[] = $sender->getUserIdentifier();
+                if ($error === null) {
+                    $delivered[] = $recipient;
+                } else {
+                    $rejected[$recipient] = $error;
                 }
+            }
 
-                $transport->send($email, new Envelope($from, array_map(Address::create(...), $envelopeRecipients)));
-                $delivered += \count($batch);
+            if ($copy) {
+                $this->sendCopy($transport, $email, $from, $sender, $recipients, $delivered);
             }
         } catch (TransportExceptionInterface $exception) {
-            throw new MailDeliveryException($delivered, $exception);
+            throw new MailDeliveryException(\count($delivered), $exception);
         } finally {
             if ($transport instanceof SmtpTransport) {
                 $transport->stop();
             }
         }
 
-        return $delivered;
+        return new BulkMailResult($delivered, $rejected);
+    }
+
+    /**
+     * Sends the email to one recipient.
+     *
+     * @param TransportInterface $transport The connected transport.
+     * @param Email $email The email (without recipient).
+     * @param Address $from The sender.
+     * @param string $recipient The recipient's email address.
+     *
+     * @return ?string NULL if the email was sent, or the reply of the mail server if it rejected the recipient.
+     *
+     * @throws TransportExceptionInterface if the connection failed.
+     */
+    private function sendTo(TransportInterface $transport, Email $email, Address $from, string $recipient): ?string
+    {
+        try {
+            $transport->send((clone $email)->to($recipient), new Envelope($from, [new Address($recipient)]));
+        } catch (UnexpectedResponseException $exception) {
+            // The server rejected this recipient, but the connection can still be used (except after 421).
+            if ($exception->getCode() === self::SERVICE_NOT_AVAILABLE) {
+                throw $exception;
+            }
+
+            return $exception->getMessage();
+        }
+
+        return null;
+    }
+
+    /**
+     * Sends a copy to the sender, if they have a mailbox, aren't a recipient anyway, and anybody got the email.
+     *
+     * Send-only addresses can't receive emails. A rejected copy is ignored, since the email has been sent anyway.
+     *
+     * @param TransportInterface $transport The connected transport.
+     * @param Email $email The email (without recipient).
+     * @param Address $from The sender.
+     * @param Account $sender The current user.
+     * @param list<string> $recipients All recipients.
+     * @param list<string> $delivered The recipients the email was delivered to.
+     *
+     * @throws TransportExceptionInterface if the connection failed.
+     */
+    private function sendCopy(TransportInterface $transport, Email $email, Address $from, Account $sender, array $recipients, array $delivered): void
+    {
+        $address = $sender->getUserIdentifier();
+
+        if (!$sender->isMailbox() || $delivered === [] || \in_array($address, array_map(strtolower(...), $recipients), true)) {
+            return;
+        }
+
+        $this->sendTo($transport, $email, $from, $address);
     }
 
     /**

@@ -6,6 +6,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\Account;
 use App\Entity\AccountType;
+use App\Entity\Destination;
 use App\Tests\DatabaseTrait;
 use App\Tests\TestData;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -84,23 +85,22 @@ final class ComposeControllerTest extends WebTestCase
     public function testSendEmailToSeveralRecipients(): void
     {
         $crawler = $this->compose($this->data->alice, '/manage/domain/example.com/compose', [$this->data->bob->id, $this->data->team->id]);
-        $this->send($crawler, ['compose[password]' => 'secret']);
+        $this->send($crawler, ['compose[password]' => 'secret', 'compose[copy]' => '1']);
 
         self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
-        self::assertEmailCount(1);
+        // Each recipient gets an email addressed to them, and the sender the requested copy.
+        self::assertEmailCount(3);
 
-        $event = self::getMailerEvent(0);
-        self::assertInstanceOf(MessageEvent::class, $event);
-        $email = $event->getMessage();
-        self::assertInstanceOf(Email::class, $email);
-        // The recipients don't see each other, the email is addressed to the sender.
-        self::assertSame('alice@example.com', $email->getFrom()[0]->getAddress());
-        self::assertSame(['alice@example.com'], array_map(static fn (Address $address): string => $address->getAddress(), $email->getTo()));
-        self::assertSame('Hello', $email->getSubject());
-        self::assertSame(
-            ['bob@example.com', 'team@example.com', 'alice@example.com'],
-            array_map(static fn (Address $address): string => $address->getAddress(), $event->getEnvelope()->getRecipients())
-        );
+        $to = [];
+        foreach (self::getMailerEvents() as $event) {
+            self::assertInstanceOf(MessageEvent::class, $event);
+            $email = $event->getMessage();
+            self::assertInstanceOf(Email::class, $email);
+            self::assertSame('alice@example.com', $email->getFrom()[0]->getAddress());
+            self::assertSame('Hello', $email->getSubject());
+            $to[] = implode(',', array_map(static fn (Address $address): string => $address->getAddress(), $email->getTo()));
+        }
+        self::assertSame(['bob@example.com', 'team@example.com', 'alice@example.com'], $to);
 
         $this->client->followRedirect();
         self::assertSelectorTextContains('.alert-success', '2 recipients');
@@ -119,6 +119,28 @@ final class ComposeControllerTest extends WebTestCase
         $email = self::getMailerMessage(0);
         self::assertInstanceOf(Email::class, $email);
         self::assertSame('team@example.com', $email->getTo()[0]->getAddress());
+        // No copy unless requested.
+        self::assertEmailCount(1);
+    }
+
+    public function testCopyIsOfferedUnchecked(): void
+    {
+        $this->compose($this->data->alice, '/manage/domain/example.com/compose', [$this->data->bob->id]);
+
+        self::assertSelectorExists('input[name="compose[copy]"]:not(:checked)');
+    }
+
+    public function testSenderMarkedAsRecipientGetsTheEmailOnce(): void
+    {
+        $crawler = $this->compose($this->data->alice, '/manage/domain/example.com/compose', [$this->data->alice->id, $this->data->bob->id]);
+        $this->send($crawler, ['compose[password]' => 'secret', 'compose[copy]' => '1']);
+
+        self::assertResponseRedirects('/manage/domain/example.com/accounts', 303);
+        $recipients = array_map(
+            static fn (MessageEvent $event): string => $event->getEnvelope()->getRecipients()[0]->getAddress(),
+            self::getMailerEvents()
+        );
+        self::assertSame(['alice@example.com', 'bob@example.com'], $recipients);
     }
 
     public function testRecipientsCanBeUnmarked(): void
@@ -163,16 +185,19 @@ final class ComposeControllerTest extends WebTestCase
 
     public function testListManagerWritesToMembers(): void
     {
-        // A member which is a local account that cannot receive emails is skipped.
+        // Members the mail server would reject are skipped: a disabled local account and an unknown local address.
         $this->data->dave->disable();
+        $typo = new Destination('typo@example.com');
+        $this->entityManager->persist($typo);
+        $this->data->team->addDestinations($typo);
         $this->entityManager->flush();
 
         $crawler = $this->compose($this->data->bob, '/manage/list/' . $this->data->team->id . '/compose', [
-            'bob@example.com', 'dave@example.org', 'external@example.net', 'stranger@example.net'
+            'bob@example.com', 'dave@example.org', 'external@example.net', 'stranger@example.net', 'typo@example.com'
         ]);
 
         self::assertSame(['bob@example.com', 'external@example.net'], $this->recipients($crawler));
-        self::assertSelectorTextContains('.alert-warning', 'dave@example.org');
+        self::assertSelectorTextContains('.alert-warning', 'dave@example.org, typo@example.com');
     }
 
     public function testMembersOnlyListIsSkippedForNonMembers(): void

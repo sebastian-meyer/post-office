@@ -102,12 +102,15 @@ managers to their mailing lists and the lists' members:
 #. Click "Write email" above the table (or "Write to the list" on the list page).
 #. Check the recipients, enter subject and message, and click "Send".
 
-The email is sent from your own email address with your own account, just like an email from your mail program. The
-recipients don't see each other's addresses, and you get a copy of the email, because it isn't saved in your "Sent"
-folder.
+The email is sent from your own email address with your own account, just like an email from your mail program. Each
+recipient gets an email of their own, addressed to them, so they don't see each other's addresses. The email isn't
+saved in your "Sent" folder, so if you have a mailbox, you can check "Send me a copy" to get the email as well. If you
+marked your own address as recipient, you get the email anyway (but only once).
 
 Addresses which can't receive emails are left out, and the email form lists them: disabled accounts, send-only
-addresses, catch-all addresses, mailing lists without members, and "members only" lists you aren't a member of.
+addresses, catch-all addresses, mailing lists without members, "members only" lists you aren't a member of, and list
+members with an address of one of your domains which doesn't exist (unless the domain has a catch-all address). If the
+mail server still rejects a recipient, the others get the email anyway, and you see which addresses were rejected.
 
 The Post Office keeps your password from the login (encrypted) until you log out, so it can send the email with your
 account. If you logged in before this feature was installed, or the mail server rejects the password, the email form

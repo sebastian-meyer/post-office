@@ -145,6 +145,19 @@ final class ChecksTest extends TestCase
         $this->resolver->set('example.com', 'TXT', ['v=spf1 +all']);
         $this->assertResult(CheckStatus::Error, ['spf.passAll'], $check->check($this->domain));
 
+        // Modifiers may follow "all".
+        $this->resolver->set('example.com', 'TXT', ['v=spf1 mx -all exp=explain._spf.example.com']);
+        $this->assertResult(CheckStatus::Ok, ['spf.ok'], $check->check($this->domain));
+
+        $includes = implode(' ', array_map(static fn (int $i): string => "include:_spf{$i}.example.org", range(1, 11)));
+        $this->resolver->set('example.com', 'TXT', ["v=spf1 {$includes} mx -all"]);
+
+        foreach (range(1, 11) as $i) {
+            $this->resolver->set("_spf{$i}.example.org", 'TXT', ["v=spf1 ip4:198.51.100.{$i} -all"]);
+        }
+
+        $this->assertResult(CheckStatus::Error, ['spf.tooManyLookups', 'spf.tooManyLookups'], $check->check($this->domain));
+
         $this->resolver->set('example.com', 'TXT', ['v=spf1 mx -all', 'v=spf1 -all']);
         $this->assertResult(CheckStatus::Error, ['spf.multiple'], $check->check($this->domain));
     }
@@ -157,6 +170,8 @@ final class ChecksTest extends TestCase
         $this->resolver->set('old._domainkey.example.com', 'TXT', ['v=DKIM1; p=']);
         $this->assertResult(CheckStatus::Ok, ['dkim.ok'], (new DkimCheck($this->lookup, ['mail']))->check($this->domain));
         $this->assertResult(CheckStatus::Error, ['dkim.revoked'], (new DkimCheck($this->lookup, ['old']))->check($this->domain));
+        $this->resolver->set('two._domainkey.example.com', 'TXT', ['v=DKIM1; p=MIIBold', 'v=DKIM1; p=MIIBnew']);
+        $this->assertResult(CheckStatus::Error, ['dkim.multiple'], (new DkimCheck($this->lookup, ['two']))->check($this->domain));
         // One valid key is enough.
         $this->assertResult(CheckStatus::Info, ['dkim.ok', 'dkim.missing'], (new DkimCheck($this->lookup, ['mail', 'new']))->check($this->domain));
     }
@@ -184,8 +199,12 @@ final class ChecksTest extends TestCase
         $this->resolver->set('_mta-sts.example.com', 'TXT', ['v=STSv1; id=20261121']);
         $this->assertResult(CheckStatus::Ok, ['mtasts.ok'], $check("version: STSv1\r\nmode: enforce\r\nmx: *.example.net\r\nmax_age: 604800\r\n"));
         $this->assertResult(CheckStatus::Error, ['mtasts.mxMismatch'], $check("version: STSv1\nmode: enforce\nmx: mx.example.org\nmax_age: 604800\n"));
-        $this->assertResult(CheckStatus::Info, ['mtasts.testing'], $check("version: STSv1\nmode: testing\nmx: mail.example.net\n"));
-        $this->assertResult(CheckStatus::Error, ['mtasts.invalidPolicy'], $check("version: STSv2\nmode: enforce\n"));
+        $this->assertResult(CheckStatus::Info, ['mtasts.testing'], $check("version: STSv1\nmode: testing\nmx: mail.example.net\nmax_age: 86400\n"));
+        $this->assertResult(CheckStatus::Error, ['mtasts.invalidPolicy'], $check("version: STSv2\nmode: enforce\nmx: mail.example.net\nmax_age: 86400\n"));
+        // Sending servers ignore policies without max_age, or without mx (unless the mode is "none").
+        $this->assertResult(CheckStatus::Error, ['mtasts.invalidPolicy'], $check("version: STSv1\nmode: enforce\nmx: mail.example.net\n"));
+        $this->assertResult(CheckStatus::Error, ['mtasts.invalidPolicy'], $check("version: STSv1\nmode: enforce\nmax_age: 86400\n"));
+        $this->assertResult(CheckStatus::Warning, ['mtasts.none'], $check("version: STSv1\nmode: none\nmax_age: 86400\n"));
 
         $unavailable = (new MtaStsCheck($this->lookup, new MockHttpClient(new MockResponse('', ['http_code' => 404]))))->check($this->domain);
         $this->assertResult(CheckStatus::Error, ['mtasts.policyUnavailable'], $unavailable);

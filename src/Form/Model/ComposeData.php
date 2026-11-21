@@ -51,6 +51,11 @@ final class ComposeData
     public ?string $body = null;
 
     /**
+     * Whether the sender gets a copy of the email (only offered to senders with a mailbox).
+     */
+    public bool $copy = false;
+
+    /**
      * The user's password, if it is not kept in the session (see App\Security\SubmissionCredentials).
      */
     public ?string $password = null;

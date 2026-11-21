@@ -39,6 +39,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class MtaStsCheck implements DomainCheck
 {
     /**
+     * The maximum value of "max_age" in seconds (RFC 8461, section 3.2).
+     */
+    private const int MAX_AGE = 31557600;
+
+    /**
      * Checks the MTA-STS record and policy.
      *
      * @see DomainCheck::check()
@@ -87,13 +92,18 @@ final class MtaStsCheck implements DomainCheck
      * Checks the mode and MX patterns of the policy.
      *
      * @param CheckResult $result The result.
-     * @param array{version: string, mode: string, mx: list<string>} $policy The policy.
+     * @param array{version: string, mode: string, max_age: string, mx: list<string>} $policy The policy.
      * @param list<string> $hosts The mail exchangers of the domain.
      */
     private function checkPolicy(CheckResult $result, array $policy, array $hosts): CheckResult
     {
-        if ($policy['version'] !== 'STSv1' || !\in_array($policy['mode'], ['enforce', 'testing', 'none'], true)) {
+        if (!$this->isValid($policy)) {
             return $result->add(CheckStatus::Error, 'mtasts.invalidPolicy');
+        }
+
+        // The mode "none" turns MTA-STS off, so the MX patterns don't matter.
+        if ($policy['mode'] === 'none') {
+            return $result->add(CheckStatus::Warning, 'mtasts.none');
         }
 
         foreach ($hosts as $host) {
@@ -102,11 +112,28 @@ final class MtaStsCheck implements DomainCheck
             }
         }
 
-        return match ($policy['mode']) {
-            'enforce' => $result->status === CheckStatus::Ok ? $result->add(CheckStatus::Ok, 'mtasts.ok') : $result,
-            'testing' => $result->add(CheckStatus::Info, 'mtasts.testing'),
-            default => $result->add(CheckStatus::Warning, 'mtasts.none')
-        };
+        if ($policy['mode'] === 'testing') {
+            return $result->add(CheckStatus::Info, 'mtasts.testing');
+        }
+
+        return $result->status === CheckStatus::Ok ? $result->add(CheckStatus::Ok, 'mtasts.ok') : $result;
+    }
+
+    /**
+     * Whether the policy has all required fields with valid values (RFC 8461, section 3.2).
+     *
+     * Sending servers ignore invalid policies, e.g. without "max_age".
+     *
+     * @param array{version: string, mode: string, max_age: string, mx: list<string>} $policy The policy.
+     */
+    private function isValid(array $policy): bool
+    {
+        return $policy['version'] === 'STSv1'
+            && \in_array($policy['mode'], ['enforce', 'testing', 'none'], true)
+            && preg_match('/^\d{1,10}$/', $policy['max_age']) === 1
+            && (int) $policy['max_age'] <= self::MAX_AGE
+            // Only the mode "none" may do without MX patterns.
+            && ($policy['mx'] !== [] || $policy['mode'] === 'none');
     }
 
     /**
@@ -133,11 +160,11 @@ final class MtaStsCheck implements DomainCheck
      *
      * @param string $content The content of the policy file.
      *
-     * @return array{version: string, mode: string, mx: list<string>} The policy.
+     * @return array{version: string, mode: string, max_age: string, mx: list<string>} The policy.
      */
     private function parsePolicy(string $content): array
     {
-        $policy = ['version' => '', 'mode' => '', 'mx' => []];
+        $policy = ['version' => '', 'mode' => '', 'max_age' => '', 'mx' => []];
 
         foreach (explode("\n", str_replace("\r", '', $content)) as $line) {
             [$key, $value] = array_map(trim(...), explode(':', $line, 2) + [1 => '']);
@@ -145,6 +172,7 @@ final class MtaStsCheck implements DomainCheck
             match (strtolower($key)) {
                 'version' => $policy['version'] = $value,
                 'mode' => $policy['mode'] = strtolower($value),
+                'max_age' => $policy['max_age'] = $value,
                 'mx' => $policy['mx'][] = $value,
                 default => null
             };

@@ -30,6 +30,7 @@ use App\Repository\AccountRepository;
 use App\Security\SubmissionCredentials;
 use App\Security\Voter\AccountVoter;
 use App\Security\Voter\DomainVoter;
+use App\Service\AddressDeliverability;
 use App\Service\BulkMailer;
 use App\Service\MailDeliveryException;
 use App\Service\RecipientPolicy;
@@ -98,14 +99,6 @@ final class ComposeController extends AbstractController
         $choices = [];
         $skipped = [];
 
-        // Members which are local accounts the mail server would reject.
-        $rejected = [];
-        foreach ($this->accountRepository->findByEmails($members) as $account) {
-            if (!$this->recipientPolicy->canReceiveEmails($account, $user)) {
-                $rejected[strtolower((string) $account)] = true;
-            }
-        }
-
         if ($this->recipientPolicy->canReceiveEmails($list, $user)) {
             $choices[(string) $list] = (string) $list;
         } elseif (\in_array((string) $list, $selection, true)) {
@@ -113,7 +106,8 @@ final class ComposeController extends AbstractController
         }
 
         foreach ($members as $member) {
-            if (!isset($rejected[strtolower($member)])) {
+            // Members the mail server would reject (e.g. unknown addresses of hosted domains) abort the delivery.
+            if ($this->deliverability->accepts($member, $user)) {
                 $choices[$member] = $member;
             } elseif (\in_array($member, $selection, true)) {
                 $skipped[] = $member;
@@ -146,7 +140,7 @@ final class ComposeController extends AbstractController
             $data->recipients = array_values(array_intersect($choices, $this->getSelection($request)));
         }
 
-        $form = $this->createComposeForm($data, $choices, $password === null);
+        $form = $this->createComposeForm($data, $choices, $user, $password === null);
 
         if ($isSubmission) {
             $form->handleRequest($request);
@@ -156,7 +150,7 @@ final class ComposeController extends AbstractController
             $recipients = array_map(strval(...), array_keys(array_intersect($choices, $data->recipients)));
 
             try {
-                $count = $this->mailer->send($user, $password ?? (string) $data->password, $recipients, (string) $data->subject, (string) $data->body);
+                $result = $this->mailer->send($user, $password ?? (string) $data->password, $recipients, (string) $data->subject, (string) $data->body, $data->copy);
             } catch (MailDeliveryException $exception) {
                 if ($exception->delivered > 0) {
                     // Don't let the user send the email again to the recipients who already got it.
@@ -168,7 +162,7 @@ final class ComposeController extends AbstractController
                 if ($exception->isAuthenticationFailure()) {
                     // Ask for the password (again).
                     $this->credentials->clear();
-                    $form = $this->createComposeForm($data, $choices, true);
+                    $form = $this->createComposeForm($data, $choices, $user, true);
                     $this->addFlash('danger', new TranslatableMessage('emailAuthenticationFailed'));
                 } else {
                     $this->addFlash('danger', new TranslatableMessage('emailNotSent', ['%error%' => $exception->getMessage()]));
@@ -182,7 +176,7 @@ final class ComposeController extends AbstractController
                 $this->credentials->store($user, (string) $data->password);
             }
 
-            $this->addFlash('success', new TranslatableMessage('emailSent', ['%count%' => $count]));
+            $this->reportResult($result->delivered, $result->rejected);
 
             return $this->redirect($backUrl, Response::HTTP_SEE_OTHER);
         }
@@ -191,18 +185,38 @@ final class ComposeController extends AbstractController
     }
 
     /**
+     * Reports the recipients the email was delivered to, and those the mail server rejected.
+     *
+     * @param list<string> $delivered The recipients the email was delivered to.
+     * @param array<string, string> $rejected The recipients the mail server rejected, with its reply.
+     */
+    private function reportResult(array $delivered, array $rejected): void
+    {
+        if ($delivered !== []) {
+            $this->addFlash('success', new TranslatableMessage('emailSent', ['%count%' => \count($delivered)]));
+        }
+
+        foreach ($rejected as $address => $error) {
+            $this->addFlash('danger', new TranslatableMessage('emailRecipientRejected', ['%address%' => $address, '%error%' => $error]));
+        }
+    }
+
+    /**
      * Creates the form.
      *
      * @param ComposeData $data The form data.
      * @param array<string, string> $choices The recipients the user may write to (email address => form value).
+     * @param Account $user The current user (the sender).
      * @param bool $askPassword Whether to ask for the user's password.
      *
      * @return FormInterface<ComposeData> The form.
      */
-    private function createComposeForm(ComposeData $data, array $choices, bool $askPassword): FormInterface
+    private function createComposeForm(ComposeData $data, array $choices, Account $user, bool $askPassword): FormInterface
     {
         return $this->createForm(ComposeType::class, $data, [
             'recipients' => $choices,
+            // Send-only addresses can't receive the copy.
+            'allow_copy' => $user->isMailbox(),
             'ask_password' => $askPassword
         ]);
     }
@@ -245,12 +259,14 @@ final class ComposeController extends AbstractController
      * @param SubmissionCredentials $credentials The store for the user's mail password.
      * @param BulkMailer $mailer The service for sending the email.
      * @param RecipientPolicy $recipientPolicy The rules for which accounts can receive emails.
+     * @param AddressDeliverability $deliverability The rules for which addresses the mail server accepts.
      */
     public function __construct(
         private readonly AccountRepository $accountRepository,
         private readonly SubmissionCredentials $credentials,
         private readonly BulkMailer $mailer,
-        private readonly RecipientPolicy $recipientPolicy
+        private readonly RecipientPolicy $recipientPolicy,
+        private readonly AddressDeliverability $deliverability
     ) {
     }
 }

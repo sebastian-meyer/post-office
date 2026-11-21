@@ -65,6 +65,8 @@ final class DkimCheck implements DomainCheck
             [$status, $message] = match (true) {
                 $answer->failed() => [CheckStatus::Error, 'lookupFailed'],
                 $keys === [] => [CheckStatus::Error, 'dkim.missing'],
+                // Verifiers may pick any of them, so the result would depend on chance.
+                \count($keys) > 1 => [CheckStatus::Error, 'dkim.multiple'],
                 preg_match('/(^|;)\s*p=\s*(;|$)/i', $keys[0] ?? '') === 1 => [CheckStatus::Error, 'dkim.revoked'],
                 default => [CheckStatus::Ok, 'dkim.ok']
             };

@@ -26,7 +26,7 @@ namespace App\Dns;
  * Evaluates SPF records (RFC 7208) to find out whether an IP address may send emails for a domain.
  *
  * Only the mechanisms needed to answer that question are supported: "all", "ip4", "ip6", "a", "mx", "include" and the
- * "redirect" modifier. Records with "exists", "ptr" or macros can't be evaluated, which results in NULL.
+ * "redirect" modifier. Records with "exists", "ptr" or macros can't be evaluated (SpfResult::Unknown).
  */
 final class SpfEvaluator
 {
@@ -41,18 +41,24 @@ final class SpfEvaluator
     private const string UNKNOWN = 'unknown';
 
     /**
-     * Whether the SPF record of the domain authorizes the IP address ("pass").
+     * Whether the SPF record of the domain authorizes the IP address.
      *
      * @param string $domain The domain.
      * @param string $address The IP address of the sending server.
-     *
-     * @return ?bool TRUE for "pass", FALSE for any other result, or NULL if the record can't be evaluated.
      */
-    public function authorizes(string $domain, string $address): ?bool
+    public function authorizes(string $domain, string $address): SpfResult
     {
         $lookups = 0;
 
-        return $this->evaluateRecord($domain, $address, $lookups);
+        try {
+            return match ($this->evaluateRecord($domain, $address, $lookups)) {
+                true => SpfResult::Pass,
+                false => SpfResult::NoPass,
+                null => SpfResult::Unknown
+            };
+        } catch (SpfLookupLimitExceeded) {
+            return SpfResult::TooManyLookups;
+        }
     }
 
     /**
@@ -94,7 +100,9 @@ final class SpfEvaluator
     {
         foreach ($terms as $term) {
             if (preg_match('/^redirect=(.+)$/i', $term, $matches) === 1) {
-                return ++$lookups > self::MAX_LOOKUPS ? null : $this->evaluateRecord($matches[1], $address, $lookups);
+                $this->countLookup($lookups);
+
+                return $this->evaluateRecord($matches[1], $address, $lookups);
             }
         }
 
@@ -158,15 +166,27 @@ final class SpfEvaluator
             return $this->inRange($address, $target, $parts[3] ?? '');
         }
 
-        if (++$lookups > self::MAX_LOOKUPS) {
-            return null;
-        }
+        $this->countLookup($lookups);
 
         return match ($name) {
             'include' => $this->evaluateRecord($target, $address, $lookups),
             'a' => $this->matchesHosts([$target], $address, $parts[3] ?? '', $parts[4] ?? ''),
             default => $this->matchesHosts($this->lookup->mxHosts($target), $address, $parts[3] ?? '', $parts[4] ?? '')
         };
+    }
+
+    /**
+     * Counts a mechanism or modifier causing DNS lookups.
+     *
+     * @param int $lookups The number of DNS lookups so far.
+     *
+     * @throws SpfLookupLimitExceeded if there are more than MAX_LOOKUPS.
+     */
+    private function countLookup(int &$lookups): void
+    {
+        if (++$lookups > self::MAX_LOOKUPS) {
+            throw new SpfLookupLimitExceeded();
+        }
     }
 
     /**
