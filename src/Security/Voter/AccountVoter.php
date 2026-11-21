@@ -110,7 +110,7 @@ final class AccountVoter extends Voter
     {
         $user = $token->getUser();
 
-        if (!$user instanceof Account || !$subject instanceof Account) {
+        if (!$user instanceof Account) {
             return false;
         }
 

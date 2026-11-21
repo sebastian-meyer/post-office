@@ -79,6 +79,9 @@ abstract class EntityRepository extends ServiceEntityRepository
      * @param QueryBuilder $queryBuilder The query to execute.
      *
      * @return list<T> The entities.
+     *
+     * @psalm-suppress RedundantCastGivenDocblockType Psalm's Doctrine stubs declare AbstractQuery::getResult() to return
+     *                 an array, but the native return type is mixed, and PHPStan requires the cast.
      */
     protected function getEntityResult(QueryBuilder $queryBuilder): array
     {

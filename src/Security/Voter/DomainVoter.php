@@ -73,7 +73,7 @@ final class DomainVoter extends Voter
     {
         $user = $token->getUser();
 
-        if (!$user instanceof Account || !$subject instanceof Domain) {
+        if (!$user instanceof Account) {
             return false;
         }
 
