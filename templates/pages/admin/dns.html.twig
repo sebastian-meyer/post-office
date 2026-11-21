@@ -1,0 +1,57 @@
+{% extends 'layout.html.twig' %}
+
+{% set badges = {0: 'text-bg-success', 1: 'text-bg-info', 2: 'text-bg-warning', 3: 'text-bg-danger'} %}
+{% set labels = {0: 'dns.status.ok', 1: 'dns.status.info', 2: 'dns.status.warning', 3: 'dns.status.error'} %}
+
+{% block title %}{{ app_name }} - {{ 'dnsCheck'|trans }} - {{ domain }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('manage') }}">{{ 'manage'|trans }}</a></li>
+            <li class="breadcrumb-item"><a class="font-monospace" href="{{ path('manage_domain', {domain: domain.domain}) }}">{{ domain }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ 'dnsCheck'|trans }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">{{ 'dnsCheck'|trans }} <span class="font-monospace">{{ domain }}</span></h1>
+        <a class="btn btn-outline-primary" href="{{ path('admin_domain_dns', {domain: domain.domain}) }}">
+            {{ ux_icon('mdi:refresh', {class: 'me-1'}) }} {{ 'dnsCheckAgain'|trans }}
+        </a>
+    </div>
+
+    <p class="text-body-secondary">{{ 'dnsCheckHelp'|trans }}</p>
+    {% if mailHostname is empty %}
+    <div class="alert alert-info">{{ 'dnsCheckNoHostname'|trans }}</div>
+    {% endif %}
+
+    <div class="list-group shadow-sm">
+        {% for name, result in results %}
+        <div class="list-group-item py-3" id="dns-{{ name }}">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <h2 class="h5 mb-0">{{ ('dns.' ~ name)|trans }}</h2>
+                <span class="badge {{ badges[result.status.value] }}">{{ labels[result.status.value]|trans }}</span>
+            </div>
+            <ul class="list-unstyled mb-0">
+                {% for finding in result.findings %}
+                <li class="d-flex gap-2 align-items-baseline">
+                    <span class="badge rounded-pill {{ badges[finding.status.value] }}" title="{{ labels[finding.status.value]|trans }}">&nbsp;</span>
+                    <span>{{ finding.message|trans }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if result.records is not empty %}
+            <div class="small text-body-secondary mt-2">{{ 'dnsRecordsFound'|trans }}</div>
+            <pre class="small bg-body-tertiary rounded p-2 mb-0 text-wrap text-break">{{ result.records|join("\n") }}</pre>
+            {% endif %}
+            {% if result.suggestion %}
+            <div class="small text-body-secondary mt-2">{{ 'dnsSuggestion'|trans }}</div>
+            <pre class="small bg-body-tertiary rounded p-2 mb-0 text-wrap text-break">{{ result.suggestion.name }}. IN {{ result.suggestion.type }} {{ result.suggestion.type == 'TXT' ? '"' ~ result.suggestion.value ~ '"' : result.suggestion.value }}</pre>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

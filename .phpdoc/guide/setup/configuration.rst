@@ -53,6 +53,23 @@ Settings
   The URL of your Post Office installation, e.g. ``https://postoffice.example.com/``. This is used to generate links
   when there is no HTTP request, e.g. in console commands.
 
+``DKIM_SELECTORS``
+  Comma-separated list of the DKIM selectors your mail server signs emails with, e.g. ``mail`` (the ``Selector`` in
+  OpenDKIM's configuration, or the selector in Rspamd's ``dkim_signing.conf``). The :doc:`DNS check
+  <../usage/administration>` looks for the DKIM keys under these selectors; at least one of them must have a valid
+  key. If empty, DKIM keys aren't checked.
+
+``DNS_RESOLVERS``
+  Comma-separated list of the IP addresses of the name servers used by the DNS check, e.g. ``127.0.0.1``. If empty,
+  the name servers in ``/etc/resolv.conf`` are used. Use a resolver that validates DNSSEC (like the one your mail
+  server needs for DANE), otherwise the DNS check can only tell that a zone is signed, but not that the signatures are
+  valid.
+
+``MAIL_HOSTNAME``
+  The host name of your mail server, i.e. Postfix' ``myhostname``, e.g. ``mail.example.com``. The DNS check uses it to
+  verify that the MX records of a domain point to your mail server, that its SPF record allows your mail server to
+  send emails, and that the reverse DNS of your mail server's IP addresses matches. If empty, these checks are skipped.
+
 ``MAILER_DSN``
   The mail server used to send the emails written by administrators, domain managers and list managers (see
   :doc:`managing accounts <../usage/managing>`), e.g. ``smtp://mail.example.com:587``. Use the submission port of
@@ -61,9 +78,6 @@ Settings
   (e.g. when connecting to ``localhost``), add ``?verify_peer=0``.
 
   The default ``null://null`` discards all emails.
-
-``MESSENGER_TRANSPORT_DSN``
-  This is not used yet and is reserved for upcoming features. Leave it at its default.
 
 Languages
 =========

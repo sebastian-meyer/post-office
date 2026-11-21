@@ -252,6 +252,32 @@ for MySQL 8.4. Special characters in the password have to be URL-encoded (e.g. <
         <dd>The URL of your Post Office installation, e.g. <code>https://postoffice.example.com/</code>
 . This is used to generate links
 when there is no HTTP request, e.g. in console commands.</dd>
+                                <dt><code>DKIM_SELECTORS</code>
+</dt>
+        
+        <dd>Comma-separated list of the DKIM selectors your mail server signs emails with, e.g. <code>mail</code>
+ (the <code>Selector</code>
+ in
+OpenDKIM&#039;s configuration, or the selector in Rspamd&#039;s <code>dkim_signing.conf</code>
+). The <a href="guides/usage/administration.html">DNS check</a> looks for the DKIM keys under these selectors; at least one of them must have a valid
+key. If empty, DKIM keys aren&#039;t checked.</dd>
+                                <dt><code>DNS_RESOLVERS</code>
+</dt>
+        
+        <dd>Comma-separated list of the IP addresses of the name servers used by the DNS check, e.g. <code>127.0.0.1</code>
+. If empty,
+the name servers in <code>/etc/resolv.conf</code>
+ are used. Use a resolver that validates DNSSEC (like the one your mail
+server needs for DANE), otherwise the DNS check can only tell that a zone is signed, but not that the signatures are
+valid.</dd>
+                                <dt><code>MAIL_HOSTNAME</code>
+</dt>
+        
+        <dd>The host name of your mail server, i.e. Postfix&#039; <code>myhostname</code>
+, e.g. <code>mail.example.com</code>
+. The DNS check uses it to
+verify that the MX records of a domain point to your mail server, that its SPF record allows your mail server to
+send emails, and that the reverse DNS of your mail server&#039;s IP addresses matches. If empty, these checks are skipped.</dd>
                                 <dt><code>MAILER_DSN</code>
 </dt>
         
@@ -269,10 +295,6 @@ name and password in <code>MAILER_DSN</code>
     <p>The default <code>null://null</code>
  discards all emails.</p>
 </dd>
-                                <dt><code>MESSENGER_TRANSPORT_DSN</code>
-</dt>
-        
-        <dd>This is not used yet and is reserved for upcoming features. Leave it at its default.</dd>
             </dl>
 
     </section>

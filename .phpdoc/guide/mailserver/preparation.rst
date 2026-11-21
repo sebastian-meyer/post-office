@@ -112,4 +112,5 @@ For every domain you want to receive emails for, its MX record has to point to y
   mail.example.com.   IN  AAAA  2001:db8::25
 
 The reverse DNS (PTR) record of your mail server's IP addresses should resolve back to ``mail.example.com``, otherwise
-many mail servers will reject your emails. You should also publish SPF, DKIM and DMARC records for your domains.
+many mail servers will reject your emails. You should also publish SPF, DKIM and DMARC records for your domains. The
+:doc:`DNS check <../usage/administration>` of the Post Office shows whether all records are set up correctly.

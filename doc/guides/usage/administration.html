@@ -165,6 +165,12 @@
 </li>
 
     <li class="toc-item">
+    <a href="guides/usage/administration.html#dns-check">DNS Check</a>
+
+
+</li>
+
+    <li class="toc-item">
     <a href="guides/usage/administration.html#tls-policies">TLS Policies</a>
 
 
@@ -198,6 +204,48 @@ a new domain, its MX record has to point to your mail server.</p>
             
     <p>Under &quot;Domain managers&quot; on the page of a domain you can appoint users who are allowed to manage all accounts and
 mailing lists of that domain (see <a href="guides/usage/first-steps.html">first steps</a>).</p>
+
+    </section>
+
+            <section class="section " id="dns-check">
+            <h2>DNS Check</h2>
+
+            
+    <p>&quot;DNS check&quot; on the page of a domain shows whether the DNS records of the domain are set up for sending and receiving
+emails with your mail server. Each check is marked as &quot;OK&quot;, &quot;Note&quot; (optional or not checked), &quot;Warning&quot; (works, but
+could be improved) or &quot;Error&quot; (affects the delivery of emails), and shows the records found. For missing records, it
+suggests a record to add.</p>
+
+            <dl>
+                        <dt>MX</dt>
+        
+        <dd>The MX records must point to your mail server, and their hosts must have IP addresses.</dd>
+                                <dt>Reverse DNS</dt>
+        
+        <dd>The IP addresses of your mail server must point back to its host name. This is the same for all domains, and is set
+by the provider of the IP addresses, not in the domain&#039;s DNS zone.</dd>
+                                <dt>DNSSEC and DANE</dt>
+        
+        <dd>DANE lets other mail servers verify the certificate of your mail server with TLSA records. It requires the zone to
+be signed with DNSSEC.</dd>
+                                <dt>SPF, DKIM and DMARC</dt>
+        
+        <dd>These records protect your domain from forged senders. Without them, many mail servers reject your emails or mark
+them as spam. The SPF record must allow your mail server to send emails, a DKIM key must be published for the
+selector your mail server signs with, and the DMARC policy should be &quot;quarantine&quot; or &quot;reject&quot;.</dd>
+                                <dt>MTA-STS and TLS-RPT</dt>
+        
+        <dd>Both are optional. MTA-STS tells other mail servers to deliver emails to your domain only encrypted, TLS-RPT asks
+them to report problems with that.</dd>
+            </dl>
+
+            
+    <p>Some checks depend on settings of the Post Office (<code>MAIL_HOSTNAME</code>
+, <code>DKIM_SELECTORS</code>
+ and <code>DNS_RESOLVERS</code>
+, see
+<a href="guides/setup/configuration.html">configuration</a>) and are skipped if they are missing. Changes to DNS records can take a
+while to show up, depending on their TTL.</p>
 
     </section>
 

@@ -19,6 +19,38 @@ A domain can only be deleted when it has no accounts left. This makes sure that 
 Under "Domain managers" on the page of a domain you can appoint users who are allowed to manage all accounts and
 mailing lists of that domain (see :doc:`first steps <first-steps>`).
 
+DNS Check
+=========
+
+"DNS check" on the page of a domain shows whether the DNS records of the domain are set up for sending and receiving
+emails with your mail server. Each check is marked as "OK", "Note" (optional or not checked), "Warning" (works, but
+could be improved) or "Error" (affects the delivery of emails), and shows the records found. For missing records, it
+suggests a record to add.
+
+MX
+  The MX records must point to your mail server, and their hosts must have IP addresses.
+
+Reverse DNS
+  The IP addresses of your mail server must point back to its host name. This is the same for all domains, and is set
+  by the provider of the IP addresses, not in the domain's DNS zone.
+
+DNSSEC and DANE
+  DANE lets other mail servers verify the certificate of your mail server with TLSA records. It requires the zone to
+  be signed with DNSSEC.
+
+SPF, DKIM and DMARC
+  These records protect your domain from forged senders. Without them, many mail servers reject your emails or mark
+  them as spam. The SPF record must allow your mail server to send emails, a DKIM key must be published for the
+  selector your mail server signs with, and the DMARC policy should be "quarantine" or "reject".
+
+MTA-STS and TLS-RPT
+  Both are optional. MTA-STS tells other mail servers to deliver emails to your domain only encrypted, TLS-RPT asks
+  them to report problems with that.
+
+Some checks depend on settings of the Post Office (``MAIL_HOSTNAME``, ``DKIM_SELECTORS`` and ``DNS_RESOLVERS``, see
+:doc:`configuration <../setup/configuration>`) and are skipped if they are missing. Changes to DNS records can take a
+while to show up, depending on their TTL.
+
 TLS Policies
 ============
 
