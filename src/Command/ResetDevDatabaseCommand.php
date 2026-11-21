@@ -30,9 +30,12 @@ use App\Entity\Domain;
 use App\Entity\TlsPolicy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -40,8 +43,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 /**
  * Recreates the database schema and loads sample data for development.
  *
- * Until version 1.0 the schema is not managed by migrations, so this command is the way to apply schema changes to
- * the development database. It is only available in the "dev" environment.
+ * The schema is recreated by dropping all tables and running all migrations, so the development database always has
+ * exactly the schema a production database gets. It is only available in the "dev" environment.
  */
 #[AsCommand(name: 'app:dev:reset-database', description: 'Drops and recreates the database schema and loads sample data (dev only).')]
 #[When(env: 'dev')]
@@ -63,10 +66,12 @@ final class ResetDevDatabaseCommand
      * Executes the command.
      *
      * @param SymfonyStyle $io The console input/output helper.
+     * @param Application $application The console application, used to run the migrations.
      * @param bool $force Whether to actually drop all data.
      */
     public function __invoke(
         SymfonyStyle $io,
+        Application $application,
         #[Option(description: 'Actually drop all existing data and recreate the schema.')] bool $force = false
     ): int {
         if (!$force) {
@@ -75,10 +80,12 @@ final class ResetDevDatabaseCommand
             return Command::FAILURE;
         }
 
-        $schemaTool = new SchemaTool($this->entityManager);
-        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        $schemaTool->dropSchema($metadata);
-        $schemaTool->createSchema($metadata);
+        (new SchemaTool($this->entityManager))->dropDatabase();
+
+        if (!$this->migrateDatabase($application, $io)) {
+            return Command::FAILURE;
+        }
+
         $io->info('Database schema recreated.');
 
         $this->loadSampleData();
@@ -97,6 +104,27 @@ final class ResetDevDatabaseCommand
         $io->note(\sprintf('All accounts above use the password "%s".', self::PASSWORD));
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Runs all migrations.
+     *
+     * @param Application $application The console application.
+     * @param SymfonyStyle $io The console input/output helper.
+     */
+    private function migrateDatabase(Application $application, SymfonyStyle $io): bool
+    {
+        $input = new ArrayInput(['command' => 'doctrine:migrations:migrate', '--no-interaction' => true]);
+        $input->setInteractive(false);
+        $output = new BufferedOutput();
+
+        if ($application->doRun($input, $output) !== Command::SUCCESS) {
+            $io->error(\sprintf('Running the migrations failed: %s', $output->fetch()));
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
