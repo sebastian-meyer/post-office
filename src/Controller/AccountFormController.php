@@ -125,10 +125,17 @@ final class AccountFormController extends AbstractController
             default => throw $this->createNotFoundException('Mailing lists are edited on their own page.')
         };
 
-        $form = $this->createForm(self::FORM_TYPES[$data::class] ?? throw $this->createNotFoundException('Unknown account type.'), $data, [
+        $options = [
             // Prevent users from locking themselves out.
             'allow_disable' => $account !== $user
-        ]);
+        ];
+
+        if ($data instanceof SendOnlyData) {
+            // Only administrators can set new passwords for other accounts (see AccountVoter::CHANGE_PASSWORD).
+            $options['allow_password'] = $this->isGranted(AccountVoter::CHANGE_PASSWORD, $account);
+        }
+
+        $form = $this->createForm(self::FORM_TYPES[$data::class] ?? throw $this->createNotFoundException('Unknown account type.'), $data, $options);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -39,6 +39,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
  * - Only administrators and domain managers can appoint list managers.
  * - Members of a mailing list can leave it.
  * - Nobody can delete their own account or an administrator account (see also AdminAccountGuard).
+ * - Only administrators can set new passwords for other accounts, so domain managers can't take over accounts (e.g.
+ *   managers of other domains). Domain managers only set the initial password of new accounts.
  *
  * @extends Voter<string, Account>
  */
@@ -53,6 +55,11 @@ final class AccountVoter extends Voter
      * Delete the account.
      */
     public const string DELETE = 'ACCOUNT_DELETE';
+
+    /**
+     * Set a new password for the existing mailbox or send-only address.
+     */
+    public const string CHANGE_PASSWORD = 'ACCOUNT_CHANGE_PASSWORD';
 
     /**
      * Change the mailing list's settings and members, or delete the mailing list.
@@ -75,6 +82,7 @@ final class AccountVoter extends Voter
     private const array ATTRIBUTES = [
         self::MANAGE,
         self::DELETE,
+        self::CHANGE_PASSWORD,
         self::LIST_MANAGE,
         self::LIST_MANAGE_MANAGERS,
         self::LIST_LEAVE
@@ -120,11 +128,28 @@ final class AccountVoter extends Voter
 
         return match ($attribute) {
             self::LIST_LEAVE => $this->policy->isListMember($user, $subject),
+            self::CHANGE_PASSWORD => $this->canChangePassword($token, $user, $subject),
             self::DELETE => $subject !== $user && !$this->adminAccounts->isAdmin($subject) && $this->managesDomainOf($token, $user, $subject),
             self::MANAGE => $this->adminAccounts->isAdmin($subject) ? $this->isAdmin($token) : $this->managesDomainOf($token, $user, $subject),
             self::LIST_MANAGE => $this->policy->isListManager($user, $subject) || $this->managesDomainOf($token, $user, $subject),
             default => $this->managesDomainOf($token, $user, $subject)
         };
+    }
+
+    /**
+     * Whether the user can set a new password for the account (only administrators, or the user themselves).
+     *
+     * @param TokenInterface $token The security token.
+     * @param Account $user The current user.
+     * @param Account $subject The account to decide on.
+     */
+    private function canChangePassword(TokenInterface $token, Account $user, Account $subject): bool
+    {
+        if (!$subject->isMailbox() && !$subject->isSendOnly()) {
+            return false;
+        }
+
+        return $subject === $user || $this->isAdmin($token);
     }
 
     /**

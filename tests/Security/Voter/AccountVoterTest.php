@@ -118,4 +118,19 @@ final class AccountVoterTest extends TestCase
 
         self::assertTrue((new ManagerPolicy())->isListMember($data->carol, $data->team));
     }
+
+    public function testOnlyAdminsAndTheUserThemselvesCanSetNewPasswords(): void
+    {
+        $data = new TestData();
+        $voter = new AccountVoter(self::decisionManager(), new ManagerPolicy(), self::adminAccounts($data));
+
+        self::assertTrue(self::isGranted($voter, $data->admin, AccountVoter::CHANGE_PASSWORD, $data->bob));
+        self::assertTrue(self::isGranted($voter, $data->admin, AccountVoter::CHANGE_PASSWORD, $data->admin));
+        self::assertTrue(self::isGranted($voter, $data->alice, AccountVoter::CHANGE_PASSWORD, $data->alice));
+        // A domain manager could otherwise take over e.g. a manager of another domain.
+        self::assertFalse(self::isGranted($voter, $data->alice, AccountVoter::CHANGE_PASSWORD, $data->bob));
+        self::assertFalse(self::isGranted($voter, $data->carol, AccountVoter::CHANGE_PASSWORD, $data->dave));
+        // Aliases and mailing lists have no password.
+        self::assertFalse(self::isGranted($voter, $data->admin, AccountVoter::CHANGE_PASSWORD, $data->info));
+    }
 }

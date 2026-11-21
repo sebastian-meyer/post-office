@@ -32,11 +32,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * Form for creating or editing a send-only address.
  *
  * Also the base for mailboxes, which additionally have a quota (see MailboxType).
+ *
+ * Additional option:
+ * - allow_password: Whether a new password can be set for an existing account (see AccountVoter::CHANGE_PASSWORD).
+ *   New accounts always get a password field.
  */
 class SendOnlyType extends AbstractAccountType
 {
     /**
-     * Adds the password field.
+     * Adds the password field (for new accounts, and for existing ones if allow_password is set).
      *
      * @param FormBuilderInterface $builder The form builder.
      * @phpstan-param FormBuilderInterface<AccountData|null> $builder
@@ -50,6 +54,10 @@ class SendOnlyType extends AbstractAccountType
     {
         parent::buildForm($builder, $options);
 
+        if ($options['is_new'] !== true && $options['allow_password'] !== true) {
+            return;
+        }
+
         $builder->add('plainPassword', PasswordType::class, [
             'label' => $options['is_new'] === true ? 'password' : 'newPassword',
             'help' => $options['is_new'] === true ? null : 'passwordUnchangedHelp',
@@ -59,7 +67,7 @@ class SendOnlyType extends AbstractAccountType
     }
 
     /**
-     * Sets the data class.
+     * Sets the data class and the allow_password option.
      *
      * @param OptionsResolver $resolver The options resolver.
      *
@@ -69,7 +77,13 @@ class SendOnlyType extends AbstractAccountType
     public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
-        $resolver->setDefault('data_class', SendOnlyData::class);
+        $resolver
+            ->setDefaults([
+                'data_class' => SendOnlyData::class,
+                // Whether a new password can be set for an existing account (see AccountVoter::CHANGE_PASSWORD).
+                'allow_password' => true
+            ])
+            ->setAllowedTypes('allow_password', 'bool');
     }
 
     /**

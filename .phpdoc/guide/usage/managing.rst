@@ -24,7 +24,7 @@ Domain managers find their domains under "Manage". The domain page lists all acc
 status. From there you can
 
 * create new accounts (see :doc:`first steps <first-steps>` for the account types),
-* edit an account, e.g. to change the name, password or quota of a mailbox, or the destination of an alias,
+* edit an account, e.g. to change the name or quota of a mailbox, or the destination of an alias,
 * disable and enable an account by clicking its status,
 * delete an account,
 * write an email to accounts of the domain (see `Writing Emails`_).
@@ -32,6 +32,10 @@ status. From there you can
 To disable, enable or delete several accounts at once, mark them with the checkboxes in the first column and click
 "Enable", "Disable" or "Delete" above the table. The checkbox in the table header marks all accounts matching the
 current search. Accounts you aren't allowed to change (e.g. your own account or an administrator account) are skipped.
+
+You set the password of a new mailbox or send-only address when you create it. Later, only administrators can set a new
+password for it, since the account may also be a manager of other domains or mailing lists. Users change their own
+password under "Change password".
 
 Disabling an Account
 --------------------

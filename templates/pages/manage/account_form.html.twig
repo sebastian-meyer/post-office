@@ -32,6 +32,9 @@
             </div>
             {% endif %}
             {{ form_rest(form) }}
+            {% if account and (account.mailbox or account.sendOnly) and not is_granted('ACCOUNT_CHANGE_PASSWORD', account) %}
+            <div class="form-text">{{ 'passwordChangeAdminOnly'|trans }}</div>
+            {% endif %}
         </div>
         <div class="card-footer d-flex justify-content-between">
             <a class="btn btn-outline-secondary" href="{{ path('manage_domain', {domain: domain.domain}) }}">

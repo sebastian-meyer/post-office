@@ -204,6 +204,7 @@ noRecipientsMarked: "Es wurden keine Empfänger markiert."
 nothingMarked: "Es wurden keine Einträge markiert."
 open: Öffnen
 password: Passwort
+passwordChangeAdminOnly: "Nur Administratoren können für ein bestehendes Konto ein neues Passwort festlegen. Benutzer können ihr eigenes Passwort unter „Passwort ändern“ ändern."
 passwordChanged: Passwort geändert!
 passwordUnchangedHelp: Leer lassen, um das aktuelle Passwort zu behalten.
 quota: Speicherkontingent

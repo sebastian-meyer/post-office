@@ -19,6 +19,10 @@ A domain can only be deleted when it has no accounts left. This makes sure that 
 Under "Domain managers" on the page of a domain you can appoint users who are allowed to manage all accounts and
 mailing lists of that domain (see :doc:`first steps <first-steps>`).
 
+Only administrators can set a new password for an existing account (e.g. when a user forgot it). Domain managers can
+only set the password of new accounts, otherwise they could take over accounts which manage other domains or mailing
+lists.
+
 DNS Check
 =========
 

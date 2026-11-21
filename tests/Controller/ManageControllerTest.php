@@ -141,6 +141,28 @@ final class ManageControllerTest extends WebTestCase
         self::assertSame(0, $this->reload('bob@example.com')->quota);
     }
 
+    public function testOnlyAdminsCanSetNewPasswordsForOtherAccounts(): void
+    {
+        $passwordBefore = $this->data->bob->password;
+
+        // The domain manager gets no password field, and a submitted password is rejected (as extra field).
+        $crawler = $this->get($this->data->alice, '/manage/account/' . $this->data->bob->id);
+        self::assertSelectorNotExists('input[name="mailbox[plainPassword]"]');
+        self::assertSelectorTextContains('main .card-body', 'Only administrators can set a new password');
+        $form = $crawler->selectButton('Save')->form();
+        $values = $form->getPhpValues();
+        $values['mailbox']['plainPassword'] = 'correct horse battery staple';
+        $this->client->request('POST', '/manage/account/' . $this->data->bob->id, $values, [], self::SAME_ORIGIN);
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame($passwordBefore, $this->reload('bob@example.com')->password);
+
+        // Users can still set their own password, and administrators any password.
+        $this->get($this->data->alice, '/manage/account/' . $this->data->alice->id);
+        self::assertSelectorExists('input[name="mailbox[plainPassword]"]');
+        $this->get($this->data->admin, '/manage/account/' . $this->data->bob->id);
+        self::assertSelectorExists('input[name="mailbox[plainPassword]"]');
+    }
+
     public function testOwnMailboxCannotBeDisabledOrDeleted(): void
     {
         $crawler = $this->get($this->data->alice, '/manage/account/' . $this->data->alice->id);

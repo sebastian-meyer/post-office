@@ -204,6 +204,7 @@ noRecipientsMarked: "No recipients have been marked."
 nothingMarked: "No entries have been marked."
 open: Open
 password: Password
+passwordChangeAdminOnly: "Only administrators can set a new password for an existing account. Users can change their own password under \"Change password\"."
 passwordChanged: Password changed!
 passwordUnchangedHelp: Leave empty to keep the current password.
 quota: Storage quota
