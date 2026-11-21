@@ -12,6 +12,7 @@ Users manage their own email accounts, and administrators can hand over the mana
 - **Delegated management**: administrators appoint *domain managers*, who manage all accounts and mailing lists of their domains, and domain managers appoint *list managers*, who look after the members and settings of individual mailing lists.
 - **All common account types**: mailboxes with storage quota, send-only addresses, aliases, mailing lists (open or members-only) and catch-all addresses are supported.
 - **Mail server administration**: TLS policies for outgoing emails and a blacklist of senders, managed right in the browser.
+- **Bulk emails and notifications**: managers write emails to selected or all addresses of their domains and mailing lists.
 - **Secure by default**: strong passwords that are checked against known data breaches, rate-limited logins, and permissions that are checked on every action.
 - **Available in English and German**, chosen automatically according to the user's browser language.
 
