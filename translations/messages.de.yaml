@@ -3,6 +3,10 @@ accountCreated: "Das Konto %address% wurde angelegt."
 accountDeleted: "Das Konto %address% wurde gelöscht."
 accounts: Konten
 accountSaved: "Das Konto %address% wurde gespeichert."
+accountsDeleted: "{1} Das Konto %addresses% wurde gelöscht.|]1,Inf[ %count% Konten wurden gelöscht: %addresses%"
+accountsDisabled: "{1} %addresses% wurde deaktiviert.|]1,Inf[ %count% Konten wurden deaktiviert: %addresses%"
+accountsEnabled: "{1} %addresses% wurde aktiviert.|]1,Inf[ %count% Konten wurden aktiviert: %addresses%"
+accountsSkipped: "Diese Konten dürfen Sie nicht ändern, sie wurden übersprungen: %addresses%"
 accountType: Kontotyp
 accountType.alias: Weiterleitung
 accountType.list: Verteiler
@@ -14,6 +18,7 @@ addMember: Mitglied hinzufügen
 address: Adresse
 administrator: Administrator
 backToHomepage: Zurück zur Startseite
+backToSelection: "Zurück zur Auswahl"
 blacklist: Sperrliste
 blacklistAction: Aktion
 blacklistAction.DISCARD: Verwerfen
@@ -31,6 +36,7 @@ changePassword: Passwort ändern
 clickToDisable: Klicken zum Deaktivieren
 clickToEnable: Klicken zum Aktivieren
 close: Schließen
+composePasswordHelp: "Ihr Passwort wird benötigt, um die E-Mail mit Ihrem Konto zu versenden. Es wird bis zur Abmeldung gespeichert."
 confirmTitle: Bitte bestätigen
 currentPassword: Aktuelles Passwort
 datatables.emptyTable: "Keine Einträge vorhanden."
@@ -51,9 +57,11 @@ deleteDomainConfirm: "Möchten Sie die Domain %domain% wirklich löschen?"
 deleteList: Verteiler löschen
 deleteListConfirm: "Möchten Sie den Verteiler %list% wirklich löschen? Seine Mitglieder erhalten dann keine E-Mails mehr, die an ihn gesendet werden."
 deleteMailboxConfirm: "Möchten Sie das Postfach %address% wirklich löschen? Auf dem Server gespeicherte E-Mails werden nicht gelöscht und müssen vom Server-Administrator entfernt werden."
+deleteMarkedAccountsConfirm: "Möchten Sie die markierten Konten (%count%) wirklich löschen? Aliase und Catch-all-Verteiler, die nur dorthin weiterleiten, werden ebenfalls gelöscht. Auf dem Server gespeicherte E-Mails werden nicht gelöscht und müssen vom Server-Administrator entfernt werden."
 deleteTlsPolicyConfirm: "Möchten Sie die TLS-Richtlinie für %domain% wirklich löschen?"
 dependentAccountDeleted: "%address% wurde ebenfalls gelöscht, da es nur an %destination% weitergeleitet hat."
 destination: Zieladresse
+disable: "Deaktivieren"
 domain: Domain
 domainCreated: "Die Domain %domain% wurde angelegt."
 domainDeleted: "Die Domain %domain% wurde gelöscht."
@@ -70,6 +78,11 @@ editAccount: "%address% bearbeiten"
 editBlacklistEntry: "Sperrlisteneintrag für %address% bearbeiten"
 editTlsPolicy: "TLS-Richtlinie für %domain% bearbeiten"
 email: E-Mail-Adresse
+emailAuthenticationFailed: "Der Mailserver hat Ihr Passwort nicht akzeptiert. Bitte geben Sie es erneut ein."
+emailNotSent: "Die E-Mail konnte nicht versendet werden: %error%"
+emailPartiallySent: "Der Versand ist nach %count% von %total% Empfängern fehlgeschlagen: %error%"
+emailSent: "{1} Die E-Mail wurde an einen Empfänger versendet.|]1,Inf[ Die E-Mail wurde an %count% Empfänger versendet."
+enable: "Aktivieren"
 enabled: Aktiviert
 entryDisabled: "%name% wurde deaktiviert."
 entryEnabled: "%name% wurde aktiviert."
@@ -104,10 +117,15 @@ manageList: Verwalten
 managerAdded: "%email% ist jetzt Verteilerverwalter."
 managerHelp: Muss ein aktiviertes Postfach sein (beliebige Domain).
 managerRemoved: "%email% ist kein Verteilerverwalter mehr."
+markAll: "Alle markieren"
+markedEntries: "Markiert: %count%"
+markEntry: "%name% markieren"
 memberAdded: "%email% wurde dem Verteiler hinzugefügt."
 memberRemoved: "%email% wurde aus dem Verteiler entfernt."
 memberRemoveFailed: "%email% kann nicht entfernt werden, da eine Catch-all-Adresse mindestens ein Ziel benötigt."
 members: Mitglieder
+membersRemoved: "{1} %emails% wurde aus dem Verteiler entfernt.|]1,Inf[ %count% Mitglieder wurden aus dem Verteiler entfernt: %emails%"
+message: "Nachricht"
 myMailingLists: Meine Verteiler
 myMailingListsHelp: Sie erhalten E-Mails, die an diese Verteiler gesendet werden.
 newAlias: Neue Weiterleitung
@@ -119,6 +137,8 @@ newPassword: Neues Passwort
 newPasswordRepeat: Neues Passwort (Wiederholung)
 newSendOnly: Neue Nur-Senden-Adresse
 newTlsPolicy: Neue TLS-Richtlinie
+noRecipientsMarked: "Es wurden keine Empfänger markiert."
+nothingMarked: "Es wurden keine Einträge markiert."
 open: Öffnen
 password: Passwort
 passwordChanged: Passwort geändert!
@@ -129,13 +149,19 @@ quotaInMegabytes: Speicherkontingent (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unbegrenzt
 recipientDomain: Empfängerdomain
+recipients: "Empfänger"
+recipientsHelp: "Die Empfänger sehen die Adressen der anderen nicht. Sie erhalten eine Kopie der E-Mail. Entfernen Sie die Markierung, um Empfänger auszulassen."
+recipientsSkipped: "Diese markierten Adressen können keine E-Mails empfangen (z. B. weil sie deaktiviert, Nur-Senden-Adressen oder Verteiler nur für Mitglieder sind, in denen Sie nicht Mitglied sind) und wurden ausgelassen: %addresses%"
 remove: Entfernen
 removeDomainManagerConfirm: "Möchten Sie %email% wirklich als Verwalter von %domain% entfernen?"
 removeManagerConfirm: "Möchten Sie %email% wirklich als Verwalter von %list% entfernen?"
+removeMarkedMembersConfirm: "Möchten Sie die markierten Mitglieder (%count%) wirklich aus %list% entfernen?"
 removeMemberConfirm: "Möchten Sie %email% wirklich aus %list% entfernen?"
 replyToList: Antworten gehen an den Verteiler
 replyToListHelp: Fügt einen Reply-To-Header mit der Verteileradresse hinzu.
 save: Speichern
+sendEmail: "Senden"
+sender: "Absender"
 showPassword: Passwort ein-/ausblenden
 status: Status
 statusDisabled: Deaktiviert
@@ -143,6 +169,7 @@ managerSuspendedHint: Dieses Konto ist deaktiviert. Seine Verwalterrolle ruht, b
 statusEnabled: Aktiviert
 strictList: Nur Mitglieder
 strictListHelp: Nur Mitglieder des Verteilers dürfen E-Mails an ihn senden.
+subject: "Betreff"
 tlsDomainHelp: Ein vorangestellter Punkt (z. B. .example.com) schließt alle Subdomains ein.
 tlsParams: Parameter
 tlsParamsHelp: Optionale Postfix-Parameter der Richtlinie, z. B. match=hostname.
@@ -153,3 +180,6 @@ tlsPolicyDeleted: "Die TLS-Richtlinie für %domain% wurde gelöscht."
 tlsPolicySaved: "Die TLS-Richtlinie für %domain% wurde gespeichert."
 username: Benutzername
 welcome: "Willkommen, %label%!"
+writeEmail: "E-Mail schreiben"
+writeToList: "An den Verteiler schreiben"
+yourPassword: "Ihr Passwort"

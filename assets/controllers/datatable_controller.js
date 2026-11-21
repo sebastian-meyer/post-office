@@ -31,8 +31,20 @@ import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
  * table) and connecting (initializing it again) in an endless loop.
  *
  * Column options can be set on the header cells, e.g. <th data-orderable="false" data-searchable="false">.
+ *
+ * Rows can be marked with checkboxes to submit them to bulk action forms (see templates/macros/datatable.html.twig):
+ * - a checkbox per row: <input type="checkbox" value="ID" data-datatable-row data-action="datatable#update">
+ * - a checkbox in the header marks or unmarks all rows matching the search: <input type="checkbox"
+ *   data-datatable-target="all" data-action="datatable#toggleAll">
+ * - forms inside the wrapper with data-action="datatable#submit" get the marked values as hidden "selection[]"
+ *   fields when submitted (rows on other pages included, which DataTables removes from the document)
+ * - elements with data-datatable-target="count" show the number of marked rows, buttons with
+ *   data-datatable-target="action" are disabled while no row is marked, and forms with a
+ *   data-datatable-confirm-template attribute get it as confirmation message, with %count% replaced.
  */
 export default class extends Controller {
+    static targets = ['all', 'count', 'action'];
+
     static values = {
         language: Object,
         options: Object
@@ -53,6 +65,10 @@ export default class extends Controller {
             ...this.optionsValue
         });
 
+        // The header checkbox reflects the rows matching the current search.
+        this.table.on('draw', () => this.update());
+        this.update();
+
         // Restore the plain table before Turbo caches the page, so it isn't initialized twice when restored.
         this.beforeCache = () => this.destroy();
         document.addEventListener('turbo:before-cache', this.beforeCache);
@@ -66,5 +82,81 @@ export default class extends Controller {
     destroy() {
         this.table?.destroy();
         this.table = null;
+    }
+
+    /**
+     * Marks or unmarks all rows matching the current search (on all pages).
+     */
+    toggleAll(event) {
+        this.checkboxes({ search: 'applied' }).forEach((checkbox) => {
+            checkbox.checked = event.target.checked;
+        });
+        this.update();
+    }
+
+    /**
+     * Updates the header checkbox, the counters, the action buttons and the confirmation messages.
+     */
+    update() {
+        const count = this.marked().length;
+        const visible = this.checkboxes({ search: 'applied' });
+        const visibleMarked = visible.filter((checkbox) => checkbox.checked).length;
+
+        this.allTargets.forEach((checkbox) => {
+            checkbox.checked = visible.length > 0 && visibleMarked === visible.length;
+            checkbox.indeterminate = visibleMarked > 0 && visibleMarked < visible.length;
+        });
+        this.countTargets.forEach((element) => {
+            element.textContent = count;
+        });
+        this.actionTargets.forEach((button) => {
+            button.disabled = count === 0;
+        });
+        this.element.querySelectorAll('form[data-datatable-confirm-template]').forEach((form) => {
+            form.dataset.confirmMessageValue = form.dataset.datatableConfirmTemplate.replace('%count%', count);
+        });
+    }
+
+    /**
+     * Adds the marked values to the submitted form.
+     */
+    submit(event) {
+        const form = event.target;
+        const values = this.marked().map((checkbox) => checkbox.value);
+
+        if (values.length === 0) {
+            event.preventDefault();
+            return;
+        }
+
+        form.querySelectorAll('input[data-datatable-selection]').forEach((input) => input.remove());
+        values.forEach((value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selection[]';
+            input.value = value;
+            input.dataset.datatableSelection = '';
+            form.append(input);
+        });
+    }
+
+    /**
+     * Returns the row checkboxes, including those of rows on other pages.
+     */
+    checkboxes(selector = {}) {
+        if (!this.table) {
+            return [...this.element.querySelectorAll('input[data-datatable-row]')];
+        }
+
+        return this.table.rows(selector).nodes().toArray()
+            .map((row) => row.querySelector('input[data-datatable-row]'))
+            .filter((checkbox) => checkbox !== null && !checkbox.disabled);
+    }
+
+    /**
+     * Returns the marked row checkboxes.
+     */
+    marked() {
+        return this.checkboxes().filter((checkbox) => checkbox.checked);
     }
 }

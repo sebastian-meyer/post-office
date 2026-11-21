@@ -75,7 +75,7 @@ final class ManageControllerTest extends WebTestCase
     public function testDomainPageListsAccounts(): void
     {
         $crawler = $this->get($this->data->alice, '/manage/domain/example.com/accounts');
-        $addresses = array_map('trim', $this->column($crawler, 0));
+        $addresses = array_map('trim', $this->column($crawler, 1));
 
         self::assertContains('alice@example.com', $addresses);
         self::assertContains('info@example.com', $addresses);

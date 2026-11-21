@@ -123,6 +123,25 @@ final class AccountRepository extends EntityRepository
     }
 
     /**
+     * Finds the accounts with the given email addresses (e.g. to check which list members are local accounts).
+     *
+     * @param list<string> $emails The email addresses.
+     *
+     * @return list<Account> The accounts, in no particular order.
+     */
+    public function findByEmails(array $emails): array
+    {
+        if ($emails === []) {
+            return [];
+        }
+
+        return $this->getEntityResult(
+            $this->createQueryBuilder('account')
+                ->andWhere("CONCAT(account.username, '@', IDENTITY(account.domain)) IN (:emails)")->setParameter('emails', $emails)
+        );
+    }
+
+    /**
      * Finds the account with the given email address (or "@domain" for a catch-all address).
      *
      * @param string $email The email address.

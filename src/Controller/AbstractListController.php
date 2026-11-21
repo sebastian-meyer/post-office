@@ -28,6 +28,7 @@ use App\Form\Model\AccountData;
 use App\Form\Model\ManagerData;
 use App\Form\Model\MemberData;
 use App\Repository\AccountRepository;
+use App\Service\RecipientPolicy;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,6 +54,7 @@ abstract class AbstractListController extends AbstractController
         ?FormInterface $member = null,
         ?FormInterface $manager = null
     ): Response {
+        $user = $this->getUser();
         $submitted = ($settings?->isSubmitted() ?? false) || ($member?->isSubmitted() ?? false) || ($manager?->isSubmitted() ?? false);
 
         return $this->render('pages/manage/list.html.twig', [
@@ -60,6 +62,8 @@ abstract class AbstractListController extends AbstractController
             'settingsForm' => $settings ?? $this->listForms->settings($list),
             'memberForm' => $member ?? $this->listForms->member($list),
             'managerForm' => $manager ?? $this->listForms->manager($list),
+            // Whether the "write to the list" button is shown.
+            'listCanReceiveEmails' => $user instanceof Account && $this->recipientPolicy->canReceiveEmails($list, $user),
             // Suggestions for the manager form (eligible accounts which are not yet managers).
             'managerCandidates' => array_values(array_filter(
                 $this->accountRepository->findManagerCandidates($list->domain),
@@ -71,10 +75,12 @@ abstract class AbstractListController extends AbstractController
     /**
      * @param MailingListForms $listForms The factory for the forms of the mailing list page.
      * @param AccountRepository $accountRepository The repository for accounts.
+     * @param RecipientPolicy $recipientPolicy The rules for which accounts can receive emails.
      */
     public function __construct(
         protected readonly MailingListForms $listForms,
-        private readonly AccountRepository $accountRepository
+        private readonly AccountRepository $accountRepository,
+        private readonly RecipientPolicy $recipientPolicy
     ) {
     }
 }

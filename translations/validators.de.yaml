@@ -7,5 +7,6 @@ invalidUsername: Der Benutzername enthält ungültige Zeichen.
 managerNotEligible: Nur aktivierte Postfächer können Verwalter sein.
 managerNotFound: Es gibt kein Konto mit dieser E-Mail-Adresse.
 newPasswordSameAsCurrent: Das neue Passwort darf nicht mit dem aktuellen Passwort übereinstimmen.
+noRecipients: "Bitte markieren Sie mindestens einen Empfänger."
 passwordsNotMatching: Die Passwörter stimmen nicht überein.
 usernameRequired: Bitte geben Sie einen Benutzernamen ein.

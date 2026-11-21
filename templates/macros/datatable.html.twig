@@ -32,3 +32,35 @@
     }|json_encode|e('html_attr') }}"
     {%- if options is not empty %} data-datatable-options-value="{{ options|json_encode|e('html_attr') }}"{% endif %}
 {%- endmacro %}
+
+{#
+    Header cell with a checkbox that marks or unmarks all rows (matching the current search). The column must not be
+    the one the table is ordered by.
+
+    Usage: <th {{ datatable.select_column() }}>{{ datatable.select_all() }}</th>
+#}
+{% macro select_column() -%}
+    class="text-center" style="width: 1%;" data-orderable="false" data-searchable="false"
+{%- endmacro %}
+
+{% macro select_all() -%}
+    <input type="checkbox" class="form-check-input" data-datatable-target="all" data-action="datatable#toggleAll"
+           title="{{ 'markAll'|trans }}" aria-label="{{ 'markAll'|trans }}">
+{%- endmacro %}
+
+{#
+    Checkbox marking a row for the bulk actions (value: the value to submit, label: what the row is about).
+
+    Usage: <td class="text-center">{{ datatable.select_row(account.id, account) }}</td>
+#}
+{% macro select_row(value, label) -%}
+    <input type="checkbox" class="form-check-input" value="{{ value }}" data-datatable-row data-action="datatable#update"
+           aria-label="{{ 'markEntry'|trans({'%name%': label ~ ''}) }}">
+{%- endmacro %}
+
+{#
+    Counter of the marked rows, for the toolbar of the bulk actions.
+#}
+{% macro marked_count() -%}
+    <span class="text-body-secondary">{{ 'markedEntries'|trans({'%count%': '<span data-datatable-target="count">0</span>'})|raw }}</span>
+{%- endmacro %}

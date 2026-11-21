@@ -3,6 +3,10 @@ accountCreated: "The account %address% has been created."
 accountDeleted: "The account %address% has been deleted."
 accounts: Accounts
 accountSaved: "The account %address% has been saved."
+accountsDeleted: "{1} The account %addresses% has been deleted.|]1,Inf[ %count% accounts have been deleted: %addresses%"
+accountsDisabled: "{1} %addresses% has been disabled.|]1,Inf[ %count% accounts have been disabled: %addresses%"
+accountsEnabled: "{1} %addresses% has been enabled.|]1,Inf[ %count% accounts have been enabled: %addresses%"
+accountsSkipped: "You are not allowed to change these accounts, so they have been skipped: %addresses%"
 accountType: Account type
 accountType.alias: Alias
 accountType.list: Mailing list
@@ -14,6 +18,7 @@ addMember: Add member
 address: Address
 administrator: Administrator
 backToHomepage: Back to homepage
+backToSelection: "Back to the selection"
 blacklist: Blacklist
 blacklistAction: Action
 blacklistAction.DISCARD: Discard
@@ -31,6 +36,7 @@ changePassword: Change password
 clickToDisable: Click to disable
 clickToEnable: Click to enable
 close: Close
+composePasswordHelp: "Your password is needed to send the email with your account. It is kept until you log out."
 confirmTitle: Please confirm
 currentPassword: Current password
 datatables.emptyTable: "No entries available."
@@ -51,9 +57,11 @@ deleteDomainConfirm: "Do you really want to delete the domain %domain%?"
 deleteList: Delete mailing list
 deleteListConfirm: "Do you really want to delete the mailing list %list%? Its members will no longer receive emails sent to it."
 deleteMailboxConfirm: "Do you really want to delete the mailbox %address%? Emails stored on the server are not deleted and have to be removed by the server administrator."
+deleteMarkedAccountsConfirm: "Do you really want to delete the marked accounts (%count%)? Aliases and catch-all lists forwarding only to them are deleted as well. Emails stored on the server are not deleted and have to be removed by the server administrator."
 deleteTlsPolicyConfirm: "Do you really want to delete the TLS policy for %domain%?"
 dependentAccountDeleted: "%address% has been deleted as well, because it only forwarded to %destination%."
 destination: Destination address
+disable: "Disable"
 domain: Domain
 domainCreated: "The domain %domain% has been created."
 domainDeleted: "The domain %domain% has been deleted."
@@ -70,6 +78,11 @@ editAccount: "Edit %address%"
 editBlacklistEntry: "Edit blacklist entry for %address%"
 editTlsPolicy: "Edit TLS policy for %domain%"
 email: E-mail address
+emailAuthenticationFailed: "The mail server did not accept your password. Please enter it again."
+emailNotSent: "The email could not be sent: %error%"
+emailPartiallySent: "Sending the email failed after %count% of %total% recipients: %error%"
+emailSent: "{1} The email has been sent to one recipient.|]1,Inf[ The email has been sent to %count% recipients."
+enable: "Enable"
 enabled: Enabled
 entryDisabled: "%name% has been disabled."
 entryEnabled: "%name% has been enabled."
@@ -104,10 +117,15 @@ manageList: Manage
 managerAdded: "%email% is now a list manager."
 managerHelp: Must be an enabled mailbox (of any domain).
 managerRemoved: "%email% is no longer a list manager."
+markAll: "Mark all"
+markedEntries: "Marked: %count%"
+markEntry: "Mark %name%"
 memberAdded: "%email% has been added to the mailing list."
 memberRemoved: "%email% has been removed from the mailing list."
 memberRemoveFailed: "%email% cannot be removed, because a catch-all address needs at least one destination."
 members: Members
+membersRemoved: "{1} %emails% has been removed from the mailing list.|]1,Inf[ %count% members have been removed from the mailing list: %emails%"
+message: "Message"
 myMailingLists: My mailing lists
 myMailingListsHelp: You receive emails sent to these mailing lists.
 newAlias: New alias
@@ -119,6 +137,8 @@ newPassword: New password
 newPasswordRepeat: New password (repeat)
 newSendOnly: New send-only address
 newTlsPolicy: New TLS policy
+noRecipientsMarked: "No recipients have been marked."
+nothingMarked: "No entries have been marked."
 open: Open
 password: Password
 passwordChanged: Password changed!
@@ -129,13 +149,19 @@ quotaInMegabytes: Storage quota (MB)
 quotaMegabytes: '%quota% MB'
 quotaUnlimited: Unlimited
 recipientDomain: Recipient domain
+recipients: "Recipients"
+recipientsHelp: "Recipients don't see each other's addresses. You get a copy of the email. Unmark recipients to leave them out."
+recipientsSkipped: "These marked addresses cannot receive emails (e.g. because they are disabled, send-only addresses or members-only lists you are not a member of) and have been left out: %addresses%"
 remove: Remove
 removeDomainManagerConfirm: "Do you really want to remove %email% as manager of %domain%?"
 removeManagerConfirm: "Do you really want to remove %email% as manager of %list%?"
+removeMarkedMembersConfirm: "Do you really want to remove the marked members (%count%) from %list%?"
 removeMemberConfirm: "Do you really want to remove %email% from %list%?"
 replyToList: Replies go to the list
 replyToListHelp: Adds a Reply-To header with the list address.
 save: Save
+sendEmail: "Send"
+sender: "Sender"
 showPassword: Show/hide password
 status: Status
 statusDisabled: Disabled
@@ -143,6 +169,7 @@ managerSuspendedHint: This account is disabled. Its manager role is suspended un
 statusEnabled: Enabled
 strictList: Members only
 strictListHelp: Only members of the list are allowed to send emails to it.
+subject: "Subject"
 tlsDomainHelp: A leading dot (e.g. .example.com) includes all subdomains.
 tlsParams: Parameters
 tlsParamsHelp: Optional Postfix policy parameters, e.g. match=hostname.
@@ -153,3 +180,6 @@ tlsPolicyDeleted: "The TLS policy for %domain% has been deleted."
 tlsPolicySaved: "The TLS policy for %domain% has been saved."
 username: Username
 welcome: "Welcome, %label%!"
+writeEmail: "Write email"
+writeToList: "Write to the list"
+yourPassword: "Your password"

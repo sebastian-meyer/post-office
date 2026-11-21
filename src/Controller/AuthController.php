@@ -24,6 +24,7 @@ namespace App\Controller;
 
 use App\Entity\Account;
 use App\Security\AccountUserProvider;
+use App\Security\SubmissionCredentials;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -56,6 +57,7 @@ final class AuthController extends AbstractController
         #[CurrentUser] Account $user,
         AccountUserProvider $userProvider,
         UserPasswordHasherInterface $hasher,
+        SubmissionCredentials $credentials,
         #[MapQueryParameter('success')] ?bool $success = false
     ): array|Response {
         $form = $this->createFormBuilder()
@@ -106,6 +108,8 @@ final class AuthController extends AbstractController
         if ($form->isSubmitted() && $form->isValid() && \is_string($newPassword)) {
             $hashedPassword = $hasher->hashPassword($user, $newPassword);
             $userProvider->upgradePassword($user, $hashedPassword);
+            // Keep sending emails with the new password (see ComposeController).
+            $credentials->store($user, $newPassword);
 
             return $this->redirectToRoute('change_password', ['success' => true]);
         }

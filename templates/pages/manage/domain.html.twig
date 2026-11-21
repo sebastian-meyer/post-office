@@ -33,10 +33,41 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <div {{ datatable.attributes({order: [[0, 'asc']]}) }}>
+            <div {{ datatable.attributes({order: [[1, 'asc']]}) }}>
+                {% set bulkToken = csrf_token('bulk-accounts-' ~ domain.domain) %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    {{ datatable.marked_count() }}
+                    <form method="post" action="{{ path('manage_domain_compose', {domain: domain.domain}) }}" class="ms-auto"
+                          data-turbo="false" data-action="datatable#submit">
+                        <button type="submit" class="btn btn-sm btn-primary" data-datatable-target="action" disabled>
+                            {{ ux_icon('mdi:email-edit', {class: 'me-1'}) }} {{ 'writeEmail'|trans }}
+                        </button>
+                    </form>
+                    <form method="post" action="{{ path('manage_domain_bulk_toggle', {domain: domain.domain, action: 'enable'}) }}" data-action="datatable#submit">
+                        <input type="hidden" name="_token" value="{{ bulkToken }}">
+                        <button type="submit" class="btn btn-sm btn-outline-success" data-datatable-target="action" disabled>
+                            {{ ux_icon('mdi:check-circle-outline', {class: 'me-1'}) }} {{ 'enable'|trans }}
+                        </button>
+                    </form>
+                    <form method="post" action="{{ path('manage_domain_bulk_toggle', {domain: domain.domain, action: 'disable'}) }}" data-action="datatable#submit">
+                        <input type="hidden" name="_token" value="{{ bulkToken }}">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" data-datatable-target="action" disabled>
+                            {{ ux_icon('mdi:close-circle-outline', {class: 'me-1'}) }} {{ 'disable'|trans }}
+                        </button>
+                    </form>
+                    <form method="post" action="{{ path('manage_domain_bulk_delete', {domain: domain.domain}) }}"
+                          data-controller="confirm" data-action="confirm#ask datatable#submit"
+                          data-datatable-confirm-template="{{ 'deleteMarkedAccountsConfirm'|trans }}">
+                        <input type="hidden" name="_token" value="{{ bulkToken }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" data-datatable-target="action" disabled>
+                            {{ ux_icon('mdi:delete', {class: 'me-1'}) }} {{ 'delete'|trans }}
+                        </button>
+                    </form>
+                </div>
                 <table class="table table-striped table-hover align-middle">
                     <thead>
                         <tr>
+                            <th {{ datatable.select_column() }}>{{ datatable.select_all() }}</th>
                             <th>{{ 'address'|trans }}</th>
                             <th>{{ 'accountType'|trans }}</th>
                             <th>{{ 'label'|trans }}</th>
@@ -48,6 +79,7 @@
                     <tbody>
                         {% for account in accounts %}
                         <tr>
+                            <td class="text-center">{{ datatable.select_row(account.id, account) }}</td>
                             <td class="font-monospace">
                                 {{ account }}
                                 {% if account.catchAll %}<span class="badge text-bg-secondary ms-1">{{ 'catchAll'|trans }}</span>{% endif %}

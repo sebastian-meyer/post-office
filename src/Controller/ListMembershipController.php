@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Account;
+use App\Entity\Destination;
 use App\Security\Voter\AccountVoter;
 use App\Service\MembershipManager;
 use LogicException;
@@ -84,6 +85,46 @@ final class ListMembershipController extends AbstractListController
         } catch (LogicException) {
             // The last member of a catch-all list cannot be removed.
             $this->addFlash('danger', new TranslatableMessage('memberRemoveFailed', ['%email%' => $email]));
+        }
+
+        return $this->redirectToList($list);
+    }
+
+    /**
+     * Removes the members marked in the list's member table.
+     *
+     * @param Account $list The mailing list.
+     * @param Request $request The current request (with the marked email addresses).
+     * @param MembershipManager $membershipManager The service for memberships and manager roles.
+     */
+    #[IsGranted(AccountVoter::LIST_MANAGE, subject: 'list')]
+    #[Route('/manage/list/{id}/members/remove-marked', name: 'manage_list_members_bulk_remove', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function removeMembers(#[MapEntity(id: 'id')] Account $list, Request $request, MembershipManager $membershipManager): Response
+    {
+        $this->checkToken('bulk-members-' . $list->id, $request);
+        $members = array_map(static fn (Destination $member): string => strtolower((string) $member), $list->destinations->getValues());
+        $emails = array_values(array_filter(
+            $request->getPayload()->all('selection'),
+            static fn (mixed $email): bool => \is_string($email) && \in_array(strtolower($email), $members, true)
+        ));
+        $removed = [];
+
+        if ($emails === []) {
+            $this->addFlash('warning', new TranslatableMessage('nothingMarked'));
+        }
+
+        foreach ($emails as $email) {
+            try {
+                $membershipManager->removeMember($list, $email);
+                $removed[] = $email;
+            } catch (LogicException) {
+                // The last member of a catch-all list cannot be removed.
+                $this->addFlash('danger', new TranslatableMessage('memberRemoveFailed', ['%email%' => $email]));
+            }
+        }
+
+        if ($removed !== []) {
+            $this->addFlash('success', new TranslatableMessage('membersRemoved', ['%count%' => \count($removed), '%emails%' => implode(', ', $removed)]));
         }
 
         return $this->redirectToList($list);

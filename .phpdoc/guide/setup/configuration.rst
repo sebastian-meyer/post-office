@@ -36,8 +36,8 @@ Settings
   remove its ID from this list.
 
 ``APP_SECRET``
-  A random string which is used to secure sessions and forms. It should be at least 32 characters long and must be
-  kept secret. Changing it logs out all users.
+  A random string which is used to secure sessions and forms, and to encrypt the users' passwords kept in the session
+  for sending emails. It should be at least 32 characters long and must be kept secret. Changing it logs out all users.
 
 ``APP_ENV``
   The environment the application runs in. Always use ``prod`` (the default) for production systems.
@@ -53,8 +53,17 @@ Settings
   The URL of your Post Office installation, e.g. ``https://postoffice.example.com/``. This is used to generate links
   when there is no HTTP request, e.g. in console commands.
 
-``MAILER_DSN`` and ``MESSENGER_TRANSPORT_DSN``
-  These are not used yet and are reserved for upcoming features. Leave them at their defaults.
+``MAILER_DSN``
+  The mail server used to send the emails written by administrators, domain managers and list managers (see
+  :doc:`managing accounts <../usage/managing>`), e.g. ``smtp://mail.example.com:587``. Use the submission port of
+  your own mail server: the emails are sent with the email address and password of the logged-in user, so any user
+  name and password in ``MAILER_DSN`` are ignored. If the certificate of the mail server doesn't match the host name
+  (e.g. when connecting to ``localhost``), add ``?verify_peer=0``.
+
+  The default ``null://null`` discards all emails.
+
+``MESSENGER_TRANSPORT_DSN``
+  This is not used yet and is reserved for upcoming features. Leave it at its default.
 
 Languages
 =========
