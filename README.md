@@ -73,11 +73,11 @@ This application follows the highest coding standards of [PHPStan](https://phpst
 
 [![PHPCS](https://github.com/sebastian-meyer/post-office/actions/workflows/phpcs.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/phpcs.yml)
 [![PHPMD](https://github.com/sebastian-meyer/post-office/actions/workflows/phpmd.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/phpmd.yml)
-
 [![PHPStan](https://github.com/sebastian-meyer/post-office/actions/workflows/phpstan.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/phpstan.yml)
 [![Psalm](https://github.com/sebastian-meyer/post-office/actions/workflows/psalm.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/psalm.yml)
-
 [![PHPUnit](https://github.com/sebastian-meyer/post-office/actions/workflows/phpunit.yml/badge.svg)](https://github.com/sebastian-meyer/post-office/actions/workflows/phpunit.yml)
+
+Assisted-by: Claude Opus 5.5 (Anthropic)
 
 ## Contributing
 
