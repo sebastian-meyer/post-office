@@ -24,6 +24,7 @@ namespace App\Security;
 
 use App\Entity\Account;
 use App\Entity\Destination;
+use App\Service\AccountAddresses;
 
 /**
  * Rules for list managers and list members.
@@ -61,10 +62,8 @@ final class ManagerPolicy
             return false;
         }
 
-        $address = $user->getUserIdentifier();
-
         return $list->destinations->exists(
-            static fn (int|string $key, Destination $destination): bool => strcasecmp((string) $destination, $address) === 0
+            static fn (int|string $key, Destination $destination): bool => AccountAddresses::belongsTo((string) $destination, $user)
         );
     }
 }

@@ -25,6 +25,7 @@ namespace App\Repository;
 use App\Entity\Account;
 use App\Entity\AccountType;
 use App\Entity\Domain;
+use App\Service\AccountAddresses;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use SortDirection;
@@ -64,7 +65,7 @@ final class AccountRepository extends EntityRepository
     /**
      * Returns all aliases (including catch-all aliases) forwarding to the given account.
      *
-     * Destinations are identified by their email address, which the database collation compares case-insensitively.
+     * This includes aliases forwarding to an address with extension (see AccountAddresses).
      *
      * @param Account $destination The destination.
      *
@@ -72,19 +73,13 @@ final class AccountRepository extends EntityRepository
      */
     public function findAliasesByDestination(Account $destination): array
     {
-        return $this->getEntityResult(
-            $this->createQueryBuilder('account')
-                ->andWhere('account.type = :type')->setParameter('type', AccountType::Alias)
-                ->andWhere(':email MEMBER OF account.destinations')->setParameter('email', $destination->getUserIdentifier())
-                ->addOrderBy('account.domain', SortDirection::Ascending)
-                ->addOrderBy('account.username', SortDirection::Ascending)
-        );
+        return $this->findByDestinationOf($destination, AccountType::Alias);
     }
 
     /**
      * Returns all mailing lists the given account is a member of.
      *
-     * Destinations are identified by their email address, which the database collation compares case-insensitively.
+     * This includes lists with an address with extension as member (see AccountAddresses).
      *
      * @param Account $member The member.
      *
@@ -92,10 +87,33 @@ final class AccountRepository extends EntityRepository
      */
     public function findListsByMember(Account $member): array
     {
+        return $this->findByDestinationOf($member, AccountType::MailingList);
+    }
+
+    /**
+     * Returns all accounts of the given type with a destination belonging to the account.
+     *
+     * Destinations are identified by their email address, which the database collation compares case-insensitively.
+     *
+     * @param Account $account The account the destinations belong to.
+     * @param AccountType $type The type of the accounts to return.
+     *
+     * @return list<Account> The accounts, ordered by domain and username.
+     */
+    private function findByDestinationOf(Account $account, AccountType $type): array
+    {
+        if ($account->isCatchAll()) {
+            return [];
+        }
+
         return $this->getEntityResult(
             $this->createQueryBuilder('account')
-                ->andWhere('account.type = :type')->setParameter('type', AccountType::MailingList)
-                ->andWhere(':email MEMBER OF account.destinations')->setParameter('email', $member->getUserIdentifier())
+                ->distinct()
+                ->innerJoin('account.destinations', 'destination')
+                ->andWhere('account.type = :type')->setParameter('type', $type->value, Types::STRING)
+                ->andWhere("destination.destination = :email OR destination.destination LIKE :extension ESCAPE '!'")
+                ->setParameter('email', $account->getUserIdentifier())
+                ->setParameter('extension', AccountAddresses::extensionPattern($account))
                 ->addOrderBy('account.domain', SortDirection::Ascending)
                 ->addOrderBy('account.username', SortDirection::Ascending)
         );

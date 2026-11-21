@@ -112,10 +112,11 @@ final class AccountManager
     /**
      * Deletes an account.
      *
-     * The account is removed from all manager roles and its address from all mailing lists first. Aliases forwarding
-     * to the address, and catch-all mailing lists having it as their last member, are deleted as well (and so on, for
-     * aliases and lists forwarding to those), so no address keeps forwarding to the deleted one. Otherwise, whoever
-     * gets the address next would receive their emails. Note that the mail storage of a mailbox is not deleted.
+     * The account is removed from all manager roles and its addresses from all mailing lists first. Aliases forwarding
+     * to its addresses, and catch-all mailing lists having one as their last member, are deleted as well (and so on,
+     * for aliases and lists forwarding to those), so no address keeps forwarding to the deleted one. Otherwise, whoever
+     * gets the address next would receive their emails. This includes addresses with extension (e.g.
+     * "bob+news@example.com", see AccountAddresses). Note that the mail storage of a mailbox is not deleted.
      *
      * @param Account $account The account to delete.
      *

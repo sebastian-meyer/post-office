@@ -44,7 +44,9 @@ Deleting an Account
 -------------------
 
 Deleting an account removes it from all mailing lists and revokes all its manager roles. Aliases which only forwarded to
-the deleted account are deleted as well, because they would be useless otherwise.
+the deleted account are deleted as well, because they would be useless otherwise. This includes addresses with an
+extension, e.g. ``bob+news@example.com`` for ``bob@example.com``, since the mail server delivers them to the same
+account.
 
 .. caution::
 

@@ -131,11 +131,12 @@ final class MembershipManager
     }
 
     /**
-     * Removes the account's email address from all mailing lists (e.g. before the account is deleted).
+     * Removes the account's email addresses from all mailing lists (e.g. before the account is deleted).
      *
-     * Otherwise, the lists would keep forwarding to the address, and whoever gets the address next would receive
-     * the list's emails. The address cannot be removed from catch-all lists of which it is the last member; these
-     * lists are returned unchanged, so they can be deleted as well (see AccountManager::delete()).
+     * This includes addresses with extension (e.g. "bob+news@example.com", see AccountAddresses). Otherwise, the lists
+     * would keep forwarding to the address, and whoever gets the address next would receive the list's emails. The
+     * last member of a catch-all list cannot be removed; these lists are returned, so they can be deleted as well
+     * (see AccountManager::delete()).
      *
      * This does not flush the changes.
      *
@@ -152,20 +153,47 @@ final class MembershipManager
         $remaining = [];
 
         foreach ($this->accountRepository->findListsByMember($account) as $list) {
-            $destination = $this->findMember($list, $account->getUserIdentifier());
-
-            if ($destination === null) {
-                continue;
-            }
-
             try {
-                $list->removeDestination($destination);
+                $this->removeAddresses($list, $account);
             } catch (LogicException) {
                 $remaining[] = $list;
             }
         }
 
         return $remaining;
+    }
+
+    /**
+     * Removes all addresses of an account from a mailing list (e.g. when a user leaves a list).
+     *
+     * This includes addresses with extension (e.g. "bob+news@example.com", see AccountAddresses).
+     *
+     * @param Account $list The mailing list.
+     * @param Account $member The member.
+     *
+     * @throws LogicException if the account is not a mailing list, or the last member of a catch-all list is removed.
+     */
+    public function removeAccount(Account $list, Account $member): void
+    {
+        $this->removeAddresses($list, $member);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Removes all addresses of an account from a mailing list without flushing the changes.
+     *
+     * @param Account $list The mailing list.
+     * @param Account $member The member.
+     *
+     * @throws LogicException if the account is not a mailing list, or the last member of a catch-all list is removed.
+     */
+    private function removeAddresses(Account $list, Account $member): void
+    {
+        foreach ($list->destinations->toArray() as $destination) {
+            if (AccountAddresses::belongsTo((string) $destination, $member)) {
+                $list->removeDestination($destination);
+            }
+        }
     }
 
     /**

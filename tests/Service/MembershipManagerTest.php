@@ -49,6 +49,19 @@ final class MembershipManagerTest extends KernelTestCase
         self::assertCount(4, $this->data->team->destinations);
     }
 
+    public function testRemoveAccountRemovesAllItsAddresses(): void
+    {
+        $manager = $this->membershipManager($this->em);
+        $manager->addMember($this->data->team, 'bob+lists@example.com');
+
+        $manager->removeAccount($this->data->team, $this->data->bob);
+
+        self::assertSame(
+            ['alice@example.com', 'dave@example.org', 'external@example.net'],
+            array_values(array_map(strval(...), $this->data->team->destinations->toArray()))
+        );
+    }
+
     public function testMembersCanBeAddedToAnEmptyList(): void
     {
         foreach (['alice@example.com', 'bob@example.com', 'dave@example.org', 'external@example.net'] as $email) {

@@ -103,7 +103,7 @@ final class AccountController extends AbstractController
         }
 
         try {
-            $membershipManager->removeMember($list, $account->getUserIdentifier());
+            $membershipManager->removeAccount($list, $account);
             $this->addFlash('success', new TranslatableMessage('listLeft', ['%list%' => $list->getUserIdentifier()]));
         } catch (LogicException) {
             // e.g. the user is the only member of a catch-all list

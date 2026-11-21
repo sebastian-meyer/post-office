@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Security\Voter;
 
+use App\Entity\Destination;
 use App\Security\ManagerPolicy;
 use App\Security\Voter\AccountVoter;
 use App\Tests\TestData;
@@ -108,5 +109,13 @@ final class AccountVoterTest extends TestCase
 
         self::assertTrue($policy->isListMember($data->dave, $data->team));
         self::assertFalse($policy->isListMember($data->carol, $data->team));
+    }
+
+    public function testMembershipIncludesAddressesWithExtension(): void
+    {
+        $data = new TestData();
+        $data->team->addDestinations(new Destination('CAROL+lists@example.org'));
+
+        self::assertTrue((new ManagerPolicy())->isListMember($data->carol, $data->team));
     }
 }

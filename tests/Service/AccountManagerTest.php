@@ -201,6 +201,28 @@ final class AccountManagerTest extends KernelTestCase
         self::assertInstanceOf(Account::class, $accounts->findOneByEmail('team@example.com'));
     }
 
+    public function testDeleteAlsoCleansUpAddressesWithExtension(): void
+    {
+        $destinations = $this->destinationRepository($this->em);
+        // An alias to "bob+shop@" and list members "BOB+lists@" and "bobby@" (a different address).
+        $shop = new Account('shop', $this->data->exampleOrg, AccountType::Alias, null, $destinations->getEntity('bob+shop@example.com'));
+        $this->em->persist($shop);
+        $this->data->team->addDestinations($destinations->getEntity('BOB+lists@example.com'), $destinations->getEntity('bobby@example.com'));
+        $this->em->flush();
+
+        $dependents = $this->manager->delete($this->data->bob);
+        $this->em->clear();
+
+        self::assertSame([['address' => 'shop@example.org', 'destination' => 'bob@example.com']], $dependents);
+        self::assertNull($this->accountRepository($this->em)->findOneByEmail('shop@example.org'));
+        $team = $this->accountRepository($this->em)->findOneByEmail('team@example.com');
+        self::assertInstanceOf(Account::class, $team);
+        self::assertSame(
+            ['alice@example.com', 'bobby@example.com', 'dave@example.org', 'external@example.net'],
+            array_values(array_map(strval(...), $team->destinations->toArray()))
+        );
+    }
+
     public function testDeleteStopsAtCircularAliases(): void
     {
         $ping = $this->alias('ping', 'pong@example.com');
