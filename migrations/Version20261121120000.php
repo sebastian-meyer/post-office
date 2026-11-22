@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -76,7 +77,8 @@ final class Version20261121120000 extends AbstractMigration
         foreach (self::POLICIES as $domain => [$policy, $params]) {
             $this->addSql(
                 'INSERT IGNORE INTO tlspolicies (domain, policy, params, enabled) VALUES (?, ?, ?, 1)',
-                [$domain, $policy, $params]
+                [$domain, $policy, $params],
+                [ParameterType::STRING, ParameterType::STRING, ParameterType::STRING]
             );
         }
     }
@@ -87,7 +89,8 @@ final class Version20261121120000 extends AbstractMigration
         foreach (self::POLICIES as $domain => [$policy, $params]) {
             $this->addSql(
                 'DELETE FROM tlspolicies WHERE domain = ? AND policy = ? AND params = ?',
-                [$domain, $policy, $params]
+                [$domain, $policy, $params],
+                [ParameterType::STRING, ParameterType::STRING, ParameterType::STRING]
             );
         }
     }
