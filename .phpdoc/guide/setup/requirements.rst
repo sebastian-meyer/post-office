@@ -17,8 +17,8 @@ should only be reachable via **HTTPS**.
 The database has to be **MariaDB** (recommended, version 10.11 or later) or **MySQL** (version 8.0 or later). Other
 database systems are not supported, because Postfix and Dovecot access the very same database.
 
-For easy :doc:`deployment <installation>` and dependency management you need `Composer <https://getcomposer.org/>`_ up
-and running, too.
+For easy :doc:`deployment <installation>` and dependency management you need `Composer <https://getcomposer.org/>`_
+(version 2.3 or later) up and running, too.
 
 Mail Server
 ===========

@@ -21,15 +21,15 @@ Users manage their own email accounts, and administrators can hand over the mana
 - PHP 8.4 or later with the extensions `ctype`, `iconv`, `intl` and `pdo_mysql`
 - MariaDB 10.11 or later (recommended) or MySQL 8.0 or later
 - A web server which can run PHP applications (e.g. [Nginx](https://nginx.org/) with PHP-FPM, or [Apache](https://httpd.apache.org/) with PHP-FPM or `mod_php`), reachable via HTTPS
+- [Composer](https://getcomposer.org/) 2.3 or later
 - Postfix 3.6 or later and Dovecot 2.3 or 2.4, both with MySQL support
-- [Composer](https://getcomposer.org/)
 
 ## Quick Start
 
 The intended and recommended way of installing this application is via [Composer](https://getcomposer.org/). The following command will get you the latest version:
 
 ```shell
-composer create-project sebastian-meyer/post-office --ask --keep-vcs --no-dev
+composer create-project sebastian-meyer/post-office --ask --no-dev
 ```
 
 All available versions as well as further information about requirements and dependencies can be found on [Packagist](https://packagist.org/packages/sebastian-meyer/post-office).
@@ -58,6 +58,17 @@ Then, in short:
 5. Configure Postfix and Dovecot to use the database of the Post Office.
 
 The [installation guide](https://sebastian-meyer.github.io/post-office/guides/setup/installation.html) explains each step in detail, including the database users and a sample Nginx configuration.
+
+## Upgrading
+
+The Post Office comes with the [Composer Updater](https://code.opencultureconsulting.com/composer-updater/), so upgrading to a new version is as easy as:
+
+```shell
+composer app:upgrade --list  # list available versions
+composer app:upgrade         # upgrade to the latest stable release
+```
+
+This downloads and installs the new version and its dependencies, runs the database migrations and compiles the frontend assets. Make a backup of your database first and check the [changelog](https://sebastian-meyer.github.io/post-office/guides/changelog.html) for breaking changes. The [upgrade guide](https://sebastian-meyer.github.io/post-office/guides/setup/upgrade.html) has all the details, including how to upgrade from v1.1.0 or earlier.
 
 ## Full Documentation
 

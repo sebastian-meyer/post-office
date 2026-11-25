@@ -164,10 +164,45 @@
 
 </li>
 
+    <li class="toc-item">
+    <a href="guides/setup/upgrade.html#what-happens-during-an-upgrade">What Happens During an Upgrade</a>
+
+
+</li>
+
+    <li class="toc-item">
+    <a href="guides/setup/upgrade.html#troubleshooting">Troubleshooting</a>
+
+
+</li>
+
+    <li class="toc-item">
+    <a href="guides/setup/upgrade.html#upgrading-from-v1-1-0-or-earlier">Upgrading from v1.1.0 or Earlier</a>
+
+
+</li>
+
     </ul>
 </div>
 
     </div>
+</div>
+
+            
+    <p>The Post Office comes with the <a href="https://code.opencultureconsulting.com/composer-updater/">Composer Updater</a>, which
+adds the command <code>composer app:upgrade</code>
+ to the application. It downloads and installs a new version, updates the
+dependencies, runs the database migrations and compiles the frontend assets in one go. If anything goes wrong while the
+new version is installed, the previous version is restored automatically.</p>
+
+            <div class="phpdocumentor-admonition caution">
+                <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <article>
+        
+    <p>Just like during the <a href="guides/setup/installation.html">installation</a>, all commands should be run as your unprivileged
+Apache/Nginx system user or the PHP-FPM/PHP-CGI user (depending on your environment)!</p>
+
+    </article>
 </div>
 
             <section class="section " id="step-by-step">
@@ -176,27 +211,130 @@
             
     
 <ol type="1">
-    <li>Make a backup of your database before upgrading.</li>
+    <li>Check the <a href="guides/changelog.html">changelog</a> for breaking changes and for changes to the
+<a href="guides/mailserver/index.html">mail server configuration</a>.</li>
 
     <li>
-    <p>Update the application and its dependencies.</p>
-<pre><code class="language-shell"># Checkout the new version of the application (e.g. v1.1.0)
-git fetch --tags
-git checkout v1.1.0</code></pre>
-
-    <p>Available versions can be found on <a href="https://packagist.org/packages/sebastian-meyer/post-office">Packagist</a>.</p>
-<pre><code class="language-shell"># Update the dependencies
-composer install --no-dev --optimize-autoloader</code></pre>
+    <p>Make a backup of your database before upgrading (see <a href="guides/setup/maintenance.html">maintenance</a>).</p>
+<pre><code class="language-shell">sudo mariadb-dump --single-transaction vmail | gzip &gt; /var/backups/vmail-$(date +%F).sql.gz</code></pre>
 </li>
 
     <li>
-    <p>Apply all changes to the database schema that came with the new version.</p>
-<pre><code class="language-shell"># Show which migrations are going to be executed
+    <p>Show the available versions and upgrade to the latest stable release.</p>
+<pre><code class="language-shell"># List all versions available for your environment
+composer app:upgrade --list
+
+# Upgrade to the latest stable release
+composer app:upgrade</code></pre>
+
+    <p>The command asks for confirmation before it changes anything. It only offers versions whose requirements (e.g. the
+PHP version and extensions) are met by your environment.</p>
+<div class="phpdocumentor-admonition hint">
+                    <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <article>
+        
+    <p>If you want to install a version other than the latest stable release, append it to the command. Downgrading or
+reinstalling the current version additionally requires the <code>--force</code>
+ option.</p>
+<pre><code class="language-shell"># Install a specific version
+composer app:upgrade 1.1.0</code></pre>
+
+    <p>See <code>composer app:upgrade --help</code>
+ for all options.</p>
+
+    </article>
+</div>
+</li>
+
+    <li>If you have cached your environment variables with <code>composer dump-env prod</code>
+ (see
+<a href="guides/setup/configuration.html">configuration</a>), run that command again, because the new version may come with new settings.</li>
+
+    <li>Check the new version&#039;s <a href="guides/setup/configuration.html">configuration</a> options and adjust your <code>.env.local</code>
+ if needed. The
+example configuration files in <code>./mailserver/</code>
+ are updated together with the application.</li>
+
+</ol>
+
+    </section>
+
+            <section class="section " id="what-happens-during-an-upgrade">
+            <h2>What Happens During an Upgrade</h2>
+
+            
+    
+<ol type="1">
+    <li>The selected version is downloaded from <a href="https://packagist.org/packages/sebastian-meyer/post-office">Packagist</a>.</li>
+
+    <li>The <code>./vendor/</code>
+ directory and every file that is going to be replaced or deleted are backed up to
+<code>./.composer-updater-backup/</code>
+.</li>
+
+    <li>
+    <p>The application&#039;s files are replaced with those of the new version. The directories <code>./assets/</code>
+, <code>./bin/</code>
+,
+<code>./config/</code>
+, <code>./doc/</code>
+, <code>./mailserver/</code>
+, <code>./migrations/</code>
+, <code>./src/</code>
+, <code>./templates/</code>
+ and <code>./translations/</code>
+
+are replaced entirely, so files which are not part of the new version are deleted. Your local settings in
+<code>.env.local</code>
+ (and <code>.env.local.php</code>
+), the cache and logs in <code>./var/</code>
+ and any secrets in <code>./config/secrets/</code>
+
+are kept.</p>
+<div class="phpdocumentor-admonition caution">
+                <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <article>
+        
+    <p>Don&#039;t put your own files into the directories listed above, because they are deleted on upgrades.</p>
+
+    </article>
+</div>
+</li>
+
+    <li>The dependencies of the new version are installed with <code>composer install</code>
+ and the cache is cleared.</li>
+
+    <li>The backup is removed.</li>
+
+    <li>All changes to the database schema that came with the new version are applied and the frontend assets are compiled
+(<code>composer run-script post-upgrade-cmd</code>
+).</li>
+
+</ol>
+
+    </section>
+
+            <section class="section " id="troubleshooting">
+            <h2>Troubleshooting</h2>
+
+            
+    <p>If the download, the replacement of files or the installation of the dependencies fails, the previous version is
+restored from the backup and keeps working. Fix the cause and run <code>composer app:upgrade</code>
+ again.</p>
+
+            
+    <p>If the database migrations or the compilation of the assets fail, the new version is already installed and <strong>no</strong>
+
+rollback takes place, because the previous version might not work with a partially migrated database. Fix the cause and
+run the remaining tasks manually:</p>
+
+            <pre><code class="language-shell"># Show which migrations have not been executed yet
 php bin/console doctrine:migrations:status
 
-# Execute them
-php bin/console doctrine:migrations:migrate</code></pre>
-<div class="phpdocumentor-admonition caution">
+# Run the database migrations and compile the frontend assets
+composer run-script post-upgrade-cmd</code></pre>
+
+            <div class="phpdocumentor-admonition caution">
                 <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 <article>
         
@@ -205,19 +343,46 @@ intermediate state. In this case restore the backup, fix the cause and run the m
 
     </article>
 </div>
-</li>
 
-    <li>
-    <p>Compile the frontend assets and clear the cache.</p>
-<pre><code class="language-shell">php bin/console asset-map:compile
-php bin/console cache:clear</code></pre>
-</li>
+            
+    <p>If restoring the previous version fails, the backup is kept in <code>./.composer-updater-backup/</code>
+ and further upgrades are
+refused until you have restored the files manually and removed that directory.</p>
 
-    <li>Check the <a href="guides/changelog.html">changelog</a> for changes to the <a href="guides/mailserver/index.html">mail server configuration</a>.
-The example configuration files in <code>./mailserver/</code>
- are updated together with the application.</li>
+    </section>
 
-</ol>
+            <section class="section " id="upgrading-from-v1-1-0-or-earlier">
+            <h2>Upgrading from v1.1.0 or Earlier</h2>
+
+            
+    <p>Versions up to and including v1.1.0 don&#039;t include the Composer Updater yet, so the upgrade to the next version has to
+be done manually once. All later upgrades can be done with <code>composer app:upgrade</code>
+.</p>
+
+            
+    <p>If you have installed the application with the <code>--keep-vcs</code>
+ option as recommended for those versions, use Git to
+check out the new version (e.g. v1.2.0):</p>
+
+            <pre><code class="language-shell"># Check out the new version of the application
+git fetch --tags
+git checkout v1.2.0
+
+# Install the dependencies
+composer install --no-dev --optimize-autoloader
+
+# Run the database migrations and compile the frontend assets
+composer run-script post-upgrade-cmd</code></pre>
+
+            
+    <p>Otherwise, download the new version from the <a href="https://github.com/sebastian-meyer/post-office/releases">GitHub releases page</a>,
+replace the application&#039;s files with those of the new version (keeping your <code>.env.local</code>
+) and run the last two
+commands above. Because Composer can&#039;t detect the installed version without Git, you have to tell it once on your next
+upgrade:</p>
+
+            <pre><code class="language-shell"># Upgrade from v1.2.0 to the latest stable release
+COMPOSER_ROOT_VERSION=1.2.0 composer app:upgrade</code></pre>
 
     </section>
 

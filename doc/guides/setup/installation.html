@@ -227,17 +227,14 @@ collation of the database. Don&#039;t change the collation of the database or it
     <li>
     <p>Install the application. The following command will get you the latest stable version and all its dependencies.</p>
 <pre><code class="language-shell"># Install the latest stable version suitable for your environment
-composer create-project sebastian-meyer/post-office --ask --keep-vcs --no-dev</code></pre>
+composer create-project sebastian-meyer/post-office --ask --no-dev</code></pre>
 <div class="phpdocumentor-admonition note">
             <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
                     <article>
         
-    <p>The <code>--keep-vcs</code>
- option is important if you want to be able to easily <a href="guides/setup/upgrade.html">upgrade the application</a>
-later on. It keeps the <code>.git/</code>
- directory of the original repository allowing you to pull in new changes and
-updates. If you don&#039;t want to use Git, you can omit this option, but you will have to manually download and
-install new versions of the application in the future.</p>
+    <p>The application comes with the <a href="https://code.opencultureconsulting.com/composer-updater/">Composer Updater</a>, so
+you can easily <a href="guides/setup/upgrade.html">upgrade the application</a> later on with <code>composer app:upgrade</code>
+.</p>
 
     </article>
 </div>
@@ -248,7 +245,7 @@ install new versions of the application in the future.</p>
     <p>If you want to use a version other than the latest available for your environment you can do so by appending the
 desired <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints">version constraint</a>.</p>
 <pre><code class="language-shell"># Install the latest patch level version of 1.0 (i. e. &gt;=1.0.0 &amp; &lt;1.1.0)
-composer create-project sebastian-meyer/post-office &quot;1.0.*&quot; --ask --keep-vcs --no-dev</code></pre>
+composer create-project sebastian-meyer/post-office &quot;1.0.*&quot; --ask --no-dev</code></pre>
 
     <p>Available versions can be found on <a href="https://packagist.org/packages/sebastian-meyer/post-office">Packagist</a>.</p>
 
@@ -354,6 +351,9 @@ done that already.</li>
 then nobody can log in.</li>
 
     <li>Take a few steps to ease <a href="guides/setup/maintenance.html">maintenance</a>.</li>
+
+    <li>Keep the application up to date by <a href="guides/setup/upgrade.html">upgrading</a> to new versions with <code>composer app:upgrade</code>
+.</li>
 
 </ol>
 
