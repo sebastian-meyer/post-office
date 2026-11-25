@@ -68,7 +68,7 @@ What Happens During an Upgrade
    ``./.composer-updater-backup/``.
 
 #. The application's files are replaced with those of the new version. The directories ``./assets/``, ``./bin/``,
-   ``./config/``, ``./doc/``, ``./mailserver/``, ``./migrations/``, ``./src/``, ``./templates/`` and ``./translations/``
+   ``./config/``, ``./mailserver/``, ``./migrations/``, ``./src/``, ``./templates/`` and ``./translations/``
    are replaced entirely, so files which are not part of the new version are deleted. Your local settings in
    ``.env.local`` (and ``.env.local.php``), the cache and logs in ``./var/`` and any secrets in ``./config/secrets/``
    are kept.

@@ -1,4 +1,6 @@
+/.composer-updater-backup/
 /.vscode/
+/doc/
 /TODO
 
 ###> symfony/framework-bundle ###
