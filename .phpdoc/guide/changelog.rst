@@ -10,10 +10,18 @@ All available versions as well as further information about :doc:`requirements a
 can be found in the `Packagist repository <https://packagist.org/packages/sebastian-meyer/post-office>`_ and on the
 `GitHub releases page <https://github.com/sebastian-meyer/post-office/releases>`_.
 
-v1.0.0
+v1.2.0
 ======
 
-**Initial Release**
+**New Features**
+
+* Added the `Composer Updater <https://code.opencultureconsulting.com/composer-updater/>`_ for easy upgrades with
+  ``composer app:upgrade``.
+
+**Upgrading**
+
+The Composer Updater is not part of previous versions, so the upgrade to this version has to be done
+:doc:`manually <setup/upgrade>` once. All later upgrades can be done with ``composer app:upgrade``.
 
 v1.1.0
 ======
@@ -30,3 +38,8 @@ v1.1.0
 
 There are no breaking changes in this release and all normal :doc:`upgrade procedures <setup/upgrade>` apply. However,
 some of the new features require :doc:`additional configuration <setup/configuration>` in order to function properly.
+
+v1.0.0
+======
+
+**Initial Release**

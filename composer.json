@@ -41,6 +41,7 @@
         "doctrine/doctrine-migrations-bundle": "^4.0.1",
         "doctrine/orm": "^3.8.0",
         "mikepultz/netdns2": "^2.0",
+        "opencultureconsulting/updater": "^1.0.0",
         "phpdocumentor/reflection-docblock": "^6.0.3",
         "phpstan/phpdoc-parser": "^2.4.1",
         "symfony/asset": "7.4.*",
@@ -63,18 +64,18 @@
         "symfony/runtime": "7.4.*",
         "symfony/security-bundle": "7.4.*",
         "symfony/serializer": "7.4.*",
-        "symfony/stimulus-bundle": "^3.7",
+        "symfony/stimulus-bundle": "^3.8",
         "symfony/string": "7.4.*",
         "symfony/translation": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
-        "symfony/ux-icons": "^3.7",
-        "symfony/ux-turbo": "^3.7",
-        "symfony/ux-twig-component": "^3.7",
+        "symfony/ux-icons": "^3.8.1",
+        "symfony/ux-turbo": "^3.8",
+        "symfony/ux-twig-component": "^3.8",
         "symfony/validator": "7.4.*",
         "symfony/web-link": "7.4.*",
         "symfony/yaml": "7.4.*",
-        "twig/extra-bundle": "^2.12|^3.29",
-        "twig/twig": "^2.12|^3.30"
+        "twig/extra-bundle": "^2.12|^3.31",
+        "twig/twig": "^2.12|^3.31.1"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.95.32",
@@ -82,10 +83,10 @@
         "phpmd/phpmd": "^3.0",
         "phpstan/phpstan": "^2.3.7",
         "phpstan/phpstan-doctrine": ">=2.1.2",
-        "phpstan/phpstan-strict-rules": ">=2.1.1",
+        "phpstan/phpstan-strict-rules": ">=2.1.2",
         "phpstan/phpstan-symfony": ">=2.1.1",
         "phpunit/phpunit": "^13.4.8",
-        "psalm/plugin-symfony": "^5.12.2",
+        "psalm/plugin-symfony": "^5.14.0",
         "squizlabs/php_codesniffer": "^4.0.4",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",
@@ -93,18 +94,22 @@
         "symfony/maker-bundle": "^1.68",
         "symfony/stopwatch": "7.4.*",
         "symfony/web-profiler-bundle": "7.4.*",
-        "vimeo/psalm": "^7.12"
+        "vimeo/psalm": "^7.19"
     },
     "config": {
         "allow-plugins": {
-            "phpdocumentor/shim": true,
+            "opencultureconsulting/updater": true,
             "php-http/discovery": true,
+            "phpdocumentor/shim": true,
             "symfony/flex": true,
             "symfony/runtime": true
         },
         "apcu-autoloader": true,
         "bump-after-update": true,
         "optimize-autoloader": true,
+        "platform": {
+            "php": "8.4.3"
+        },
         "sort-packages": true
     },
     "autoload": {
@@ -141,6 +146,10 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
+        "post-upgrade-cmd": [
+            "@php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
+            "@php bin/console asset-map:compile"
+        ],
         "php-cs-fixer:check": [
             "@php vendor/bin/php-cs-fixer check"
         ],
@@ -168,6 +177,7 @@
         ]
     },
     "scripts-descriptions": {
+        "post-upgrade-cmd": "Runs the database migrations and compiles the frontend assets after an upgrade. This is triggered by 'composer app:upgrade' and should not be run by itself unless an upgrade failed while running it.",
         "php-cs-fixer:check": "Runs a code check with PHP Coding Standards Fixer and reports problems. If a custom configuration file '.php-cs-fixer.php' exists, it will be used instead of the default settings in '.php-cs-fixer.dist.php'.",
         "php-cs-fixer:fix": "Runs a code check with PHP Coding Standards Fixer and tries to fix all issues. If a custom configuration file '.php-cs-fixer.php' exists, it will be used instead of the default settings in '.php-cs-fixer.dist.php'.",
         "phpcs:check": "Runs a code check with PHP_CodeSniffer and reports problems. If a custom configuration file '.phpcs.xml' exists, it will be used instead of the default settings in '.phpcs.xml.dist'.",
@@ -184,6 +194,23 @@
         "symfony": {
             "allow-contrib": true,
             "require": "7.4.*"
+        },
+        "composer-updater": {
+            "mirror": [
+                "assets",
+                "bin",
+                "config",
+                "doc",
+                "mailserver",
+                "migrations",
+                "src",
+                "templates",
+                "translations"
+            ],
+            "ignore": [
+                "assets/vendor",
+                "config/secrets"
+            ]
         }
     }
 }
