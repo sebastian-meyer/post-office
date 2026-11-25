@@ -200,7 +200,6 @@
                 "assets",
                 "bin",
                 "config",
-                "doc",
                 "mailserver",
                 "migrations",
                 "src",

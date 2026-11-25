@@ -72,7 +72,7 @@ This downloads and installs the new version and its dependencies, runs the datab
 
 ## Full Documentation
 
-The full documentation is available on [GitHub Pages](https://sebastian-meyer.github.io/post-office/) or alternatively in [doc/](doc/). It covers
+The full documentation is available on [GitHub Pages](https://sebastian-meyer.github.io/post-office/). It covers
 
 - the [setup](https://sebastian-meyer.github.io/post-office/guides/setup/index.html): requirements, installation, configuration, maintenance and upgrades,
 - the [mail server](https://sebastian-meyer.github.io/post-office/guides/mailserver/index.html): how to set up Postfix and Dovecot to work with the Post Office, and
